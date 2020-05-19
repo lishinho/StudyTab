@@ -1,0 +1,301 @@
+work38
+首先server的singlehandler生效了么
+client的filter生效了么
+
+工作周报 - 李镇邦 20200713 ~ 20200717
+
+完成：
+1. WARP-48068: 修改apacheds-cleaner，整理主从不同步问题的wiki(http://172.16.1.168:8090/pages/viewpage.action?pageId=24596451)
+2. WARP-27572：federation单点登出调试
+
+其他：
+1. sla3-8610: 富登村中银批处理hdfs连接失败
+2. kundb权限问题排查支持
+
+本周：
+1. federation功能整理并集群测试
+2. 支持guardian3.2.1 的开发工作，修改review后的代码
+
+    final String token = BearerTokenExtractor.extract(request);
+    if (StringUtils.isBlank(token)) {
+      logger.debug("No token can be tracked");
+      return;
+    }
+    final String mappingId = String.valueOf(token.hashCode());
+
+存储开关/重定向地址
+
+        redirectUri = request.getParameter("redirect_uri");
+
+spring.datasource.url=jdbc:mysql://localhost:3307/federation?characterEncoding=UTF-8&amp;useSSL=false
+spring.datasource.username=root
+spring.datasource.password=123456
+
+server.port=8282
+
+security.oauth2.client.clientId=test1-35BmPNbue7
+security.oauth2.client.clientSecret=mJ0MYQ6ScQTmHMbnEY9n
+
+server.port=8283
+
+security.oauth2.client.clientId=test2-yQmIficZSq
+security.oauth2.client.clientSecret=I0HlYAnwRCRaojfx0Tf9
+
+    http.addFilterAt(new SloLogoutFilter(), UsernamePasswordAuthenticationFilter.class);
+
+security.oauth2.client.accessTokenUri=http://localhost:8011/federation-server/demo/oauth/token
+security.oauth2.client.userAuthorizationUri=http://localhost:8011/federation-server/demo/oauth/authorize
+security.oauth2.client.logoutSuccessUri=http://localhost:8011/federation-server/logout
+security.oauth2.resource.tokenInfoUri=http://localhost:8011/federation-server/demo/oauth/check_token
+
+resourceServer.secret.uri=http://localhost:8011/resource-server-1-demo/secret
+
+/api/v1/tokens
+
+try {
+      is = Thread.currentThread().getContextClassLoader().getResourceAsStream(versionInfoFile);
+      info.load(is);
+    } catch (IOException ex) {
+      LOG.warn("Could not read '" + versionInfoFile + "', " + ex.toString(), ex);
+    } finally {
+      closeStream(is);
+    }
+
+try wwith resource
+try (InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(versionInfoFile)) {
+      info.load(is);
+    } catch (IOException ex) {
+      LOG.warn("Could not read '" + versionInfoFile + "', " + ex.toString(), ex);
+    }
+
+
+ private VersionUtil() {
+    info = new Properties();
+    String versionInfoFile = "versionInfo.properties";
+    try (InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(versionInfoFile)) {
+      info.load(is);
+    } catch (IOException ex) {
+      LOG.warn("Could not read '" + versionInfoFile + "', " + ex.toString(), ex);
+    }
+  }
+
+public static void loadVersion(Map<String, String> configs, String component) {
+    configs.put(component + ".plugin.version", getPluginVersion());
+    configs.put(component + ".component.version", getComponentVersion());
+  }
+
+
+
+xoxoxoxoxooxoxoxoxoxoxoxoxoxoxoxoxoxoxoxo
+
+  private static final Logger LOG = LoggerFactory.getLogger(VersionUtil.class);
+
+  private Properties info;
+
+  protected VersionUtil(String service) {
+    info = new Properties();
+    String versionInfoFile = service + "-version-info.properties";
+    try (InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(versionInfoFile)) {
+      info.load(is);
+    } catch (IOException ex) {
+      LOG.warn("Could not read '" + versionInfoFile + "', " + ex.toString(), ex);
+    }
+  }
+
+  protected String _getComponentVersion() {
+    return info.getProperty("componentVersion");
+  }
+
+  protected String _getPluginVersion() {
+    return info.getProperty("pluginVersion");
+  }
+
+  private static final VersionUtil ORIGIN_VERSION_INFO = new VersionUtil("guardian");
+
+  public static String getComponentVersion() {
+    return ORIGIN_VERSION_INFO._getComponentVersion();
+  }
+
+  public static String getPluginVersion() {
+    return ORIGIN_VERSION_INFO._getPluginVersion();
+  }
+
+  public static void loadVersion(Map<String, String> configs, String service) {
+    configs.put(service + ".plugin.version", getPluginVersion());
+    configs.put(service + ".component.version", getComponentVersion());
+  }
+
+{"_links":{"self":{"href":"http://localhost:8380/actuator","templated":false},"health":{"href":"http://localhost:8380/actuator/health","templated":false},"info":{"href":"http://localhost:8380/actuator/info","templated":false}}}
+
+["jvm.memory.committed","jvm.gc.pause","process.files.max","jvm.gc.memory.promoted","jvm.memory.max",
+"system.load.average.1m","jvm.memory.used","jvm.gc.max.data.size","system.cpu.count","jvm.buffer.memory.used",
+"jvm.threads.daemon","system.cpu.usage","jvm.gc.memory.allocated","datasource.connection.pool.usage","jvm.threads.live",
+"jvm.threads.peak","process.uptime","datasource.request.count","process.cpu.usage","jvm.classes.loaded","jvm.classes.unloaded",
+"jvm.gc.live.data.size",
+"jvm.gc.concurrent.phase.time","process.files.open","jvm.buffer.count","jvm.buffer.total.capacity",
+"datasource.average.request.time","guardian.request.api","process.start.time"]}
+
+
+
+http://172.16.1.97:8080/index.php/s/LHOlbuLppFRgsXN
+
+{"_links":{"self":{"href":"http://localhost:8380/actuator","templated":false},"auditevents":{"href":"http://localhost:8380/actuator/auditevents","templated":false},"beans":{"href":"http://localhost:8380/actuator/beans","templated":false},"health":{"href":"http://localhost:8380/actuator/health","templated":false},"conditions":{"href":"http://localhost:8380/actuator/conditions","templated":false},"configprops":{"href":"http://localhost:8380/actuator/configprops","templated":false},"env":{"href":"http://localhost:8380/actuator/env","templated":false},"env-toMatch":{"href":"http://localhost:8380/actuator/env/{toMatch}","templated":true},"info":{"href":"http://localhost:8380/actuator/info","templated":false},"loggers":{"href":"http://localhost:8380/actuator/loggers","templated":false},"loggers-name":{"href":"http://localhost:8380/actuator/loggers/{name}","templated":true},"heapdump":{"href":"http://localhost:8380/actuator/heapdump","templated":false},"threaddump":{"href":"http://localhost:8380/actuator/threaddump","templated":false},"prometheus":{"href":"http://localhost:8380/actuator/prometheus","templated":false},"metrics":{"href":"http://localhost:8380/actuator/metrics","templated":false},"metrics-requiredMetricName":{"href":"http://localhost:8380/actuator/metrics/{requiredMetricName}","templated":true},"scheduledtasks":{"href":"http://localhost:8380/actuator/scheduledtasks","templated":false},"httptrace":{"href":"http://localhost:8380/actuator/httptrace","templated":false},"mappings":{"href":"http://localhost:8380/actuator/mappings","templated":false}}}
+
+@ConditionalOnClass会检查类加载器中是否存在对应的类，如果有的话被注解修饰的类就有资格被Spring容器所注册，否则会被skip。
+
+
+curl -X POST /actuator/env --header 'Content-Type: application/json' -d '{"name":"eureka.client.serviceUrl.defaultZone","value":"http://value:guardian.txsql.connection.password@172.16.203.112"}'
+
+
+POST http://localhost:8380/actuator/env
+Content-Type: application/json
+{"name":"eureka.client.serviceUrl.defaultZone","value":"http://value:guardian.txsql.connection.password@172.16.203.112"}
+
+
+您可以按如下方式公开所有端点：management.endpoints.web.exposure.include=*
+您可以通过以下方式显式启用/shutdown端点：management.endpoint.shutdown.enabled=true
+要公开所有（已启用）网络端点除env端点之外：
+
+http://localhost:8011/federation-server/actuator
+
+@ConditionalOnProperty
+通过其两个属性name以及havingValue来实现的，其中name用来从application.properties中读取某个属性值。
+如果该值为空，则返回false;
+如果值不为空，则将该值与havingValue指定的值进行比较，如果一样则返回true;否则返回false。
+如果返回值为false，则该configuration不生效；为true则生效。
+
+@DependsOn
+该注解用于声明当前bean依赖于另外一个bean。所依赖的bean会被容器确保在当前bean实例化之前被实例化。
+举例来讲，如果容器通过@DependsOn注解方式定义了bean plant依赖于bean water,那么容器在会确保bean water的实例在实例化bean plant之前完成。
+一般用在一个bean没有通过属性或者构造函数参数显式依赖另外一个bean，但实际上会使用到那个bean或者那个bean产生的某些结果的情况。
+
+test1-35BmPNbue7
+
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary for guardian-federation guardian-3.2.0:
+[INFO] 
+[INFO] guardian-federation ................................ SUCCESS [  2.400 s]
+[INFO] federation-common .................................. SUCCESS [  3.972 s]
+[INFO] federation-service ................................. SUCCESS [  6.177 s]
+[INFO] federation-utils ................................... SUCCESS [  6.992 s]
+[INFO] federation-client .................................. SUCCESS [  3.317 s]
+[INFO] samples ............................................ SUCCESS [  0.117 s]
+[INFO] oauth-client-demo .................................. SUCCESS [  0.362 s]
+[INFO] resource-server-demo ............................... SUCCESS [  0.454 s]
+[INFO] oauth-server-demo .................................. SUCCESS [  0.412 s]
+[INFO] jenkins-test ....................................... SUCCESS [  0.277 s]
+[INFO] ------------------------------------------------------------------------
+
+public static int LengthOfLIS_BinarySearch(int[] nums)
+{
+    if (nums == null || nums.Length == 0) return 0;
+    var res = new List<int>();      //Java8 List<Integer> res = new ArrayList<>();
+    res.Add(nums[0]);               //
+    for (int i = 1; i < nums.Length; i++)
+    {
+        if (nums[i] > res.Last())   //当前元素比数组尾部元素大
+            res.Add(nums[i]);       //则添加到尾部元素
+        else
+        {
+            //二分法判断nums[i]在result中的哪个位置，如果小于则更新result为当前元素
+            int left = 0;
+            int right = res.Count - 1;
+            while (left <= right)
+            {
+                int mid = (left + right) / 2;
+                if (nums[i] > res[mid])
+                    left = mid + 1; //在右边找，更新left
+                else
+                    right = mid - 1;//在左边找，更新right
+            }
+            res[left] = nums[i]; //更新res[left]
+
+        }
+    }
+    return res.Count;
+}
+
+
+curl -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' -D cookies.txt -d '{"username": "admin","password": "123","isSystem": false}' 'http://172.26.5.99:8380/api/v2/login'
+
+curl -X GET --header 'Content-Type: application/json' --header 'Accept: application/json' -b cookies.txt -d '{"dataSource": [ { "type": "GLOBAL","value": "*"}],"serviceName": "inceptor1", "serviceType": "INCEPTOR" }' 'http://localhost:8380/api/v2/perms/authorized-dataNodes?princ=admin&princType=USER&inheritance=false&subtree=false'
+
+curl -X GET --header 'Accept: application/json' 'https://172.26.5.99:8380/api/v1/users/lzb?pageSize=-1&sorting=false&revision=10'
+
+WARP-48198: 1. getuser guardian-3.1.3前端没有
+
+userManager.getUser(sessionVo, username, true, revision >= 1)
+ userDao.getRegularUser(username, withLabel)
+getregularuser return getUserInternal(username, UserSearchScope.REGULAR, withLabel, false);
+
+v1 WARP-26568
+
+user/group/role
+createTime
+
+mobile
+
+迁移数据
+
+时间戳/
+
+const UintSize = 32 << (^uint(0) >> 32 & 1) // 32 or 64
+
+const (
+    MaxInt  = 1<<(UintSize-1) - 1 // 1<<31 - 1 or 1<<63 - 1
+    MinInt  = -MaxInt - 1         // -1 << 31 or -1 << 63
+    MaxUint = 1<<UintSize - 1     // 1<<32 - 1 or 1<<64 - 1
+)
+
+dp[i][j] : 表示包含第i行j列元素的最小路径和         
+
+func minimumTotal(triangle [][]int) int {
+    if len(triangle) < 1 {
+        return 0
+    }
+    if len(triangle) == 1 {
+        return triangle[0][0]
+    }
+	dp := make([][]int, len(triangle))
+	for i, arr := range triangle {
+		dp[i] = make([]int, len(arr))
+	}
+    result := 1<<31 - 1
+	dp[0][0] = triangle[0][0]
+	dp[1][1] = triangle[1][1] + triangle[0][0]
+	dp[1][0] = triangle[1][0] + triangle[0][0]
+
+	for i := 2; i < len(triangle); i++ {
+		for j := 0; j < len(triangle[i]); j++ {
+			if j == 0 {
+				dp[i][j] = dp[i-1][j] + triangle[i][j]
+			} else if j == (len(triangle[i]) - 1) {
+				dp[i][j] = dp[i-1][j-1] + triangle[i][j]
+			} else {
+				dp[i][j] = min(dp[i-1][j-1], dp[i-1][j]) + triangle[i][j]
+			}
+		}  
+	}
+    for _,k := range dp[len(dp)-1] {
+        result = min(result, k)
+    }
+	return result
+}
+
+func min(a, b int) int {
+	if a > b {
+		return b
+	}
+	return a
+}
+
+
+  {
+    "userName": "admin",
+    "userLocked": false,
+    "rememberMe": false,
+    "gidNumber": "5000",
+    "uidNumber": "5000",
+    "createTime": "2020-07-23T23:16:08.000+0000"
+  },
+

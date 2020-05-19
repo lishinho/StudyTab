@@ -1,0 +1,288 @@
+work37
+
+mysql -hnode63 -P34231 -uroot -pTranswarp! --ssl-ca=/etc/kundb10/conf/ca-cert.pem --ssl-cert=/etc/kundb10/conf/kungate-client-cert.pem --ssl-key=/etc/kundb10/conf/kungate-client-key.pem
+
+select database() from dual
+
+工作周报 - 李镇邦 20200706 ~ 20200710
+
+完成：
+
+1. WARP-27572: 本地实现federation单点登出问题demo
+
+其他：
+高并发访问guardian api
+1. sla-8427: 青岛国税 tdt访问guardian api报错 高并发堵塞问题 在sla-8440圣哥解决
+2. sla-8378: 高并发导致kdc认为是重放攻击 涉及到jira WARP-14694 wiki上写明jdk7没法解决 调整并发数 
+
+修复漏洞
+3. sla-8422: 浙江农商 jackson jar包修复漏洞
+
+其他组件
+4. sla-8464: 广州农商 search使用guardian sasl接口报kerberos信息错误 开debug需要审核 重启
+
+操作姿势
+5. sla-8479: 银保监会 cas启动失败 节点迁移错误
+6. sla-8428: kerberos下zk acl问题 新建kafka用户对生成的topic目录无权限 kafka手册里解决
+
+已知问题
+7. sla-8370 sla-8450: 国信智电 apacheds主从问题，换jar包后apacheds master读事务不生效
+8. sla-8408: hdfs nn频繁切换 访问不正常 apacheds主从不同步 ->  重启apacheds 换jar包解决
+9. sla-8424: api连接hyperbase的OAuth配置报错 -> 6.x的组件走dadl会走到core-site的oauth相关配置 在7.0已做修改 现修改core-site配置完成
+10. sla-8375: slipstream httpclient获取不到ca证书 上海大数据中心客户端dns抖动 获取ca地址不稳定
+11. sla-7680: tdh调用guardian client的getEffectiveService接口版本不支持 -> catalog解决
+
+
+安全不相关的sla: 
+1. sla-8359: guardian不相关，guardian报错是心跳信息 -> inceptor解决
+3. sla-8421: inceptor license问题 guardian不相关 不过涉及到sla-5724 311，312版的guardian无法配置inceptor scheduler
+4. sla-8462: guardian不相干
+
+本周工作：
+1. 解决federation的slo问题
+2. 其他jira与wiki的整理 
+
+
+apacheds--
+
+sophen 
+
+
+1. sla-8359: guardian不相关，guardian报错是心跳信息 -> inceptor解决
+2. sla-7680: tdh调用guardian client的getEffectiveService接口版本不支持 -> catalog解决
+3. sla-8375: slipstream httpclient获取不到ca证书 上海大数据中心客户端dns抖动 获取ca地址不稳定
+1. sla-8359: guardian不相关，guardian报错是心跳信息 -> inceptor解决
+5. sla-8408: hdfs nn频繁切换 访问不正常 apacheds主从不同步 ->  重启apacheds 换jar包解决
+6. sla-8424: api连接hyperbase的OAuth配置报错 -> 6.x的组件走dadl会走到core-site的oauth相关配置 在7.0已做修改 现修改core-site配置完成
+7. sla-8421: inceptor license问题 guardian不相关 不过涉及到sla-5724 311，312版的guardian无法配置inceptor scheduler
+8. sla-8378: 高并发导致kdc认为是重放攻击 涉及到jira WARP-14694 wiki上写明jdk7没法解决 调整并发数 
+9. sla-8428: kerberos下zk acl问题 新建kafka用户对生成的topic目录无权限 kafka手册里解决
+10. sla-8462: guardian不相干
+11. sla-8479: cas启动失败 节点迁移错误
+12. sla-8464: search使用guardian sasl接口报kerberos信息错误 重启
+13. sla-8370: apacheds主从问题，换jar包后apacheds master读事务不生效
+14 sla-8422: jackson jar包修复漏洞
+15 sla-8450: hadoop报找不到kerberos database
+16 sla-8427: 青岛国税 tdt访问guardian api报错 高并发堵塞问题 在sla-8440圣哥解决
+
+
+ mysql -h127.0.0.1 -P15307 -uvt_app -p123 --enable-cleartext-plugin --ssl-ca=/home/transwarp/go/src/github.com/youtube/vitess/examples/local_mfed/sub_scripts/ca-cert.pem --ssl-cert=/home/transwarp/go/src/github.com/youtube/vitess/examples/local_mfed/sub_scripts/kungate-client-cert.pem --ssl-key=/home/transwarp/go/src/github.com/youtube/vitess/examples/local_mfed/sub_scripts/kungate-client-key.pem --ssl-mode=VERIFY_CA
+
+
+grant.Action == sqlparser.RevokeStr
+
+target: kundb1.0.master, no valid tablet
+
+Starting MySQL for tablet test-0000000101...
+Resuming from existing kuntablet dir:
+    /home/transwarp/go/vtdataroot/vt_0000000101
+Starting MySQL for tablet test-0000000102...
+Resuming from existing kuntablet dir:
+    /home/transwarp/go/vtdataroot/vt_0000000102
+Starting MySQL for tablet test-0000000103...
+Resuming from existing kuntablet dir:
+
+查看Linux内核版本信息
+
+方法1：登陆Linux，在终端输入 cat /proc/version
+
+centos安装lmdb工具集
+
+/guardian/data/partitions/guardian/liblmdb
+
+ldapsearch -h localhost -p10389 -x -D "uid=admin,ou=system" -w 123 -b "ou=people, dc=tdh"
+
+lmdb
+不需要运行单独的数据库管理进程，只要在访问数据的代码里引用LMDB库，访问时给文件路径即可。
+Lmdb数据库的特性是读不会阻塞写，写不会阻塞读，写操作是序列化的，即同一时刻只能有一个进行中的写事务。
+
+metastoreListener会导致创建临时表时大量无用权限写入
+master大量发送数据到slave
+slave处理同步返回结果迟缓被挂起 所以大量读事务未释放 写事务会不断向文件末添加新的页，导致jvm堆占满OOM
+slave无法读取tcp socket的数据 并向master发出零窗口tcp报文
+master写请求堆积 导致full gc
+在Guardian Server节点的/etc/guardian/conf/fortress.properties中的admin.pw配置项中读出
+
+注意：
+
+      TDC环境由于配置文件位置有所不同，需要注释掉 apacheds-cleaner 脚本中 “cp /etc/$hdfs_name/conf/core-site.xml /etc/$service_name/conf/hive-site.xml $cur_folder/resources/” 这行代码，改为手工拷贝 core-site.xml 和 hive-site.xml 到 resources 目录下
+
+ApacheDS对应uid=admin,ou=system的root用户密码
+
+以下是對 “> /dev/null 2>&1” 分拆的解釋:
+>: 是重新導向, 例如將指令的執行結果寫入到檔案, 而以上的例子是將 /path/to/my-script.sh 的執行結果重新導向到 /dev/null.
+/dev/null: /dev/null 在 Unix 或 Linux 就像黑洞, 會將任何導入的東西吃掉, 簡單來說就是程式會照常執行, 但不會輸出任何執行結果.
+2: 系統將標準輸入/輸出分成三個, 分別是 stdin (fd 是 0), stdout (fd 是 1), 及 stderr (fd 是 2), 在這裡 2 代表標準錯誤輸出 stderr.
+>: 重新導向.
+&: 設定使用 fd 代號, 如果 “> dev/null 2>&1” 沒有加上 “&”, 會視後面的 “1” 為檔案名稱, 而不是 fd.
+1: fd 的標準輸出 stdout.
+簡單來說, “> /dev/null 2>&1” 的意思, 是將左邊程式的所有標準輸出 stdout, 及標準錯誤輸出 stderr 導向到 /dev/null, 即左邊的程式只會執行, 而不會輸出任何程式執行的結果。
+
+
+yum -y install openldap-clients
+
+手动恢复主从同步?
+清除压缩写在一个脚本
+apacheDS有一个配置项guardian.ds.lmdb.mapsize控制最大可映射的文件大小?添加配置项guardian.ds.lmdb.mapsize和guardian.ds.ha.syncrepl.log.size
+lmdb与apacheds事务?->lmdb压缩
+什么样的算冗余权限
+DBPASS=`grep password "$DB_PASSWD_FILE" | cut -d'=' -f 2`
+DATACONF=${grep "guardian.ds.database.dir" "guardian-ds.properties" 
+
+mkdir /guardian/data/partitions/guardian-compressed
+./mdb_copy -c /guardian/data/partitions/guardian /guardian/data/partitions/guardian-compressed
+rm -rf /guardian/data/partitions/guardian 
+mv /guardian/data/partitions/guardian-compressed /guardian/data/partitions/guardian
+
+
+if [ -f /etc/guardian/conf/guardian-ds.properties ]; then
+  DS_PROPERTIES=/etc/guardian/conf/guardian-ds.properties
+  DS_LMDB_DIR=${cat $DS_PROPERTIES | grep guardian.ds.database.dir | cut -d'=' -f 1}
+  if [ -n "$DS_LMDB_DIR" ]; then
+    mkdir $DS_LMDB_DIR/partitions/guardian-compressed
+    ./liblmdb/mdb_copy $DS_LMDB_DIR/partitions/guardian $DS_LMDB_DIR/partitions/guardian/guardian-compressed
+    mv $DS_LMDB_DIR/partitions/guardian $DS_LMDB_DIR/partitions/guardian-copy 
+    mv $DS_LMDB_DIR/partitions/guardian-compressed $DS_LMDB_DIR/partitions/guardian
+    echo "[+] Apacheds lmdb compressed work done!"
+   ./liblmdb/mdb_stat -e -f $DS_LMDB_DIR/partitions/guardian
+  fi
+fi
+
+
+
+目录型数据存储
+
+存储用户/组/（系统）角色信息
+存储权限、配额信息
+存储密码策略信息
+提供LDAP/Kerberos接口
+
+目录型数据存储
+
+1. 缓存用户/组/角色信息
+2. 提供LDAP/Kerberos接口
+
+进入ApacheDS的master和slave容器，确认ApacheDS进程没有占用异常高的CPU
+
+
+{
+  "LdapServer": "172.16.1.113:10389",
+  "LdapCA": "",
+  "Method": "mysql_clear_password",
+  "User": "uid=admin,ou=system",
+  "Password": "123",
+  "GroupQuery": "ou=people,dc=tdh",
+  "UserDnPattern":"uid=%s,ou=people,dc=tdh"
+}
+
+  MDEV-12645 - mysql_install_db: no install test db option  Added --skip-test-db option to mysql_install_db. If specified, no test database created and relevant grants issued.  Removed --skip-auth-anonymous-user option of mysql_install_db. Now it is covered by --skip-test-db.  Dropped some Debian patches that did the same.  Removed unused make_win_bin_dist.1, make_win_bin_dist and mysql_install_db.pl.in.
+
+docker run -p 3306:3308 --name mariadb -v /opt/docker_v/mysql/conf:/etc/mysql/conf.d -e MYSQL_ROOT_PASSWORD=123456 -d 7c1
+
+sed -i 's/ throws.*//g' testv2
+删除匹配throws字符后面的字符串
+
+{{ .NAMESPACE }}
+
+root@tdcregression-00 ~]# history 25
+ 1016  vi guardian.yaml 
+ 1017  walmctl -s 10.10.90.107:9001 --tls=false -n test compose -w -t 900 -p guardian -f guardian.yaml
+ 1018  vi guardian.yaml 
+ 1019  walmctl -s 10.10.90.107:9001 --tls=false -n test compose -w -t 900 -p guardian -f guardian.yaml
+ 1020  vi guardian.yaml 
+ 1021  walmctl -s 10.10.90.107:9001 --tls=false -n test compose -w -t 900 -p guardian -f guardian.yaml
+ 1022  eslmctl -n test list release
+ 1023  walmctl -n test list release
+ 1024  walmctl -s 10.10.90.107:9001 -n test list release
+ 1025  export WALM_HOST=10.10.90.107
+ 1026  walmctl -n test list project
+ 1027  walmctl -s 10.10.90.107:9001 -n test list project
+ 1028  walm -n test list release -p guardian
+ 1029  walmctl -n test list release -p guardian
+ 1030  walmctl -s WALM_HOST -n test list release -p guardian
+ 1031  walmctl -s 10.10.90.107:9001 -n test list release -p guardian
+ 1032  kubectl get po -owide
+ 1033  walmctl -s 10.10.90.107:9001 --tls=false -n test list project
+ 1034  walmctl -s 10.10.90.107:9001 --tls=false -n test list release
+ 1035  ls
+ 1036  cat guardian.yaml 
+ 1037  walmctl -s 10.10.90.107:9001 --tls=false -n test list project
+ 1038  kubectl get namespace
+ 1039  kubectl get pods --namespace=test
+ 1040  history 25
+
+sed -i 's/{{ .PROJECT_NAME }}/tdh/g' tdh.yaml
+transwarp@transwarp-lishinho-5480:~/study/20200717$ vi tdh.yaml 
+transwarp@transwarp-lishinho-5480:~/study/20200717$ sed -i 's/{{ .NAMESPACE }}/test/g' tdh.yaml
+transwarp@transwarp-lishinho-5480:~/study/20200717$ sed -i 's/{{ .NAMESPACE | upper }}/test/g' tdh.yaml
+transwarp@transwarp-lishinho-5480:~/study/20200717$ sed -i 's/{{ .GUARDIAN_INSTALL_ID }}/rrpz8/g' tdh.yaml
+transwarp@transwarp-lishinho-5480:~/study/20200717$ sed -i 's/{{ .CLUSTER_HOST }}/10.10.90.107/g' tdh.yaml
+
+kubectl describe po kafka-xrplv-0  --namespace=test
+
+kubectl -n kube-system get svc
+
+kubectl get ns
+
+beeline -u "jdbc:hive2://localhost:10000/default;principal=hive/tdcregression-01@TDH"
+kinit -kt /etc/keytab
+
+beeline -u "jdbc:hive2://localhost:10000/default;principal=hive/tos_guardian-use@GUARDIAN-USE.TDH"
+
+for i in `seq 1 10`; do echo "create table tb$i(a int);">> c.sql; done
+
+<property>
+    <name>hive.metastore.service.id</name>
+    <value>tdh-metastore</value>
+  </property>
+
+klist -kt hdfs.keytab
+
+
+cd /etc/hdfs1/conf
+
+klist -kt hdfs.keytab
+
+kinit -kt hdfs.keytab hdfs/tw-node41@TDH
+
+./apacheds-cleaner -H 10.16.71.226 
+./apacheds-cleaner -H 10.16.71.226 -P 10389 -d tdh -s tdh-metastore -p 123 -S hdfs1
+
+javax.jdo.option.ConnectionURL
+
+kubectl -n guardian-use edit statefulset executor-pccgp
+
+./apacheds-cleaner -H tdcregression-04 -P 10389 -d tdh -s tdh-metastore -p 123 -S hdfs1
+
+19:19
+
+在你认证登陆成功之后，springsecurity 会把你的登陆用户信息存在session里面，你前端进行修改这个登陆用户的时候，如果要session中的一起修改，最后是在修改接口里面调用，以MVC为例，即前端调用Controller的修改方法的时候调用最好，或者service里面也可以。集成的方法可以看看我的上篇博客登陆基本实现。HttpServletRequest可以直接在Controller注入获取。
+
+172.16.179.50
+
+
+10.49
+11.09
+
+
+kubectl get po -owide -n guardian-use
+
+jdbc:mysql://tw-node599:3316,tw-node597:3316,tw-node598:3316/metastore_inceptor1?createDatabaseIfNotExist=true&amp;characterEncoding=UTF-8&amp;failOverReadOnly=false&amp;user=hiveuser&amp;password=passwd
+
+if [ -f /etc/$hdfs_name/conf/core-site.xml ] && [ -f /etc/$service_name/conf/hive-site.xml ]; then
+  echo "[+] copy core-site.xml and hive-site.xml into resources folder"
+  cp /etc/$hdfs_name/conf/core-site.xml /etc/$service_name/conf/hive-site.xml $cur_folder/resources/
+elif [ -f $cur_folder/resources/core-site.xml ] && [ -f $cur_folder/resources/hive-site.xml ]; then
+  echo "[+] core-site.xml and hive-site.xml exist in $cur_folder/resources/"
+else
+  echo "[+] please copy core-site.xml and hive-site.xml to $cur_folder/resources/"
+  exit 1
+fi
+
+jdbc:mysql://tw-node599:3316,tw-node597:3316,tw-node598:3316/metastore_inceptor1?failOverReadOnly=false&amp;createDatabaseIfNotExist=false&amp;characterEncoding=UTF-8&amp;user=inceptoruser&amp;password=password
+
+uid=admin, ou=system
+
+apacheds-cleaner放在tool里
+3440f584072467f1cb37fa53afc905eb  apacheds-cleaner-20-07-15.tar.gz
+68110fb4da66c1e52e6eddf8efbb689a  apacheds-compressed-20-07-15.tar.gz

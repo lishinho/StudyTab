@@ -1,0 +1,215 @@
+work36
+10:00 - 20:30
+
+工作周报 - 李镇邦 20200629 ~ 20200703
+
+完成：
+1. WARP-27572: 对federation OAuth单点登出的设计工作 http://172.16.1.168:8090/pages/viewpage.action?pageId=24593028
+2. WARP-47032: guardian-3.1 errocode fix
+
+进行中：
+1. WARP-27572: 单点登出接口的完善与调试
+
+本周：
+1. 完成WARP-27572
+2. 支持sla
+
+loginURl-service-logoutURL
+
+从authentication request解析出SLOservice
+拿着SLOservice换后
+端存储的registeredService
+SLOservice和registeredService决定logouturl：
+1. registeredService在后端找是否存储有对应的logouturl，
+2. SLOservice解析出logouturl返回
+封装logoutmsg
+将logoutmsg发送至logouturl
+
+拦截到对应logoutmsg的报文
+将报文携带的sessionID映射到client的token，token对应残留在client中的其他session
+相应清除掉logout的session
+
+loginurl->logouturl->send
+logoutmanager: logout urls -> send
+
+geturls -> for-each { determineUrl(url) }
+send msg to logouturl 
+get url 
+
+
+datank
+
+极简版
+server
+1. 拿到loginurl拼出对应的logouturl
+2. 发送logoutMsg 给logouturl 直接走client的logout逻辑
+3. 销毁session
+
+http://localhost:8011/federation-server/#/account/login
+
+https://localhost:8011/federation-server/demo/oauth/authorize?client_id=testDemo-e89MA2QVyl&redirect_uri=http://localhost:8282/login&response_type=code&state=YjauxS
+
+29297
+
+
+/usr/lib/jvm/java-8-openjdk-amd64/bin/java -javaagent:/home/transwarp/Downloads/idea-IC-192.7142.36/lib/idea_rt.jar=33513:/home/transwarp/Downloads/idea-IC-192.7142.36/bin -Dfile.encoding=UTF-8 -classpath /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/charsets.jar:/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/ext/cldrdata.jar:/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/ext/dnsns.jar:/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/ext/icedtea-sound.jar:/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/ext/jaccess.jar:/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/ext/localedata.jar:/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/ext/nashorn.jar:/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/ext/sunec.jar:/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/ext/sunjce_provider.jar:/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/ext/sunpkcs11.jar:/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/ext/zipfs.jar:/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/jce.jar:/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/jsse.jar:/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/management-agent.jar:/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/resources.jar:/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/rt.jar:/home/transwarp/Downloads/work/guardian-federation-demo/spring-security/simple-client/target/classes:/home/transwarp/.m2/repository/org/springframework/boot/spring-boot-starter-web/2.0.5.RELEASE/spring-boot-starter-web-2.0.5.RELEASE.jar:/home/transwarp/.m2/repository/org/springframework/boot/spring-boot-starter/2.0.5.RELEASE/spring-boot-starter-2.0.5.RELEASE.jar:/home/transwarp/.m2/repository/org/springframework/boot/spring-boot-starter-logging/2.0.5.RELEASE/spring-boot-starter-logging-2.0.5.RELEASE.jar:/home/transwarp/.m2/repository/ch/qos/logback/logback-classic/1.2.3/logback-classic-1.2.3.jar:/home/transwarp/.m2/repository/ch/qos/logback/logback-core/1.2.3/logback-core-1.2.3.jar:/home/transwarp/.m2/repository/org/apache/logging/log4j/log4j-to-slf4j/2.10.0/log4j-to-slf4j-2.10.0.jar:/home/transwarp/.m2/repository/org/apache/logging/log4j/log4j-api/2.10.0/log4j-api-2.10.0.jar:/home/transwarp/.m2/repository/org/slf4j/jul-to-slf4j/1.7.25/jul-to-slf4j-1.7.25.jar:/home/transwarp/.m2/repository/javax/annotation/javax.annotation-api/1.3.2/javax.annotation-api-1.3.2.jar:/home/transwarp/.m2/repository/org/yaml/snakeyaml/1.19/snakeyaml-1.19.jar:/home/transwarp/.m2/repository/org/springframework/boot/spring-boot-starter-json/2.0.5.RELEASE/spring-boot-starter-json-2.0.5.RELEASE.jar:/home/transwarp/.m2/repository/com/fasterxml/jackson/datatype/jackson-datatype-jdk8/2.9.6/jackson-datatype-jdk8-2.9.6.jar:/home/transwarp/.m2/repository/com/fasterxml/jackson/datatype/jackson-datatype-jsr310/2.9.6/jackson-datatype-jsr310-2.9.6.jar:/home/transwarp/.m2/repository/com/fasterxml/jackson/module/jackson-module-parameter-names/2.9.6/jackson-module-parameter-names-2.9.6.jar:/home/transwarp/.m2/repository/org/springframework/boot/spring-boot-starter-tomcat/2.0.5.RELEASE/spring-boot-starter-tomcat-2.0.5.RELEASE.jar:/home/transwarp/.m2/repository/org/apache/tomcat/embed/tomcat-embed-core/8.5.34/tomcat-embed-core-8.5.34.jar:/home/transwarp/.m2/repository/org/apache/tomcat/embed/tomcat-embed-el/8.5.34/tomcat-embed-el-8.5.34.jar:/home/transwarp/.m2/repository/org/apache/tomcat/embed/tomcat-embed-websocket/8.5.34/tomcat-embed-websocket-8.5.34.jar:/home/transwarp/.m2/repository/org/hibernate/validator/hibernate-validator/6.0.12.Final/hibernate-validator-6.0.12.Final.jar:/home/transwarp/.m2/repository/javax/validation/validation-api/2.0.1.Final/validation-api-2.0.1.Final.jar:/home/transwarp/.m2/repository/org/jboss/logging/jboss-logging/3.3.2.Final/jboss-logging-3.3.2.Final.jar:/home/transwarp/.m2/repository/com/fasterxml/classmate/1.3.4/classmate-1.3.4.jar:/home/transwarp/.m2/repository/org/springframework/spring-web/5.0.9.RELEASE/spring-web-5.0.9.RELEASE.jar:/home/transwarp/.m2/repository/org/springframework/spring-webmvc/5.0.9.RELEASE/spring-webmvc-5.0.9.RELEASE.jar:/home/transwarp/.m2/repository/org/springframework/spring-expression/5.0.9.RELEASE/spring-expression-5.0.9.RELEASE.jar:/home/transwarp/.m2/repository/org/springframework/boot/spring-boot-starter-thymeleaf/2.0.5.RELEASE/spring-boot-starter-thymeleaf-2.0.5.RELEASE.jar:/home/transwarp/.m2/repository/org/thymeleaf/thymeleaf-spring5/3.0.9.RELEASE/thymeleaf-spring5-3.0.9.RELEASE.jar:/home/transwarp/.m2/repository/org/thymeleaf/thymeleaf/3.0.9.RELEASE/thymeleaf-3.0.9.RELEASE.jar:/home/transwarp/.m2/repository/org/attoparser/attoparser/2.0.4.RELEASE/attoparser-2.0.4.RELEASE.jar:/home/transwarp/.m2/repository/org/unbescape/unbescape/1.1.5.RELEASE/unbescape-1.1.5.RELEASE.jar:/home/transwarp/.m2/repository/org/slf4j/slf4j-api/1.7.25/slf4j-api-1.7.25.jar:/home/transwarp/.m2/repository/org/thymeleaf/extras/thymeleaf-extras-java8time/3.0.1.RELEASE/thymeleaf-extras-java8time-3.0.1.RELEASE.jar:/home/transwarp/.m2/repository/org/springframework/boot/spring-boot-starter-security/2.0.5.RELEASE/spring-boot-starter-security-2.0.5.RELEASE.jar:/home/transwarp/.m2/repository/org/springframework/spring-aop/5.0.9.RELEASE/spring-aop-5.0.9.RELEASE.jar:/home/transwarp/.m2/repository/org/springframework/security/spring-security-config/5.0.8.RELEASE/spring-security-config-5.0.8.RELEASE.jar:/home/transwarp/.m2/repository/org/springframework/security/spring-security-web/5.0.8.RELEASE/spring-security-web-5.0.8.RELEASE.jar:/home/transwarp/.m2/repository/org/springframework/security/oauth/boot/spring-security-oauth2-autoconfigure/2.0.5.RELEASE/spring-security-oauth2-autoconfigure-2.0.5.RELEASE.jar:/home/transwarp/.m2/repository/com/fasterxml/jackson/core/jackson-annotations/2.9.0/jackson-annotations-2.9.0.jar:/home/transwarp/.m2/repository/com/fasterxml/jackson/core/jackson-databind/2.9.6/jackson-databind-2.9.6.jar:/home/transwarp/.m2/repository/com/fasterxml/jackson/core/jackson-core/2.9.6/jackson-core-2.9.6.jar:/home/transwarp/.m2/repository/org/springframework/boot/spring-boot/2.0.5.RELEASE/spring-boot-2.0.5.RELEASE.jar:/home/transwarp/.m2/repository/org/springframework/boot/spring-boot-autoconfigure/2.0.5.RELEASE/spring-boot-autoconfigure-2.0.5.RELEASE.jar:/home/transwarp/.m2/repository/org/springframework/security/spring-security-jwt/1.0.9.RELEASE/spring-security-jwt-1.0.9.RELEASE.jar:/home/transwarp/.m2/repository/org/bouncycastle/bcpkix-jdk15on/1.56/bcpkix-jdk15on-1.56.jar:/home/transwarp/.m2/repository/org/bouncycastle/bcprov-jdk15on/1.56/bcprov-jdk15on-1.56.jar:/home/transwarp/.m2/repository/org/springframework/security/oauth/spring-security-oauth2/2.3.3.RELEASE/spring-security-oauth2-2.3.3.RELEASE.jar:/home/transwarp/.m2/repository/org/springframework/spring-beans/5.0.9.RELEASE/spring-beans-5.0.9.RELEASE.jar:/home/transwarp/.m2/repository/org/springframework/spring-core/5.0.9.RELEASE/spring-core-5.0.9.RELEASE.jar:/home/transwarp/.m2/repository/org/springframework/spring-jcl/5.0.9.RELEASE/spring-jcl-5.0.9.RELEASE.jar:/home/transwarp/.m2/repository/org/springframework/spring-context/5.0.9.RELEASE/spring-context-5.0.9.RELEASE.jar:/home/transwarp/.m2/repository/org/springframework/security/spring-security-core/5.0.8.RELEASE/spring-security-core-5.0.8.RELEASE.jar:/home/transwarp/.m2/repository/commons-codec/commons-codec/1.11/commons-codec-1.11.jar:/home/transwarp/.m2/repository/org/codehaus/jackson/jackson-mapper-asl/1.9.13/jackson-mapper-asl-1.9.13.jar:/home/transwarp/.m2/repository/org/codehaus/jackson/jackson-core-asl/1.9.13/jackson-core-asl-1.9.13.jar:/home/transwarp/.m2/repository/io/transwarp/guardian/federation/federation-utils/guardian-3.2.0/federation-utils-guardian-3.2.0.jar io.transwarp.guardian.federation.demo.client.springsecurity.Client
+
+Usage: hdfs dfs -getfacl [-R] <path>
+显示文件和目录的访问控制列表（ACL）。如果目录具有默认ACL，则getfacl还会显示默认ACL。
+用confidencial
+hdfs dfs -getacl / 先走hdfs逻辑再走插件 查看/ facl
+配置多个实例 enable parallel
+
+http://172.16.0.244:8080/browse/SLA-7381
+
+
+server--Map{token-tokenId}, 
+server2client(send token/logout}--(token-tokenId)/token
+client--Map1{tokenId-token}, Map2{token-session}: receive token--{add Map1, Map2}, logout--{invalid token, drop map}
+
+
+AS createtoken{tokenID}
+
+在server端包装token 成功发送到client
+
+/slipstream1/complete/default.f_cis_corp_icd_corp_base_info_job
+
+server.port=8282
+
+security.oauth2.client.clientId=testDemo2-vyosOdPAwT
+security.oauth2.client.clientSecret=W9ch7pCkhKZ7yrblQ0n6
+
+server.port=8283
+
+security.oauth2.client.clientId=testDemo3-mzYEGK3Ape
+security.oauth2.client.clientSecret=yCDjv9gP1VyDeNzY7nRu
+
+hdfs://nameservice1/ext/tdm/exp/EXP_TM_RPT_RE062/00000_0
+
+Principal:{"authorities":[],"details":{"remoteAddress":"0:0:0:0:0:0:0:1","sessionId":"C121FC27A03773FF3F99B621A6A0E6E2","tokenValue":"pLZUroh13IMQg5Nqfk5z-demo","tokenType":"bearer","decodedDetails":null},"authenticated":true,"userAuthentication":{"authorities":[],"details":{"userDetails":{}},"authenticated":true,"principal":"admin","credentials":"N/A","name":"admin"},"clientOnly":false,"principal":"admin","credentials":"","oauth2Request":{"clientId":"testDemo2-vyosOdPAwT","scope":["read","write"],"requestParameters":{"client_id":"testDemo2-vyosOdPAwT#demo"},"resourceIds":[],"authorities":[],"approved":true,"refresh":false,"redirectUri":null,"responseTypes":[],"extensions":{},"refreshTokenRequest":null,"grantType":null},"name":"admin"}
+
+User Access Token:{"access_token":"pLZUroh13IMQg5Nqfk5z-demo","token_type":"bearer","refresh_token":"7doWqxViiAWjtpF7aBCH-demo","expires_in":71998,"scope":"read write","name":"admin#demo-testDemo2-vyosOdPAwT-qpM0FR1prr","user":"admin","clientId":"testDemo2-vyosOdPAwT","clientTenant":"demo","tenant":"demo","source":"CLIENT","createTime":1594121722644,"refreshTime":1594121722644,"validity":72000,
+"refreshTokenValidity":79200} Client Access Token:{"access_token":"sawvttCzaxwt18eEeU7X-demo","token_type":"bearer","expires_in":71999,"scope":"read write","name":"testDemo2-vyosOdPAwT#demo-testDemo2-vyosOdPAwT-c3QBsGBjcN","user":"testDemo2-vyosOdPAwT","clientId":"testDemo2-vyosOdPAwT","clientTenant":"demo","tenant":"demo","source":"CLIENT_CRED","createTime":1594121722786,"refreshTime":1594121722786,
+"validity":72000,"refreshTokenValidity":79200}
+
+xoxoxxoxoxoxooxoxoxooxox
+Principal:{"authorities":[],"details":{"remoteAddress":"0:0:0:0:0:0:0:1","sessionId":"888D3D40B995CF6A5F1EAE9D36D0CFD3","tokenValue":"YxslcAt5keCazp1KQ6G5-demo","tokenType":"bearer","decodedDetails":null},"authenticated":true,"userAuthentication":{"authorities":[],"details":{"userDetails":{}},"authenticated":true,"principal":"admin","credentials":"N/A","name":"admin"},"clientOnly":false,"principal":"admin","credentials":"","oauth2Request":{"clientId":"testDemo3-mzYEGK3Ape","scope":["read","write"],"requestParameters":{"client_id":"testDemo3-mzYEGK3Ape#demo"},"resourceIds":[],"authorities":[],"approved":true,"refresh":false,"redirectUri":null,"responseTypes":[],"extensions":{},"refreshTokenRequest":null,"grantType":null},"name":"admin"}
+
+user to client
+User Access Token:{"access_token":"YxslcAt5keCazp1KQ6G5-demo","token_type":"bearer","refresh_token":"7HUvQJVgrIXXFdGnyKGW-demo","expires_in":71998,"scope":"read write","name":"admin#demo-testDemo3-mzYEGK3Ape-YOGF1geT9H","user":"admin","clientId":"testDemo3-mzYEGK3Ape","clientTenant":"demo","tenant":"demo","source":"CLIENT","createTime":1594122806183,"refreshTime":1594122806183,"validity":72000,
+"token_hash":-2123358306,"refreshTokenValidity":144000} 
+
+client to resource server
+Client Access Token:{"access_token":"q3NuZKLgjiXZvoJ6gOeV-demo","token_type":"bearer","expires_in":71999,"scope":"read write","name":"testDemo3-mzYEGK3Ape#demo-testDemo3-mzYEGK3Ape-YphWWEPmrn","user":"testDemo3-mzYEGK3Ape","clientId":"testDemo3-mzYEGK3Ape","clientTenant":"demo","tenant":"demo","source":"CLIENT_CRED","createTime":1594122806891,
+"refreshTime":1594122806891,"validity":72000,"token_hash":1278010940,"refreshTokenValidity":144000
+
+ClientCredentialsTokenEndpointFilter（拿client id和client secret) -> DaoAuthenticationProvider ->tokaneGranter grant DefaultOAuth2AccessToken -> AuthorizationServerTokenServices -> 
+/oauth/token
+
+user -- 
+server -- token
+
+session 发的 accesstoken 无效
+
+token发给哪个url？
+session生成token的过程
+
+AuthorizationServerTokenServices
+MultiTenantTokenServices
+
+session
+
+io.transwarp.guardian.federation.utils.oauth2.client.OAuth2ClientException: Failed to process request result.
+
+
+cas:用户再访问别的应用的时候,就会将这个ticket带上,作为自己的凭据,应用系统接收到请求之后,就会把ticket送到认证系统进行校验,检查ticket的合法性.如果通过校验,用户就可以在不用再次登录的情况下访问应用系统2和3了.
+oauth:
+
+session被注销--记录这个session发放的token --向记录token的url发送注销session消息 -- 拿到tokenid映射session --注销client的session
+访问resource server没有权限
+DelegatedAuthenticationFilter
+session有
+
+
+OAuth2AuthenticationProcessingFilter
+
+server端通知代码 加service 其他在util
+
+ protected OAuth2Authentication getOAuth2Authentication(ClientDetails client, TokenRequest tokenRequest) {
+    Map<String, String> parameters = new LinkedHashMap(tokenRequest.getRequestParameters());
+    String username = (String)parameters.get("username");
+    String password = (String)parameters.get("password");
+    parameters.remove("password");
+    Authentication userAuth = new UsernamePasswordAuthenticationToken(username, password);
+    ((AbstractAuthenticationToken)userAuth).setDetails(parameters);
+
+    Authentication userAuth;
+    try {
+      userAuth = this.authenticationManager.authenticate(userAuth);
+    } catch (AccountStatusException var8) {
+      throw new InvalidGrantException(var8.getMessage());
+    } catch (BadCredentialsException var9) {
+      throw new InvalidGrantException(var9.getMessage());
+    }
+
+    if (userAuth != null && userAuth.isAuthenticated()) {
+      OAuth2Request storedOAuth2Request = this.getRequestFactory().createOAuth2Request(client, tokenRequest);
+      return new OAuth2Authentication(storedOAuth2Request, userAuth);
+    } else {
+      throw new InvalidGrantException("Could not authenticate user: " + username);
+    }
+  }
+}
+
+几个硬bug：
+WARP-40763: SLA-5724 tdh-621和guardian311 312 schedule显示
+SLA-
+
+
+./apacheds-cleaner -H 
+ -P 10389 -d tdh -s inceptor1 -p 123 -S hdfs1
+
+
+ldapsearch -H xxxx -x -D xxxx -w xxxx -b xxx | grep krbtgt
+
+mvn dependency-check:aggregate -DskipTests -Ddependency-check.skip=false
+
+/home/transwarp/Downloads/guardian/examples/target/lib
+
+tar –czf jpg.tar.gz *.jpg //将目录里所有jpg文件打包成jpg.tar后，并且将其用gzip压缩，生成一个gzip压缩过的包，命名为jpg.tar.gz
+
+in
+[inceptor1]------> lock [apacheds]<-------读写大量数据 [inceptor2]
+   [apacheds]
+
+tdh524前 
+GuardianMetastoreListener中监听Inceptor中数据库/表的创建/删除事件，给表的创建者赋予一些权限，在创建临时表时创建了大量的临时权限信息，极大增加了ApacheDS数据库文件的大小，也影响Guardian和Inceptor性能
+之后是
+Guardian中的权限条目都应该通过显示的用户交互进行添加
+
+
+建表时自动给owner附上权限，许多任务可能会创建成千上万的临时表，这样就会在ApacheDS中产生大量的数据。
+
+mysql -h172.16.1.236 -P15307 -uadmin -padmin --enable-cleartext-plugin --ssl-ca=/home/transwarp/go/src/github.com/youtube/vitess/examples/local_mfed/sub_scripts/ca-cert.pem --ssl-cert=/home/transwarp/go/src/github.com/youtube/vitess/examples/local_mfed/sub_scripts/kungate-client-cert.pem --ssl-key=/home/transwarp/go/src/github.com/youtube/vitess/examples/local_mfed/sub_scripts/kungate-client-key.pem --ssl-mode=VERIFY_CA
+
+
+mysql -hnode63 -P15307 -uvt_app -p123  --ssl-ca=/home/transwarp/go/src/github.com/youtube/vitess/examples/local_mfed/sub_scripts/ca-cert.pem --ssl-cert=/home/transwarp/go/src/github.com/youtube/vitess/examples/local_mfed/sub_scripts/kungate-client-cert.pem --ssl-key=/home/transwarp/go/src/github.com/youtube/vitess/examples/local_mfed/sub_scripts/kungate-client-key.pem --ssl-mode=VERIFY_CA
+
+
+mysql -hnode63 -P15307 -uvt_app -p123 --ssl-ca=/etc/kundb10/conf/ca-cert.pem --ssl-cert=/etc/kundb10/conf/kungate-client-cert.pem --ssl-key=/etc/kundb10/conf/kungate-client-key.pem
+
+mysql -hnode63 -P15307 -uyuqitest -p123 --ssl-ca=/etc/kundb10/conf/ca-cert.pem --ssl-cert=/etc/kundb10/conf/kungate-client-cert.pem --ssl-key=/etc/kundb10/conf/kungate-client-key.pem
+
+MySQL [test]> show create database test;
++----------+---------------------------------------------------------------+
+| Database | Create Database                                               |
++----------+---------------------------------------------------------------+
+| test     | CREATE DATABASE `test` /*!40100 DEFAULT CHARACTER SET utf8 */ |
++----------+---------------------------------------------------------------+
+1 row in set (0.002 sec)
+
+
+mysql -hnode63 -P34231 -uroot -pTranswarp! --ssl-ca=/etc/kundb10/conf/ca-cert.pem --ssl-cert=/etc/kundb10/conf/kungate-client-cert.pem --ssl-key=/etc/kundb10/conf/kungate-client-key.pem
+
+kubectl describe po kafka-xrplv-0  --namespace=test
+

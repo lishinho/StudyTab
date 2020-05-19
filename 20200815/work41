@@ -1,0 +1,271 @@
+20200815
+work41
+
+工作周报 - 李镇邦 20200803 ~ 20200807
+
+完成：
+1. WARP-27572: federation单点登出为jdbc session的不同情况重构server实现: http://172.16.1.168:8090/pages/viewpage.action?pageId=24593028 合进代码
+
+其他：
+安全不相关：
+1. sla-9012 银河证券： guardian srv无法启动
+2. sla-9031 得益乳业guardian cas server起不来
+3. sla-9028 中电54所guardian txsql连不上
+4. sla-9063 中电54所guardian界面队列配置在inceptor未生效
+5. sla-9103 无锡所guardian健康检查异常
+操作姿势：
+6. sla-9029 邮政tdc配置互信 terminal无法通过keytab认证
+7. sla-9126 中化集团guardian升级密码复杂度配置
+8. sla-9125 中电54所配置新域名重装guardian
+
+其他组件
+9. sla-9097 湖南农信search开安全访问接口keytab未生效 
+
+10. sla-9116 广州供电局guardian连接txsql报错
+11.其他内部支持
+
+
+本周：
+1. 完成上周遗留的支持问题
+2. 单点登出任务的review总结
+3. 其他的guardian-3.2.2的开发任务
+
+ 
+总体原则是加在启动脚本里，在java的启动参数这块加进去。
+tdh是修改metainfo模板里面  XXXX-env.sh结尾的文件，配置服务然后重启。
+tdc是编辑服务的config map，然后保存重启pod
+
+
+server.port=8282
+
+security.oauth2.client.clientId=test1-KfTgVfYTSK
+security.oauth2.client.clientSecret=PnuGMQVRCZyVMbPBrY2M
+
+server.port=8284
+
+security.oauth2.client.clientId=test-noSLO-pbhwgNw56t
+security.oauth2.client.clientSecret=ZJW34NzAPkWZ8ineg4EK
+
+server.port=8283
+
+security.oauth2.client.clientId=test2-Ib19D6gu7Y
+security.oauth2.client.clientSecret=shkGJPfQjNGWB5yDnKG5
+
+
+public static boolean checkGlobalAccess(GuardianClient client, String component, String username) {
+        if (client == null) {
+            return true;
+        } else {
+            GuardianConfiguration conf = client.getConf();
+            if (conf.getBoolean(GuardianVars.GUARDIAN_PLUGIN_CHECK_ACCESS_PERMISSION.varname, GuardianVars.GUARDIAN_PLUGIN_CHECK_ACCESS_PERMISSION.defaultBoolVal)) {
+                try {
+                    return client.checkAccess(username, global(component, "ACCESS"));
+                } catch (GuardianClientException var5) {
+                    LOG.error("Check ACCESS permission failed", var5);
+                    return false;
+                }
+            } else {
+                return true;
+            }
+        }
+
+每个client会多出一个rest 新增一个线程去每30秒往guardian后端拉数据更新cache
+队列check给的serviceId是metastore，然而client的serviceId是serviceId 导致访问cache的时候其实一直是不命中的 如果第一次没权限即读到了脏数据，cache更新不到数据，所以cache中脏数据一直残留
+
+如果有人说他们的代码在重构过程中有一两天时间不可用，基本上可以确定，他们在做的事不是重构。
+
+共享metastore的情况：inceptor1,inceptor2共享metastore1
+由于共享metastore，权限是通过metastore来共享的，只有队列，配额这些由inceptor service为单位的权限模型由inceptor管理
+
+inceptor会注册4个guardian client， 通过GUARDIAN_PERMISSION_COMPONENT判断，
+guardianAuthorizer是metastore优先
+GuardianHiveAuthorizerFactory是serviceId优先
+GuardianPLFunctionHook是metastore优先
+InceptorSchedulerProvider是serviceId优先 ->刷新serviceID优先的client的cache，向guardian拿serviceId为component的权限信息
+
+其他是metastore，队列上的global对象是metastoreid 其他队列是serviceid
+所以在InceptorSchedulerProvider中设计
+如果metastoreid存在且metastoreid和serviceid不同，那么实现两个guardian client
+分别负责global对象和其他队列对象
+
+172.26.5.35 node535
+172.26.5.36 node536
+172.26.5.37 node537
+连接
+
+
+
+[root@node538 transwarp]# kubectl describe po txsql-server-txsql1-76f5c99fbb-6n48f
+Name:                 txsql-server-txsql1-76f5c99fbb-6n48f
+Namespace:            default
+Priority:             0
+Priority Class Name:  low-priority
+Node:                 node539/172.26.5.39
+Start Time:           Wed, 12 Aug 2020 16:26:35 +0800
+Labels:               name=txsql-server-txsql1
+                      pod-template-hash=76f5c99fbb
+                      podConflictName=txsql-server-txsql1
+Annotations:          serviceInstanceName: TxSQL1
+Status:               Running
+IP:                   172.26.5.39
+IPs:
+  IP:           172.26.5.39
+Controlled By:  ReplicaSet/txsql-server-txsql1-76f5c99fbb
+Containers:
+  txsql-server-txsql1:
+    Container ID:  docker://cd0faebfd7a9334c1503ed4e704410e668f28161a915eae327fb942dd71e5bfe
+    Image:         transwarp/txsql:transwarp-5.2.4-final
+    Image ID:      docker-pullable://transwarp/txsql@sha256:25fad37b5a118baea5f8960c85eb9c69d1459b48e5d29416495b9bb1784da4d1
+    Port:          <none>
+    Host Port:     <none>
+    Args:
+      boot.sh
+      TXSQL_SERVER
+    State:          Running
+      Started:      Wed, 12 Aug 2020 16:26:35 +0800
+    Ready:          False
+    Restart Count:  0
+    Readiness:      exec [/bin/bash -c mysql -h `hostname` -uroot -P3316 -p"218690171" -e "select 1 from dual"  > /dev/null && echo ok] delay=10s timeout=1s period=10s #success=1 #failure=3
+    Environment:
+      CONF_DIR:  /etc/txsql1/conf
+    Mounts:
+      /etc/aquila/conf from aquila (rw)
+      /etc/localtime from timezone (rw)
+      /etc/tos/conf from tos (rw)
+      /etc/transwarp/conf from transwarphosts (rw)
+      /etc/transwarp_license_cluster/conf from transwarplicensecluster (rw)
+      /etc/txsql1/conf from conf (rw)
+      /usr/lib/transwarp/plugins from plugin (rw)
+      /var/log/txsql1/ from log (rw)
+      /var/run/secrets/kubernetes.io/serviceaccount from default-token-mbd5f (ro)
+      /vdir from mountbind (rw)
+Conditions:
+  Type              Status
+  Initialized       True 
+  Ready             False 
+  ContainersReady   False 
+  PodScheduled      True 
+Volumes:
+  log:
+    Type:          HostPath (bare host directory volume)
+    Path:          /var/log/txsql1/
+    HostPathType:  
+  mountbind:
+    Type:          HostPath (bare host directory volume)
+    Path:          /transwarp/mounts/txsql1
+    HostPathType:  
+  plugin:
+    Type:          HostPath (bare host directory volume)
+    Path:          /usr/lib/transwarp/plugins
+    HostPathType:  
+  timezone:
+    Type:          HostPath (bare host directory volume)
+    Path:          /etc/localtime
+    HostPathType:  
+  transwarphosts:
+    Type:          HostPath (bare host directory volume)
+    Path:          /etc/transwarp/conf
+    HostPathType:  
+  conf:
+    Type:          HostPath (bare host directory volume)
+    Path:          /etc/txsql1/conf
+    HostPathType:  
+  tos:
+    Type:          HostPath (bare host directory volume)
+    Path:          /etc/tos/conf
+    HostPathType:  
+  transwarplicensecluster:
+    Type:          HostPath (bare host directory volume)
+    Path:          /etc/transwarp_license_cluster/conf
+    HostPathType:  
+  aquila:
+    Type:          HostPath (bare host directory volume)
+    Path:          /etc/aquila/conf
+    HostPathType:  
+  default-token-mbd5f:
+    Type:        Secret (a volume populated by a Secret)
+    SecretName:  default-token-mbd5f
+    Optional:    false
+QoS Class:       BestEffort
+Node-Selectors:  txsql-server-txsql1=true
+Tolerations:     node.kubernetes.io/not-ready:NoExecute for 300s
+                 node.kubernetes.io/unreachable:NoExecute for 300s
+Events:
+  Type     Reason     Age               From               Message
+  ----     ------     ----              ----               -------
+  Normal   Scheduled  <unknown>         default-scheduler  Successfully assigned default/txsql-server-txsql1-76f5c99fbb-6n48f to node539
+  Normal   Pulling    105s              kubelet, node539   Pulling image "transwarp/txsql:transwarp-5.2.4-final"
+  Normal   Pulled     105s              kubelet, node539   Successfully pulled image "transwarp/txsql:transwarp-5.2.4-final"
+  Normal   Created    105s              kubelet, node539   Created container txsql-server-txsql1
+  Normal   Started    105s              kubelet, node539   Started container txsql-server-txsql1
+  Warning  Unhealthy  7s (x9 over 87s)  kubelet, node539   Readiness probe failed: Warning: Using a password on the command line interface can be insecure.
+ERROR 2003 (HY000): Can't connect to MySQL server on 'node539' (111)
+
+/usr/bin/txsql/bin/mysqld_safe: line 148: /home/root/percona.workspace/data/node538.err: No such file or directory
+WARNING: Logging before InitGoogleLogging() is written to STDERR
+W0812 16:57:08.565562   840 phx_glog.cpp:78] GetDefaultPath get debuf path /usr/bin/txsql/etc/
+Starting phxsqlproxy
+begin InitPhxsqlPlugins
+end InitPhxsqlPlugins
+begin InitProxyPlugins
+end InitProxyPlugins
+PhxBaseConfig::RealReadFile: Reading config from file /usr/bin/txsql/etc/phxsqlproxy.conf
+Error: failed to open file /usr/bin/txsql/etc/phxsqlproxy.conf
+Error: PhxBaseConfig::RealReadFile read path fail /usr/bin/txsql/etc/phxsqlproxy.conf, ret 22633184, error No such file or directoryPhxBaseConfig::RealReadFile: Reading config from file /usr/bin/txsql/etc/phxsqlproxy.conf
+Error: failed to open file /usr/bin/txsql/etc/phxsqlproxy.conf
+Error: PhxBaseConfig::RealReadFile read path fail /usr/bin/txsql/etc/phxsqlproxy.conf, ret 22633184, error No such file or directoryE0812 16:57:08.565789   840 phx_glog.cpp:82] ReadConfig [/usr/bin/txsql/etc/phxsqlproxy.conf] failed
+ReadConfig [/usr/bin/txsql/etc/phxsqlproxy.conf] failed
+Namespace(base_dir='/usr/bin/txsql/', new_process='', process_name='phxsqlproxy')
+start phxsqlproxy failed, exit.....
+Initializing binlogsvr
+PhxBaseConfig::RealReadFile: Reading config from file /usr/bin/txsql/etc/phxbinlogsvr.conf
+Error: failed to open file /usr/bin/txsql/etc/phxbinlogsvr.conf
+Error: PhxBaseConfig::RealReadFile read path fail /usr/bin/txsql/etc/phxbinlogsvr.conf, ret 787687624, error No such file or directoryReading mysql config
+PhxBaseConfig::RealReadFile: Reading config from file /usr/bin/txsql/etc/my.cnf
+Error: failed to open file /usr/bin/txsql/etc/my.cnf
+Error: PhxBaseConfig::RealReadFile read path fail /usr/bin/txsql/etc/my.cnf, ret 45524144, error No such file or directorySet bind ip  port 0
+Initializing binlogsvr log
+Log Initialized: InitLog level = 0, log file size limit = 0, path Starting binlogsvr
+
+
+nc -l 172.26.5.38 3336 -v
+yum install xxx -y
+
+curl -X GET -u zhenbang.li:123456 "http://172.16.1.97:8080/remote.php/webdav/TRANSWARP_RELEASES/OFFICIAL/GUARDIAN/guardian-3.2.0-final/IMAGE/centos-7/GUARDIAN-Image-Registry-Transwarp-3.2.0-final.tar.gz" > /var/lib/docker/guardian320.tar.gz
+
+beeline -u "jdbc:hive2://localhost:10000/default;principal=hive/tw-node1238@TDH"
+
+beeline -u "jdbc:hive2://tw-node594:10000/default;principal=hive/tw-node594@TDH"
+
+inceptor.server.log
+
+set ngmr.furion.pool=test1
+
+2020-08-13 10:28:10,842 INFO  inceptor.InceptorContext: (Logging.scala:logInfo(59)) [HiveServer2-Handler-Pool: Thread-144(SessionHandle=0be31fb1-247f-4efd-8638-af52952124d8)] - Setting job group hive_20200813102828_42b360cc-650a-43cf-93e3-81cf5d99d481, job description select * from tb1
+2020-08-13 10:28:10,866 WARN  scheduler.InceptorSchedulerImpl: (Logging.scala:logWarning(71)) [HiveServer2-Handler-Pool: Thread-144(SessionHandle=0be31fb1-247f-4efd-8638-af52952124d8)] - The specified pool 'test1' not found, deprecated to default pool
+2020-08-13 10:28:10,901 INFO  optimization.HolodeskGIStatisticAnalyze: (HolodeskGIStatisticAnalyze.scala:optimize(26)) [HiveServer2-Handler-Pool: Thread-144(SessionHandle=0be31fb1-247f
+
+
+<?xml version="1.0" encoding="UTF-8"?>
+<root scheduler="FIFO" maxCPURatio="100" rsvCPUNums="0" rsvCPURatio="0" maxCPUNums="2147483647" weight="1"><default scheduler="FIFO" maxCPURatio="100" rsvCPUNums="0" rsvCPURatio="0" maxCPUNums="2147483647" weight="1"/><system scheduler="FIFO" maxCPURatio="100" rsvCPUNums="0" rsvCPURatio="0" maxCPUNums="2147483647" weight="1"/><test1 scheduler="FIFO" maxCPURatio="100" rsvCPUNums="0" rsvCPURatio="0" maxCPUNums="2147483647" weight="9"/><system scheduler="FIFO" maxCPURatio="100" rsvCPUNums="0" rsvCPURatio="0" maxCPUNums="2147483647" weight="1"/></root>
+
+
+<?xml version="1.0"?>
+<root weight="100">
+  <default weight="1" />
+  <system weight="100" maxCPURatio="20" />
+  <test1 weight="60" rsvCPURatio="0" scheduler="FAIR">
+    <adhoc1 weight="50"/>
+    <adhoc2 weight="50"/>
+  </test1>
+  <etl weight="40" maxCPURatio="100" scheduler="FIFO">
+    <etl1 weight="50" />
+    <etl2 weight="50" />
+  </etl>
+</root>
+
+星环科技/产品研发部/数据平台产品/交易数据库开发部/安全中心
+
+徐汇区虹漕路88号越虹广场B座11-12楼
+
+netstat -ant|awk '/^tcp/ {++S[$NF]} END {for(a in S) print (a,S[a])}'

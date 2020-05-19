@@ -1,0 +1,81 @@
+projectConfigs:
+  commonValues: {}
+  releases:
+  - name: txsql
+    repoName: stable
+    chartName: txsql
+    chartVersion: "6.0.x"
+    configValues:
+      App:
+        txsql:
+          replicas: 3
+          image: 172.16.1.99/transwarp/txsql:transwarp-6.0.2-final
+          resources:
+            cpu_limit: 2
+            cpu_request: 1
+            memory_limit: 2
+            memory_request: 1
+  - name: guardian
+    repoName: stable
+    chartName: guardian
+    chartVersion: "3.1.x"
+    configValues:
+      App:
+        apacheds:
+          replicas: 3
+          image: 172.16.1.99/transwarp/apacheds:guardian-3.1.1-final
+          resources:
+            cpu_limit: 4
+            cpu_request: 1
+            memory_limit: 8
+            memory_request: 8
+        guardian:
+          replicas: 1
+          image: 172.16.1.99/transwarp/guardian:guardian-3.1.1-final
+          resources:
+            cpu_limit: 4
+            cpu_request: 1
+            memory_limit: 8
+            memory_request: 8
+        casconfigserver:
+          replicas: 2
+          image: 172.16.1.99/transwarp/cas-config-server:guardian-3.1.1-final
+          resources:
+            cpu_limit: 1
+            cpu_request: 0.2
+            memory_limit: 2
+            memory_request: 2          
+        casadminserver:
+          replicas: 2
+          image: 172.16.1.99/transwarp/cas-admin-server:guardian-3.1.1-final
+          resources:
+            cpu_limit: 1
+            cpu_request: 0.2
+            memory_limit: 2
+            memory_request: 2 
+        casserver:
+          replicas: 1
+          image: 172.16.1.99/transwarp/cas-server:guardian-3.1.1-final
+          resources:
+            cpu_limit: 2
+            cpu_request: 1
+            memory_limit: 4
+            memory_request: 4
+        gencerts:
+          image: 172.16.1.99/transwarp/guardian-init:guardian-3.1.1-final
+          resources:
+            cpu_limit: 1
+            cpu_request: 0.2
+            memory_limit: 2
+            memory_request: 0.5
+      Transwarp_Config:
+        Ingress:
+          path: /{{ .NAMESPACE }}/{{ .PROJECT_NAME }}/guardian
+      Transwarp_License_Address: 172.16.1.40:2191
+      Transwarp_MSL_License_Address: https://172.16.1.40:60907/licence
+      Advance_Config:
+        cas_enable: true
+        guardian:
+          realm: "{{ .NAMESPACE | upper }}.TDH"
+          guardian_site:
+            guardian.client.http.principal: guardian/guardian_{{ .NAMESPACE }}

@@ -1,0 +1,318 @@
+0727
+
+spring中的单例
+spring单例在注入时候使用scope控制，默认的@Controller、@Service、@Repository、@Component是单例，
+
+工作周报 - 李镇邦 20200720 ~ 20200724
+
+完成：
+1. WARP-48198: guardian server用户列表返回创建时间为空
+2. WARP-44993: 重构guardian-plugin返回版本号的接口
+
+其他：
+1. guardian和federation metrics相关的代码review
+2. 其他提交代码review后的修改
+
+本周：
+1. 继续修复guardian各版本问题的jira
+2. 修改review后的代码
+ 
+
+ update gs_user  set create_time = '2020-07-26 09:04:27' where user_id = 5003
+
+
+    <update id="updateRoleCreateTime" parameterType="Role">
+        UPDATE gs_role
+        <set>
+            <choose> <when test="createTime != null"> create_time = #{createTime} </when> <otherwise> create_time = create_time </otherwise> </choose>
+        </set>
+        WHERE role_name = #{roleName}
+    </update>+
+
+---------------success-----------------------
+
+curl -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' -D cookies.txt -d '{"username": "admin","password": "123","isSystem": false}' 'http://localhost:8380/api/v2/login'
+
+curl -X GET --header 'Content-Type: application/json' --header 'Accept: application/json' -b cookies.txt -d '{"dataSource": [ { "type": "GLOBAL","value": "*"}],"serviceName": "inceptor1", "serviceType": "INCEPTOR" }' 'http://localhost:8380/api/v2/perms/authorized-dataNodes?princ=admin&princType=USER&inheritance=false&subtree=false'
+-------------------------------------------------
+testGetProxyUgi(io.transwarp.guardian.client.impl.GetUgiTest)  Time elapsed: 0.279 sec  <<< ERROR!
+io.transwarp.guardian.common.exception.GuardianClientException: ErrorCode: 63201, ErrorMessage: Failed to login a user guardian/guardian from keytab /tmp/971cf548-9f90-49f8-b16f-6cf889e48d01.keytab
+	at io.transwarp.guardian.client.impl.rest.HttpClient.processFailure(HttpClient.java:401)
+	at io.transwarp.guardian.client.impl.rest.HttpClient.requestWithHA(HttpClient.java:458)
+	at io.transwarp.guardian.client.impl.rest.HttpClient.requestReturningEntity(HttpClient.java:373)
+	at io.transwarp.guardian.client.impl.rest.HttpClient.get(HttpClient.java:154)
+	at io.transwarp.guardian.client.impl.rest.GuardianClientRestImpl$33.run(GuardianClientRestImpl.java:971)
+	at io.transwarp.guardian.client.impl.rest.GuardianClientRestImpl$
+
+testGetUgiByAccessToken(io.transwarp.guardian.client.impl.GetUgiTest)  Time elapsed: 7.311 sec  <<< ERROR!
+io.transwarp.guardian.common.exception.GuardianClientException: ErrorCode: 63201, ErrorMessage: Failed to login a user gut-user1 from keytab /tmp/971cf548-9f90-49f8-b16f-6cf889e48d01.keytab
+	at io.transwarp.guardian.client.impl.rest.HttpClient.processFailure(HttpClient.java:401)
+	at io.transwarp.guardian.client.impl.rest.HttpClient.requestWithHA(HttpClient.java:458)
+	at io.transwarp.guardian.client.impl.rest.HttpClient.requestReturningEntity(HttpClient.java:373)
+	at io.transwarp.guardian.client.impl.rest.HttpClient.get(HttpClient.java:154)
+	at io.transwarp.guardian.client.impl.rest.GuardianClientRestImpl$34.run(GuardianClientRestImpl.java:988)
+	at io.transwarp.guardian.client.impl.rest.GuardianClientRestImpl$34.run(GuardianClientRestImpl.java:984)
+	at io.transwarp.guardian.client.impl.rest.RestClient.runWithRelogin(RestClient.java:278)
+
+
+application/x-www-form-urlencoded
+
+1[WAIT]. 现在federation是实现了jdbc session的。假设federation因为某些原因重启，session是会保留的，这个时候拿sessionid到内存里找映射关系，但是ConcurrentHashMap的数据已经没有了，就做不到通知client登出了
+需要对jdbcsession作处理
+需要修改serverStorage的结构
+// for server
+// <grantCode, session>
+// <sessionId, grantCode>
+// <grantCode -> clientId>
+grantCode -> 
+
+// < sessionId, grantCode >
+// < hashedToken, clientId >
+
+2[REVIEW]. containsKey是不会加锁的，如果都执行到这里，put加锁是串行的。如果有两个线程同时执行到了这里（因为有两个client同时发了请求），那么结果可能是后面一个线程的list覆盖了前面一个list，数据就丢了
+arraylist不是线程安全的，如果多个线程执行add，那么数据很可能会丢失的
+代码块加锁
+
+3[REVIEW]. 如果很多session不是用户主动注销，而是session有效期超过之后失效的。那么就不会走到这个类里面的逻辑，久而久之这个map会撑满导致无法gc
+添加listener监听servlet session事件
+
+4[REVIEW]. 这个方法名好像就是put的意思/接口的只是定义通用的方法，并不关心实际是怎么实现的，所以单从接口来说不会关心拿到的值到底是不是hash过的，也不强求一定是hash过的
+serverstorage重构之后改名
+
+5[REVIEW]. 1）这个static变量定义了有啥用吗，除了72行用了一下。看上去应该是个局部变量
+（2）还有要考虑一些如果对方是https的情况，可能需要设置hostnameverifier，不校验证书的SAN
+（3）确认下client的几个超时时间是多少（ pool connect 和socket）的超时时间是多少，是否合理
+httpclient要仿造cas重写 SimpleHttpClientFactoryBean 至少加上setSSLHostnameVerifier maxPooledConnections setDefaultMaxPerRoute
+
+6[REVIEW]. 1）感觉coreSize和maxSize设成200太大了，真的极端情况起200线程性能开销非常大
+（2）应该自顶一个ThreadFactory，把线程设为daemon的
+（3）这里用一个有界的队列感觉也不太合适，超出界的任务会被拒绝抛出异常
+（4）直接用jdk已经封装好的FixedThreadPool就行了
+（5）能给这些thread取自定义的名字就更好了，方便jstack定位问题
+设置httpclient的线程工厂 使得满足条件 245
+
+7[WAIT].  统计一下，这个logout方法加上里面的子方法调用， 一共调用了多少次oAuth2ClientService.getClient或者oAuth2ClientService.loadClientByClientId（包括在for循环里的），查询了多少次数据库，都是必要的吗，有没有考虑过性能？
+final String defaultLogoutUrl = (String) oAuth2ClientService.getClient(clientId).getAdditionalInfo().get(SINGLE_SIGN_OUT_URL);
+不好改 不过可以放
+
+8[REVIEW]. 如果是post的话，放在body里更方便。上面的content-type可以设置表单的形式；另外logout-request这个key也不合适，因为value是一个token。而不是一个什么request， 可以叫logout-identifier 之类的
+post放到body
+
+9[WAIT]. （1）redirect_uri 在UtilConstants里面有定义常量的
+（2）logout的时候client端发过来的请求完全可以不带redirect_uri参数的，难道这个client就无法被通知登出了吗
+怎么登出 不拿redirect-uri
+
+10[REVIEW]. 为什么要把有Authorization头作为条件之一？    比如有个请求是Authorization：Basic XXXXXX  它和oauth2协议有什么联系吗？
+把什么作为识别token request的条件
+
+11[REVIEW].这个是给resource-server用的，把token放在头里面进行认证，但是这个请求是无状态的，谈不上登录登出
+这个只能在用auth code获取access token的那个filter中调用这个方法，其他地方是拿不到token的
+重写extracttoken 而且考虑重构 如果重构 可能还要重写
+
+12[REVIEW]. （1）还是变量命名的问题
+（2）shiro的实现呢？shiro的session并不是HttpSession，是不是没有实现shiro的单点登出？
+shiro适配
+
+13[REVIEW]. 如果在这边就能把token和对应的client的logout的地址给记录下来，那么就不需要在登出的时候再去查询了
+另外考虑下是不是用授权码作为sessionindex更加合适，因为resource owner和client credentials模式并没有单点登入登出的概念，但是request.getSession()也会强制创建一个没有用session并且记录在map里面
+
+优先考虑这个
+
+14[REVIEW]. 非必要，因为clientSessionTokenStorage默认就是有赋值的
+搞清为什么可以删
+
+15[REVIEW]. hashcode不可用
+
+
+server storage
+// <grantCode, session>
+// <sessionId, grantCode>
+// <grantCode -> clientId>
+{
+ code (sessionIndex)
+ client logout address
+ session
+}
+
+
+private SessionManager sessionManager;
+ 
+    public void setSessionManager(SessionManager sessionManager) {
+        this.sessionManager = sessionManager;
+    }
+
+
+1. server的storage换成guava cache
+2. clientId换成新的数据结构 避免多次查询
+
+server.port=8282
+
+security.oauth2.client.clientId=test1-35BmPNbue7
+security.oauth2.client.clientSecret=mJ0MYQ6ScQTmHMbnEY9n
+
+server.port=8283
+
+security.oauth2.client.clientId=test2-yQmIficZSq
+security.oauth2.client.clientSecret=I0HlYAnwRCRaojfx0Tf9
+
+
+    ManagerBase是所有session管理工具类的基类，它是一个抽象类，所有具体实现session管理功能的类都要继承这个类，该类有一个受保护的方法，该方法就是创建sessionId值的方法：
+    （tomcat的session的id值生成的机制是一个随机数加时间加上jvm的id值，jvm的id值会根据服务器的硬件信息计算得来，因此不同jvm的id值都是唯一的），
+    StandardManager类是tomcat容器里默认的session管理实现类，
+    它会将session的信息存储到web容器所在服务器的内存里。
+    PersistentManagerBase也是继承ManagerBase类，它是所有持久化存储session信息的基类，PersistentManager继承了PersistentManagerBase，但是这个类只是多了一个静态变量和一个getName方法，目前看来意义不大，对于持久化存储session，tomcat还提供了StoreBase的抽象类，它是所有持久化存储session的基类，另外tomcat还给出了文件存储FileStore和数据存储JDBCStore两个实现。
+
+LOG.error("Failed to add label {}", label, e);
+      throw new LabelException(e, ErrorType.LabelError.DEFAULT, label.getName());
+
+cat /etc/lsb-release
+genericfilterbean
+
+SLOClientInfoRo sloClientInfoRo = new SLOClientInfoRo(client.getClientId(), authorizationCode, logoutUrl,
+                authorizationRequest.getRedirectUri(), logoutHeader, enableSLO);
+
+@Configuration
+public class SessionConfiguration extends WebMvcConfigurerAdapter{
+    //注册session监听器;
+    @Bean
+    public ServletListenerRegistrationBean<SessionListener> servletListenerRegistrationBean() {
+        ServletListenerRegistrationBean<SessionListener> slrBean = new ServletListenerRegistrationBean<SessionListener>();
+        slrBean.setListener(new SessionListener());
+        return slrBean;
+    }
+
+}
+
+UsernamePasswordAuthenticationFilter之前拦不到logout request
+logout-identifier
+
+singleLogoutCallbacksEnabled
+AbstractAuthenticationProcessingFilter servlet3.1+ ChangeSessionIdAuthenticationStrategy
+
+http.addFilterAfter(new ClientSingleLogoutFilter(), SecurityContextPersistenceFilter.class);
+
+SLOClientInfoRo
+
+HashMapClientSessionMappingStorage
+CacheClientSessionMappingStorage
+expireAfterAccess
+expireAfterWrite
+clientSLOStorage
+
+ThreadLocalRandom
+
+func main(){
+    //带缓冲的channel
+    ch := make(chan Task, 3)
+
+    //启动固定数量的worker
+    for i := 0; i< numWorkers; i++ {
+        go worker(ch)
+    }
+
+    //发送任务给worker
+    hellaTasks := getTaks()
+
+    for _, task := range hellaTasks {
+        ch <- task
+    }
+
+    ...
+
+hchan结构体使用一个环形队列来保存groutine之间传递的数据(如果是缓存channel的话)，使用两个list保存像该chan发送和从该chan接收数据的goroutine，还有一个mutex来保证操作这些结构的安全。
+https://zhuanlan.zhihu.com/p/27917262
+https://draveness.me/golang/docs/part3-runtime/ch06-concurrency/golang-channel/
+https://speakerdeck.com/kavya719/understanding-channels
+}
+
+func worker(ch chan Task){
+    for {
+       //接受任务
+       task := <- ch
+       process(task)
+    }
+}
+  private void buildCache() {
+    mappingIdToSessionCache = CacheBuilder.newBuilder()
+      .maximumSize(maximumSize)
+      .expireAfterAccess(expireAfterAccess, TimeUnit.MINUTES)
+      .expireAfterWrite(expireAfterWrite, TimeUnit.MINUTES)
+      .build();
+
+    String cacheInfo = new StringBuilder()
+      .append(name)
+      .append(" info: maximumSize=")
+      .append(maximumSize)
+      .append(", expireAfterAccess=")
+      .append(expireAfterAccess)
+      .append("min, expireAfterWrite=")
+      .append(expireAfterWrite)
+      .append("min ")
+      .toString();
+    LOG.info(cacheInfo);
+  }
+
+  public static class Builder {
+    private long maximumSize = 10000;
+    private long expireAfterAccess = 60;
+    private long expireAfterWrite = 120;
+    private String name = "SLO client cache";
+
+    public CacheClientSessionMappingStorage.Builder name(String name) {
+      if (!StringUtils.isEmpty(name)) {
+        this.name = name;
+      }
+      return this;
+    }
+
+    public CacheClientSessionMappingStorage.Builder maximumSize(long maximumSize) {
+      if (maximumSize > 0) {
+        this.maximumSize = maximumSize;
+      }
+      return this;
+    }
+
+    public CacheClientSessionMappingStorage.Builder expireAfterAccess(long expireAfterAccess) {
+      if (expireAfterAccess > 0) {
+        this.expireAfterAccess = expireAfterAccess;
+      }
+      return this;
+    }
+
+    public CacheClientSessionMappingStorage.Builder expireAfterWrite(long expireAfterWrite) {
+      if (expireAfterWrite > 0) {
+        this.expireAfterWrite = expireAfterWrite;
+      }
+      return this;
+    }
+
+    public CacheClientSessionMappingStorage build() {
+      return new CacheClientSessionMappingStorage(this);
+    }
+  }
+
+
+LOG.info("========== test create token with null owner ==========");
+
+  private void buildCache() {
+    mappingIdToSessionCache = CacheBuilder.newBuilder()
+      .maximumSize(maximumSize)
+      .expireAfterAccess(expireAfterAccess, TimeUnit.MINUTES)
+      .expireAfterWrite(expireAfterWrite, TimeUnit.MINUTES)
+      .build();
+
+    String cacheInfo = new StringBuilder()
+      .append(name)
+      .append(" info: maximumSize=")
+      .append(maximumSize)
+      .append(", expireAfterAccess=")
+      .append(expireAfterAccess)
+      .append("min, expireAfterWrite=")
+      .append(expireAfterWrite)
+      .append("min ")
+      .toString();
+    LOG.info(cacheInfo);
+  }
+
+kubectl get cm -n tdcsys| grep filebeat
+kubectl edit cm -n tdcsys filebeat-confd-conf-krbwz

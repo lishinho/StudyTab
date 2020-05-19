@@ -1,0 +1,139 @@
+work40
+
+https://draveness.me/golang/docs/part3-runtime/ch06-concurrency/golang-channel/
+
+工作周报 - 李镇邦 20200727 ~ 20200731
+
+完成：
+1. 完成federation shiro client的单点登出实现
+2. federation增加client部分的SLO内存session容器，用于适应不同需求，增加session listener控制并优化封装server端数据结构，暴露可配置的服务选项
+3. 重构http server以适应https，异步发送，重试机制，资源池处理等多种策略需求
+4. 上传apacheds-cleaner压缩包更新wiki
+5. 修改review后的WARP-44993，WARP-48198等jira
+
+本周：
+1. 支持oncall工作
+2. 修复review后的代码 支持新版本功能的完善
+
+jps -l
+jstat -gccause [pid] 1000 20
+jinfo -flags [pid]
+jmap -histo [pid]
+
+ @ConditionalOnMissingBean(name = "hostnameVerifier")
+    @Bean
+    public HostnameVerifier hostnameVerifier() {
+        if (casProperties.getHttpClient().getHostNameVerifier().equalsIgnoreCase("none")) {
+            return NoopHostnameVerifier.INSTANCE;
+        }
+        return new DefaultHostnameVerifier();
+    }
+
+这个是kerberos用来加密数据的加密算法， 不加kerberos会忽略非许可的enctypes的密钥。kdc应该会选择这个list交集的算法作为加密
+
+return new ModelAndView(getAuthorizationCodeResponse(authorizationRequest, authentication));
+
+          Map<String, Object> clientAdditionalInfo = client.getAdditionalInformation();
+          // extract authentication code for SLO
+          String authorizationCode = generateCode(authorizationRequest, authentication);
+          HttpSession requestSession = request.getSession(false);
+          if (requestSession != null) {
+            List<SLOClientInfoRo> sloInfoList = new ArrayList<>();
+            SLOClientInfoRo sloClientInfoRo = new SLOClientInfoRo.Builder().clientId(client.getClientId())
+              .authorizationCode(authorizationCode)
+              .defaultLogoutUrl((String) clientAdditionalInfo.get(SLO_CLIENT_LOGOUT_URL))
+              .resolveLogoutUrl(authorizationRequest.getRedirectUri())
+              .clientSLOHeader((String) clientAdditionalInfo.get(SLO_CLIENT_LOGOUT_HEADER))
+              .enableSLO((boolean) clientAdditionalInfo.getOrDefault(SLO_CLIENT_LOGOUT_ENABLED, true))
+              .build();
+            if (null != requestSession.getAttribute(SLO_SESSION_CLIENT_ATTRIBUTE)) {
+              sloInfoList = (List<SLOClientInfoRo>) requestSession.getAttribute(SLO_SESSION_CLIENT_ATTRIBUTE);
+            }
+            sloInfoList.add(sloClientInfoRo);
+            requestSession.setAttribute(SLO_SESSION_CLIENT_ATTRIBUTE, sloInfoList);
+          }
+          RedirectView redirectView = null;
+          try {
+            redirectView = new RedirectView(getSuccessfulRedirect(authorizationRequest,
+              authorizationCode), false, true, false);
+          } catch (OAuth2Exception e) {
+            redirectView = new RedirectView(getUnsuccessfulRedirect(authorizationRequest, e, false),
+              false, true, false);
+          }
+          return new ModelAndView(redirectView);
+
+其中primarykey的产生，是随机产生的，而jdbcSession的一个成员变量delegate是MapSession的实例
+
+EATE TABLE IF NOT EXISTS `gf_fed_single_logout` (
+  `grant_code` VARCHAR(255) NOT NULL,
+  `primary_id` VARCHAR(255) NOT NULL,
+  `session_id` VARCHAR(255) NOT NULL,
+  `client_id` VARCHAR(255) NOT NULL,
+  `logout_redirect_url` VARCHAR(255) NOT NULL,
+
+private String sessionId;
+  private String clientId;
+  private String authorizationCode;
+  private String resolveLogoutUrl;
+
+  private String determineLogoutUrl(final SLOClientEntity clientInfo) {
+    try {
+      final String defaultLogoutUrl = clientInfo.getDefaultLogoutUrl();
+      if (!StringUtils.isEmpty(defaultLogoutUrl)) {
+        LOG.debug("Logout request will be sent to [{}] in default", defaultLogoutUrl);
+        return defaultLogoutUrl;
+      }
+
+      final String redirectUrl = clientInfo.getResolveLogoutUrl();
+      if (!StringUtils.isEmpty(redirectUrl)) {
+        LOG.debug("Logout request will be sent to [{}] within redirect url", redirectUrl);
+        return redirectUrl;
+      } else {
+        LOG.debug("Logout request will not be sent, the URL is not valid");
+      }
+      return null;
+    } catch (final Exception e) {
+      LOG.error("Failed to resolve logout url for client {}", clientInfo.getClientId(), e);
+      return null;
+    }
+  }
+
+server.port=8282
+
+security.oauth2.client.clientId=test1-SJYkkdSZ82
+security.oauth2.client.clientSecret=V3t7qWP02O0oA61eTOrv
+
+server.port=8283
+
+security.oauth2.client.clientId=test2-AqF4DGS9l4
+security.oauth2.client.clientSecret=I52N0LFcfHgXqpkoS3aN
+
+server.port=8284
+
+security.oauth2.client.clientId=test-noSLO-Q3HVMw5Ytj
+security.oauth2.client.clientSecret=ArxvV2gL2yTlLNTYMb5R
+
+test-noSLO-Q3HVMw5Ytj
+ArxvV2gL2yTlLNTYMb5R
+
+select * from oauth_client_details\G;
+
+PRIMARY KEY (`grant_code`, `session_id`, `client_id`),
+
+txsql有
+
+docker pull 172.16.1.99/transwarp/guardian:guardian-3.1.3-rc0
+
+host/10.20.148.88@TDH
+host/wgq081@TDH
+
+  @Value("${server.servlet.session.timeout:T(java.Time.Duration)1h}")
+
+guardian.federation.service.session.enableSharing
+
+server.servlet.session.timeout
+
+setSLOSessionMappingStorage
+
+SLOIdentifier
+

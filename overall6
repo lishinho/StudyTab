@@ -1,0 +1,1405 @@
+work31
+工作周报 - 李镇邦  20200525 ~ 20200529
+
+完成：
+1. WARP-45092:[guardian-plugin] 添加grant过程前检查metastore是否存在此数据库的过程 判读grant quota的页面显示问题
+2. WARP-45079:[guardian-plugin]给若干inceptor开插件接口加上判断db/tb owner权限
+3. WARP-44916:[guardian]添加guardian v2对比v1缺失的接口
+4. WARP-45428:[guardian]编译生成的jar包需要包含branch、编译时间、版本号信息
+
+进行中：
+WARP-45792: txsql含密码的配置项不暴露到外界
+
+其他：
+1. 实现Kerberos重连机制多线程版本的代码并实现重连可用
+2. 支持sla2-7362 guardian页面配额未激活
+
+本周：
+1. 完成WARP-45792: txsql含密码的配置项不暴露到外界
+2. 完善之前代码 
+
+env显示所有的环境变量
+
+IP_REGEX="[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+"
+
+transwarp/txsql                                 guardian-3.1.2-final      8c7c01e2c24a        About an hour ago   552MB
+linux-du02:5000/transwarp/txsql                 guardian-3.1.2-final      8c7c01e2c24a        About an hour ago   552MB
+
+
+transwarp/txsql                                 guardian-3.1.2-final      3f93e1e1e2e0        12 months ago       552MB 99
+linux-du02:5000/transwarp/txsql                 guardian-3.1.2-final      3f93e1e1e2e0        12 months ago       552MB
+
+adf31
+
+ldapdelete -h 
+
+KundbProtocolNegotiator->newHandler->KundbAuthHandler(userEventTriggered)->sendAuth->channelRead->AuthCompletionEvent(userEventTriggered)->
+
+$ false && echo howdy!
+
+$ true && echo howdy!
+howdy!
+$ true || echo howdy!
+
+$ false || echo howdy!
+howdy!
+
+sed -i '/xxxxxx/d' 
+
+1. docker-compose是否影响
+
+application.properties.tmpl
+
+/etc/yarn1/conf/yarn.keytab
+/etc/inceptor1/conf/inceptor.keytab
+/etc/dbaservice1/conf/dba_service.keytab
+/etc/zookeeper1/conf/zookeeper.keytab
+/etc/hdfs1/conf/hdfs.keytab
+/etc/guardian/conf/guardian.keytab
+/etc/search1/instancegroup1/conf/search.keytab
+/etc/search1/conf/search.keytab
+/etc/hyperbase1/conf/hyperbase.keytab
+/etc/kafka1/conf/kafka.keytab
+/etc/catalog1/conf/catalog.keytab
+/etc/transporter1/conf/transporter.keytab
+/etc/kundb1/shard1/conf/kundb.keytab
+/etc/kundb1/conf/kundb.keytab
+
+jvm 
+
+jstack是jdk自带的线程堆栈分析工具，使用该命令可以查看或导出 Java 应用程序中线程堆栈信息。
+主要分为两个功能： 
+
+a．  针对活着的进程做本地的或远程的线程dump； 
+
+b．  针对core文件做线程dump。
+
+jstack用于生成java虚拟机当前时刻的线程快照。线程快照是当前java虚拟机内每一条线程正在执行的方法堆栈的集合，生成线程快照的主要目的是定位线程出现长时间停顿的原因，如线程间死锁、死循环、请求外部资源导致的长时间等待等。 线程出现停顿的时候通过jstack来查看各个线程的调用堆栈，就可以知道没有响应的线程到底在后台做什么事情，或者等待什么资源。
+jstack命令主要用来查看Java线程的调用堆栈的，可以用来分析线程问题（如死锁）
+线程状态
+
+想要通过jstack命令来分析线程的情况的话，首先要知道线程都有哪些状态，下面这些状态是我们使用jstack命令查看线程堆栈信息时可能会看到的线程的几种状态：
+
+    NEW,未启动的。不会出现在Dump中。
+
+    RUNNABLE,在虚拟机内执行的。运行中状态，可能里面还能看到locked字样，表明它获得了某把锁。
+
+    BLOCKED,受阻塞并等待监视器锁。被某个锁(synchronizers)給block住了。
+
+    WATING,无限期等待另一个线程执行特定操作。等待某个condition或monitor发生，一般停留在park(), wait(), sleep(),join() 等语句里。
+
+    TIMED_WATING,有时限的等待另一个线程的特定操作。和WAITING的区别是wait() 等语句加上了时间限制 wait(timeout)。
+
+    TERMINATED,已退出的。
+
+
+频繁GC问题或内存溢出问题
+
+一、使用jps查看线程ID
+
+二、使用jstat -gc 3331 250 20 查看gc情况，一般比较关注PERM区的情况，查看GC的增长情况。
+
+三、使用jstat -gccause：额外输出上次GC原因
+
+四、使用jmap -dump:format=b,file=heapDump 3331生成堆转储文件
+
+五、使用jhat或者可视化工具（Eclipse Memory Analyzer 、IBM HeapAnalyzer）分析堆情况。
+
+六、结合代码解决内存溢出或泄露问题。
+
+ 
+死锁问题
+
+一、使用jps查看线程ID
+
+二、使用jstack 3331：查看线程情况
+
+http://benjr.tw/27676
+
+ldapdelete -hxxx -pxxx -Dxxx -W -x xxx
+ldapsearch -h -p -x -b -D -w
+
+垃圾回收
+
+
+题目2：
+二分查找元素在有序数组中的位置，如果不存在，输出-1，如果存在，输出下标（存在多个，输出下标最小的）。
+
+def getPos(arr,val):
+    n=len(arr)
+    l=0
+    r=n-1
+    while l<r:
+        mid=(l+r)//2
+        if arr[mid]>=val:
+            r=mid
+        else:
+            l=mid+1
+    if arr[l]!=val:
+        return -1
+    return l
+
+grant label on object
+
+
+grant level 1 to user vt_app;   #重复执行会报grant already exists
+grant level 1 to label l1;      #重复执行会报grant already exists
+grant label l1 on table db1.t1;   #重复执行会报grant already exists
+grant label l1 on column db1.t1.c1;   #重复执行会报grant already exists
+grant label l1 on view db1.v1;   #重复执行会报grant already exists
+
+
+show level for user vt_app;
+show level for label l1;     /// -> show label for level xxx
+show label for table db1.t1;
+show label for column db1.t1.c1;
+show label for view db1.v1;
+
+
+
+revoke level from user vt_app;  #删除不存在的grant不会报错
+revoke level from label l1;     #删除不存在的grant不会报错 
+revoke label on table db1.t1;   #删除不存在的grant不会报错
+revoke label on column db1.t1.c1;    #删除不存在的grant不会报错
+revoke label on view db1.v1;       #删除不存在的grant不会报错
+
+
+user label有level（）
+文件table  column view有label（自由？）
+
+1. 验证mac语法
+
+
+q2 create user 出错
+q3 开关 是不是要关闭DAC
+
+q4 q5 不支持show levels和show labels 没有指定level和label的范围
+q6 grant level to不存在的user不报错
+q7 label对object是n对n的关系
+q8 可以grant level to 不存在的user level label
+q9 mysql> grant level 133 to user ll;
+ERROR 1264 (22003): vtgate: http://transwarp-lishinho-5480:15001/: target: kundb1.0.master, used tablet: test-100 (transwarp-lishinho-5480), vttablet: Out of range value for column 'level' at row 1 (errno 1264) (sqlstate 22003) during query: insert into mysql.user_level(user, `level`) values ('ll', 133)/* vtgate:: filtered_replication_unfriendly */, CallerID: vt_app
+mysql> 
+level范围0-127
+
+q10 
+
+2. 修理mac语法抛错
+3. 增加三个方法分别判断select/create/delete的时候对mac关系的控制
+4. 增加mac开关
+5. create user 实现不了
+
+
+
+1. create user 实现不了
+1.1 revoke level from user lzb;sou	
+完成
+2. 验证mac语法
+完成
+
+3. 同一个object不可以多个label
+完成
+
+4. 增加三个方法分别判断select/create/delete的时候对mac关系的控制
+
+
+
+5. 修理mac语法抛错
+
+6. 增加mac开关
+7. show users for level 1;
+   show label for level 1; 
+   // show mac grants;
+
+
+1. create user 实现不了
+2. 验证mac语法
+3. 同一个object不可以多个label
+4. 增加三个方法分别判断select/create/delete的时候对mac关系的控制
+5. 修理mac语法抛错
+6. 增加mac开关
+7. drop 删掉之前的mac逻辑
+8. 加一个语法
+9. 加索引 host
+
+q1 可以grant level to 不存在的user level label
+q2
+不该写在executor
+
+提一个mr kadmin.guardian
+
+
+1. drop 删掉之前的mac逻辑
+2. 语法修改
+3. 
+
+mysql> create view v as select * from tb1;
+Query OK, 0 rows affected (0.08 sec)
+
+
+select * 
+from mysql.table_or_view_label obj 
+left join mysql.label_level ll 
+on ll.label = obj.label 
+left join mysql.user_level ul 
+on ul.level = ll.level
+where obj.xxx = xxx
+and ul.user = xxx;
+
+
+
+select *  from mysql.table_or_view_label obj  left join mysql.label_level ll  on ll.label = obj.label  left join mysql.user_level ul  on ul.level = ll.level where db = 'db1' and user = 'vt_app';
+
+select *  from mysql.table_or_view_label obj  left join mysql.label_level ll  on ll.label = obj.label  left join mysql.user_level ul  on ul.level = ll.level where db = 'db1' and user = 'vt_app';
+
+
+
+	
+	// user queries[0], database queries[1], table queries[2], column queries[3], is_view queries[4],
+	sql := "select *  from mysql.table_or_view_label tvl  " +
+		"left join mysql.label_level ll  on ll.label = tvl.label  " +
+		"left join mysql.user_level ul  on ul.level = ll.level "
+	switch len(queries) {
+	case 3:
+		sql = fmt.Sprintf(sql + "where user = '%s' and db = '%s' and `table` = '%s'", queries[0], queries[1], queries[2])
+	case 4:
+		sql = fmt.Sprintf(sql + "where user = '%s' and db = '%s' and `table` = '%s' and `column` = '%s'", queries[0], queries[1], queries[2], queries[3])
+	case 5:
+		
+	default:
+		return false, fmt.Errorf("MAC parameter error")
+	}
+	res, err := e.handleExec(ctx, session, sql, sqlInfo, bindVars, target)
+	if err != nil {
+		return false, err
+	}
+	return res != nil, nil
+
+
+func (e *Executor) handleDropOnMac(ctx context.Context, session *vtgatepb.Session, bindVars map[string]*querypb.BindVariable, target querypb.Target, schema string, tableOrView string, is_view bool) error {
+	ksName, err := getFirstKeyspace(ctx, e.topServ, e.cell)
+	if err != nil {
+		return err
+	}
+
+	_, target.Shard, err = getFirstShard(ctx, e.serv, e.cell, ksName, topodatapb.TabletType_MASTER)
+	if err != nil {
+		return err
+	}
+
+	internalSql := "delete from mysql.table_or_view_label where db = '%s' and `table` = '%s'"
+	if is_view {
+		internalSql += " and is_view = 'Y'"
+	} else {
+		internalSql += " and is_view = 'N'"
+	}
+	sqlInfo, err := getSQLInfo(internalSql)
+	if err != nil {
+		return err
+	}
+
+	nsf := NewSafeSession(session)
+	if err = e.beginAndAcquireGxid(ctx, nsf, internalSql); err != nil {
+		return err
+	}
+
+	_, err = e.handleExec(ctx, session, fmt.Sprintf(internalSql, schema, tableOrView), sqlInfo, bindVars, querypb.Target{Keyspace: ksName, Shard: target.Shard, TabletType: topodatapb.TabletType_MASTER})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+1. 判断vt_app
+2. 加wiki
+
+work32
+
+工作周报 - 李镇邦 20200601 ~ 20200605
+
+完成：
+1. WARP-45792:[txsql]改动txsql的含密码的配置项不暴露到容器外配置文件
+2. WARP-45428:[guardian]guardian-apacheds和guardian-plugin编译生成的jar包需要包含branch、编译时间、版本号信息
+3. [kundb]修改kundb MAC的语法报错 增加三个查询level和label关系的接口 增加MAC控制开关
+4. WARP-45977:[kundb]修改JDBC认证阶段不能抛出正确异常
+
+其他：
+1. review并验证 guardian-federation部分的密码暴露
+2. 协助支持sla-7663出包
+3. 
+
+
+本周：
+1. kundb mac控制协助完成
+2. guardian支持
+
+CREATE TABLE IF NOT EXISTS mysql.table_or_view_label (
+  `db` VARCHAR(60) NOT NULL,
+  `table` VARCHAR(64) NOT NULL,
+  `column` VARCHAR(64) NOT NULL DEFAULT '',
+  `label` VARCHAR(32) NOT NULL,
+  `is_view` ENUM('N','Y') DEFAULT 'N',
+  PRIMARY KEY (`db`, `table`, `column`, `is_view`),
+  KEY `label_idx` (`label`))
+  ENGINE = MyISAM
+  DEFAULT CHARACTER SET = utf8
+  COLLATE=utf8_bin
+  COMMENT = 'Table/view/column-label relation';
+
+
+ "SELECT *  from mysql.label_level ll full outer join mysql.table_or_view_label tvl  on tvl.label = ll.label full outer join mysql.user_level ul  on ul.level = ll.level  "
+
+
+"SELECT *  from mysql.table_or_view_label tvl left join mysql.label_level ll  on ll.label = tvl.label  " +
+		"left join mysql.user_level ul  on ul.level = ll.level "
+
+select *
+from (select 
+
+SELECT ul.user, ll.label, ll.level, tvl.* from mysql.label_level ll left join mysql.table_or_view_label tvl on tvl.label = ll.label left join mysql.user_level ul  on ll.level = ul.level
+
+
+SELECT *  from mysql.label_level ll full join mysql.table_or_view_label tvl  on tvl.label = ll.label full join mysql.user_level ul  on ul.level = ll.level
+
+SELECT *  from mysql.label_level ll left join mysql.table_or_view_label tvl  on tvl.label = ll.label
+union all 
+SELECT *  from mysql.label_level ll right join mysql.table_or_view_label tvl  on tvl.label = ll.label
+
+
+SELECT *  from mysql.label_level ll left join mysql.table_or_view_label tvl  on tvl.label = ll.label
+union all
+SELECT *  from mysql.user_level ul left join mysql.label_level ll  on ul.level = ll.level
+
+select * from 
+
+
+SELECT  from mysql.label_level ll left join mysql.table_or_view_label tvl  on tvl.label = ll.label left join mysql.user_level ul  on ul.level = ll.level 
+
+
+
+sql.y -> token.go ->ast.go
+
+if err = e.txConn.Commit(ctx, nsf, false); err != nil {
+			return nil, err
+		}
+
+[root@tw-node595 ~]# kadmin.guardian -b admin -w admin -q 'ktadd -k /tmp/server.keytab server/tdh@TDH'
+usage: kadmin
+ -H <arg>   The host of guardian service, the default is localhost
+ -P <arg>   The port of guardian service, the default is 8380
+ -p <arg>   The user used to connect to the guardian service, such as
+            admin
+ -q <arg>   The kadmin query, must be xst, addprinc, listprincs, addent
+ -r <arg>   The realm of the kerberos, such as TDH
+ -T         Whether TLS should be used
+ -w <arg>   The password used to connect to the guardian service
+
+Sub command used for kadmin in the -q argument
+
+List principals
+usage: list_principals/listprincs
+
+Export keytab for the principal
+usage: ktadd/xst
+ -k <arg>   Specify the path for generated keytab
+
+Add principal to kdc
+usage: add_principal/addprinc
+ -pw <arg>   specify the password for principal
+ -randkey    Generate random password for the principal
+
+Delete principals
+usage: delete_principals/delprinc
+
+Generate keytab for principal using password
+usage: add_entry/addent
+ -k <arg>    specify the path for generated keytab
+ -p <arg>    specify principal
+ -pw <arg>   specify password
+
+Change principal's password
+usage: change_password/cpw
+ -pw <arg>   specify new password
+ -randkey    use random password
+The sub query must be specified
+Supported commands are ktadd(xst), add_principal(addprinc), list_principals(listprincs) or add_entry(addent)
+usage: kadmin
+ -H <arg>   The host of guardian service, the default is localhost
+ -P <arg>   The port of guardian service, the default is 8380
+ -p <arg>   The user used to connect to the guardian service, such as
+            admin
+ -q <arg>   The kadmin query, must be xst, addprinc, listprincs, addent
+ -r <arg>   The realm of the kerberos, such as TDH
+ -T         Whether TLS should be used
+ -w <arg>   The password used to connect to the guardian service
+
+
+
+
+
+
+
+Sub command used for kadmin in the -q argument
+
+List principals
+usage: list_principals/listprincs
+
+Export keytab for the principal
+usage: ktadd/xst
+ -k <arg>   Specify the path for generated keytab
+
+Add principal to kdc
+usage: add_principal/addprinc
+ -pw <arg>   specify the password for principal
+ -randkey    Generate random password for the principal
+
+Delete principals
+usage: delete_principals/delprinc
+
+Generate keytab for principal using password
+usage: add_entry/addent
+ -k <arg>    specify the path for generated keytab
+ -p <arg>    specify principal
+ -pw <arg>   specify password
+
+Change principal's password
+usage: change_password/cpw
+ -pw <arg>   specify new password
+ -randkey    use random password
+[root@tw-node595 ~]# 
+
+immediateCallerID := callerid.ImmediateCallerIDFromContext(ctx)
+ctx = callerid.NewContext(ctx, callerid.EffectiveCallerIDFromContext(ctx), callerid.NewImmediateCallerID("vt_app"))
+
+if *enableMandatoryAccessControl {
+			user := callerid.ImmediateCallerIDFromContext(ctx).GetUsername()
+			if  user == "vt_app" {
+				return e.showMacPrivs(ctx, session, sql, bindVars, target)
+			}
+			return nil, vterrors.Errorf(vtrpcpb.Code_PERMISSION_DENIED, "Access denied for %s to use MAC strategies", user)
+		}
+		return nil, vterrors.Errorf(vtrpcpb.Code_UNIMPLEMENTED, "MAC strategy is not enabled in this service")
+
+ kadmin.guardian -b admin -w 123 -r TDH-TRUSTED -q "listprincs"
+
+
+create database db1;
+use db1
+create table tb1(a int);
+craete user lzb;
+grant 
+
+keyspace:shard@target
+
+ 关于等保三要求的口令长度和更换周期等默认都有限制 密码复杂度在3.1.3支持
+
+mysql -h localhost -utranswarp -plHAwG__KmO -S /var/run/mariadb/transwarp-manager-db.sock -Dtranswarp_manager
+
+
+	result, err := e.handleExec(ctx, session, macCheckSQL, sqlInfo, bindVars,
+		querypb.Target{Keyspace: ksName, Shard: target.Shard, TabletType: topodatapb.TabletType_MASTER})
+
+           1 |         1 |         0 |         0 |
+| 15 |         1 | TRANSPORTER     | NULL                 | studio-1.4.0-final      | INSTALLED     | transporter1 | Transporter1 | KUBERNETES     |              1 |         1 |         0 |         0 |
+| 24 |      NULL | GUARDIAN        | guardian-3.1.2-final | guardian-3.2.0-rc1      | INSTALLED     | guardian     | Guardian     | KUBERNETES     |              0 |         1 |         1 |         0 |
+| 28 |         1 | KUNDB           | NULL                 | kundb-1.3.1-final       | INSTALLED     | kundb2       | kundb2       | KUBERNETES     |              0 |         1 |         0 |         0 |
+| 29 |         1 | KUNDB           | NULL                 | kundb-1.3.1-final       | INSTALLED     | kundb3       | kundb1       | KUBERNETES     |              0 |         1 |         1 |         0 |
+
+
+
+kadmin.guardian -b admin -w admin -H 172.26.2.3 -P8830 -q "listprincs"
+
+kadmin.guardian -w 123 -r TDH -q "addprinc -pw 123456 simple/tw-node593"
+
+ kadmin.guardian -b admin -w 123 -r TDH-TRUSTED -q "listprincs"
+
+
+可用
+进server pod
+[root@linux-du03 ~]# 
+
+kadmin.guardian -wadmin -rTDH -H172.26.2.3 -P8380 -T -q "listprincs"
+kadmin.guardian -wadmin -rTDH -H172.26.2.3 -P8380 -T -q "addprinc -pw 123456 test000"
+kadmin.guardian -wadmin -rTDH -T -q"addprinc -pw 123456 test000@TDC"
+kadmin.guardian -wadmin -rTDH -T -q"delprinc test000"
+
+  private void processDelPrincsCmd(String subCmd) throws Exception {
+    String princ = subCmd
+            .replace("delprinc", "")
+            .replace("delete_principal", "")
+            .trim();
+    Kadmin kadmin = getKadmin();
+    kadmin.delPrincipal(princ);
+  }
+
+show grant user xxx on xxx
+SHOW PERMISSION ON TABLE finances_orc;
+SHOW GRANT ON db.*;
+
+create user xxx
+drop user xxx
+create user xxx
+
+
+[root@linux-158-32 ~]# kadmin.local
+Authenticating as principal krbtgt/admin@ATDH with password.
+kadmin.local:  admin
+kadmin.local: Unknown request "admin".  Type "?" for a request list.
+kadmin.local:  admin
+kadmin.local: Unknown request "admin".  Type "?" for a request list.
+kadmin.local:  listprincs
+K/M@ATDH
+krbtgt/ATDH@ATDH
+kadmin/admin@ATDH
+kadmin/linux-158-32@ATDH
+kiprop/linux-158-32@ATDH
+kadmin/changepw@ATDH
+kadmin/history@ATDH
+admin@ATDH
+saslauthd/linux-158-32@ATDH
+saslauthd/linux-158-33@ATDH
+HTTP/linux-158-32@ATDH
+zookeeper/linux-158-32@ATDH
+HTTP/linux-158-33@ATDH
+zookeeper/linux-158-33@ATDH
+HTTP/linux-158-34@ATDH
+zookeeper/linux-158-34@ATDH
+host/linux-158-32@ATDH
+hdfs/linux-158-32@ATDH
+host/linux-158-33@ATDH
+hdfs/linux-158-33@ATDH
+host/linux-158-34@ATDH
+hdfs/linux-158-34@ATDH
+mapred/linux-158-32@ATDH
+yarn/linux-158-32@ATDH
+mapred/linux-158-33@ATDH
+yarn/linux-158-33@ATDH
+mapred/linux-158-34@ATDH
+yarn/linux-158-34@ATDH
+hive/linux-158-32@ATDH
+hive/linux-158-33@ATDH
+hive/linux-158-34@ATDH
+hive@ATDH
+hbase/linux-158-32@ATDH
+hbase/linux-158-33@ATDH
+hbase/linux-158-34@ATDH
+krbtgt/ATDH@TDHDEV
+krbtgt/TDHDEV@ATDH
+krbtgt/ATDH@ARGOTDH
+krbtgt/ARGOTDH@ATDH
+kadmin.local:  add_principal test1
+NOTICE: no policy specified for test1@ATDH; assigning "default"
+Enter password for principal "test1@ATDH": 
+Re-enter password for principal "test1@ATDH": 
+Principal "test1@ATDH" created.
+kadmin.local:  xst -k test.keytab -norandkey yarn/linux-158-32@ATDH
+Entry for principal yarn/linux-158-32@ATDH with kvno 4, encryption type aes256-cts-hmac-sha1-96 added to keytab WRFILE:test.keytab.
+Entry for principal yarn/linux-158-32@ATDH with kvno 4, encryption type aes128-cts-hmac-sha1-96 added to keytab WRFILE:test.keytab.
+Entry for principal yarn/linux-158-32@ATDH with kvno 4, encryption type des3-cbc-sha1 added to keytab WRFILE:test.keytab.
+Entry for principal yarn/linux-158-32@ATDH with kvno 4, encryption type arcfour-hmac added to keytab WRFILE:test.keytab.
+kadmin.local:  exit
+[root@linux-158-32 ~]# ls
+anaconda-ks.cfg                 derby.log    install.log.syslog  transwarp
+CentOS-6.5-x86_64-bin-DVD1.iso  install.log  test.keytab         transwarp-4.8.4-final-zh.el6.x86_64.tar.gz
+[root@linux-158-32 ~]# klist -kt test.keytab 
+Keytab name: FILE:test.keytab
+KVNO Timestamp           Principal
+---- ------------------- -----------------------------
+
+
+[root@linux-du03 ~]# kadmin.guardian -wadmin -rTDH -H172.26.2.3 -P8380 -T -q "listprincs"
+usage: kadmin
+ -H <arg>   The host of guardian service, the default is localhost
+ -P <arg>   The port of guardian service, the default is 8380
+ -p <arg>   The user used to connect to the guardian service, such as
+            admin
+ -q <arg>   The kadmin query, must be xst, addprinc, listprincs, addent
+ -r <arg>   The realm of the kerberos, such as TDH
+ -T         Whether TLS should be used
+ -w <arg>   The password used to connect to the guardian service
+
+------------------------------重复2遍-------------------------
+
+Sub command used for kadmin in the -q argument
+
+List principals
+usage: list_principals/listprincs
+
+Export keytab for the principal
+usage: ktadd/xst
+ -k <arg>   Specify the path for generated keytab
+
+Add principal to kdc
+usage: add_principal/addprinc
+ -pw <arg>   specify the password for principal
+ -randkey    Generate random password for the principal
+ -trust      add principal within trusted region
+
+Delete principals
+usage: delete_principals/delprinc
+ -trust      delete principal within trusted region
+
+Generate keytab for principal using password
+usage: add_entry/addent
+ -k <arg>    specify the path for generated keytab
+ -p <arg>    specify principal
+ -pw <arg>   specify password
+
+Change principal's password
+usage: change_password/cpw
+ -pw <arg>   specify new password
+ -randkey    use random password
+
+-----------------------------------------------------------------------------
+private void processAddPrincCmd(String subCmd) throws Exception {
+    CommandLineParser parser = new DefaultParser();
+    try {
+      CommandLine cmd = parser.parse(addPrincOpts, subCmd.split(" "));
+      boolean randkey = cmd.hasOption("randkey");
+      String userPwd = cmd.getOptionValue("pw");
+      List<String> args = cmd.getArgList();
+      args.remove("addprinc");
+      args.remove("add_principal");
+      if (args.size() != 1 || ((!randkey) && StringUtils.isEmpty(userPwd))) {
+orc 权限
+        usage();
+      } else {
+        Kadmin kadmin = getKadmin();
+        if (randkey) {
+          kadmin.addPrincipalWithRandkey(args.get(0));
+        } else {
+          kadmin.addPrincipal(args.get(0), userPwd);
+        }
+      }
+    } catch (ParseException e) {
+      System.out.println("Invalid argument for addprinc command");
+      usage();
+    }
+  }
+
+2020-06-11 10:47:59,060 DEBUG inceptor.GuardianHiveAuthorizationValidator: (GuardianHiveAuthorizationValidator.java:checkPrivileges(54)) [HiveServer2-Handler-Pool: Thread-191(SessionHandle=ea409886-0569-40cf-938e-f656cfebf9dc)] - Checking privileges for operation QUERY by user risk_alarm on  input objects [Object [type=TABLE_OR_VIEW, name=system.dual]] and output objects []. Context Info: HiveAuthzContext [userIpAddress=192.168.15.136, commandString=select to_char(trunc(from_unixtime(unix_timestamp() -2),'MI'),'yyyyMMddHHmmss') as endtime FROM system.dual]
+2020-06-11 10:47:59,060 DEBUG client.GuardianClient: (RestClientImpl.java:checkAccess(203)) [HiveServer2-Handler-Pool: Thread-191(SessionHandle=ea409886-0569-40cf-938e-f656cfebf9dc)] - Check Access Cache hit
+2020-06-11 10:47:59,060 DEBUG inceptor.GuardianHiveAuthorizationValidator: (GuardianHiveAuthorizationValidator.java:checkPrivileges(54)) [HiveServer2-Handler-Pool: Thread-187(SessionHandle=ccf3911f-a312-4941-8e70-9bdce85466aa)] - Checking privileges for operation QUERY by user test001 on  input objects [Object [type=TABLE_OR_VIEW, name=system.dual]] and output objects []. Context Info: HiveAuthzContext [userIpAddress=192.168.16.236, commandString=INSERT INTO fund_rec.t_marketing_orc partition(init_date = 20200102) SELECT '1','2',0.1,'3',0,'4' FROM system.dual]
+2020-06-11 10:47:59,061 DEBUG client.GuardianClient: (RestClientImpl.java:checkAccess(206)) [HiveServer2-Handler-Pool: Thread-187(SessionHandle=ccf3911f-a312-4941-8e70-9bdce85466aa)] - Check Access Cache miss
+2020-06-11 10:47:59,063 DEBUG client.GuardianClient: (RestClientImpl.java:checkAnyAccess(261)) [HiveServer2-Handler-Pool: Thread-191(SessionHandle=ea409886-0569-40cf-938e-f656cfebf9dc)] - Check Access Cache miss
+2020-06-11 10:47:59,064 DEBUG client.GuardianClient: (RestClientImpl.java:checkAnyAccess(261)) [HiveServer2-Handler-Pool: Thread-191(SessionHandle=ea409886-0569-40cf-938e-f656cfebf9dc)] - Check Access Cache miss
+2020-06-11 10:47:59,064 DEBUG client.GuardianClient: (RestClientImpl.java:checkAnyAccess(261)) [HiveServer2-Handler-Pool: Thread-191(SessionHandle=ea409886-0569-40cf-938e-f656cfebf9dc)] - Check Access Cache miss
+
+
+2020-06-11 10:47:59,088 DEBUG http.wire: (Wire.java:wire(77)) [HiveServer2-Handler-Pool: Thread-187(SessionHandle=ccf3911f-a312-4941-8e70-9bdce85466aa)] - >> "{"username":"test001", "permissions":[{"component":"inceptor1","dataSource":["GLOBAL"],"action":"ADMIN","heritable":false,"grantable":false,"administrative":false},{"component":"inceptor1","dataSource":["TABLE_OR_VIEW","system"],"action":"ADMIN","heritable":false,"grantable":false,"administrative":false},{"component":"inceptor1","dataSource":["TABLE_OR_VIEW","system","dual"],"action":"ADMIN","heritable":false,"grantable":false,"administrative":false}]}"
+
+
+2020-06-11 10:47:59,105 DEBUG http.wire: (Wire.java:wire(77)) [HiveServer2-Handler-Pool: Thread-187(SessionHandle=ccf3911f-a312-4941-8e70-9bdce85466aa)] - >> "{"username":"test001", "permissions":[{"component":"inceptor1","dataSource":["GLOBAL"],"action":"SELECT","heritable":false,"grantable":false,"administrative":false},{"component":"inceptor1","dataSource":["TABLE_OR_VIEW","system"],"action":"SELECT","heritable":false,"grantable":false,"administrative":false},{"component":"inceptor1","dataSource":["TABLE_OR_VIEW","system","dual"],"action":"SELECT","heritable":false,"grantable":false,"administrative":false}]}"
+
+2020-06-11 10:48:17,957 DEBUG inceptor.GuardianHiveAuthorizationValidator: (GuardianHiveAuthorizationValidator.java:checkPrivileges(54)) [HiveServer2-Handler-Pool: Thread-187(SessionHandle=ccf3911f-a312-4941-8e70-9bdce85466aa)] - Checking privileges for operation TRUNCATETABLE by user test001 on  input objects [] and output objects []. Context Info: HiveAuthzContext [userIpAddress=192.168.16.236, commandString=truncate table fund_rec.t_marketing_orc partition(init_date = 20200102)]
+2020-06-11 10:48:17,957 DEBUG client.GuardianClient: (RestClientImpl.java:checkAccess(203)) [HiveServer2-Handler-Pool: Thread-187(SessionHandle=ccf3911f-a312-4941-8e70-9bdce85466aa)] - Check Access Cache hit
+
+kadmin.guardian是kerberos-guardian的交互式命令行工具 使用方法
+描述
+主选项
+指令
+
+情形是orc分区表会解析hive权限input模型时为partition所以没有table_or_view的权限 导致insert和truncate的问题 和事务也不相关 只是metastore怎么识别一个object为partition的问题 i当时他们也没跟进 我觉得是orc表分区创建才会产生 在只针对这张表的权限时会触发 比如insert和truncate 而create drop这种权限是判给上一层的 是一个common问题 解决可以换tdh5.1.5的包或者还感兴趣的话拉下inceptor的on call来看什么时候判成hive partition
+
+
+
+https://172.16.1.237:8380/swagger-ui.html#/
+
+orc表分区表
+
+sla3-7805
+
+/*
+	Binary search implementation in Go
+*/
+package main
+
+func binarySearch(array []int, target int, lowIndex int, highIndex int) int {
+	if highIndex < lowIndex {
+		return -1
+	}
+	mid := int(lowIndex + (highIndex-lowIndex)/2)
+	if array[mid] > target {
+		return binarySearch(array, target, lowIndex, mid)
+	} else if array[mid] < target {
+		return binarySearch(array, target, mid+1, highIndex)
+	} else {
+		return mid
+	}
+}
+
+func iterBinarySearch(array []int, target int, lowIndex int, highIndex int) int {
+	startIndex := lowIndex
+	endIndex := highIndex
+	var mid int
+	for startIndex < endIndex {
+		mid = int(startIndex + (endIndex-startIndex))
+		if array[mid] > target {
+			endIndex = mid
+		} else if array[mid] < target {
+			startIndex = mid
+		} else {
+			return mid
+		}
+	}
+	return -1
+}
+
+ldapsearch -h localhost -p 10389 -D uid=admin,ou=system -w 123 -b ou=system -s one "ads-replconsumerid=replication" "+"
+
+apacheds主从切换
+kadmin
+
+
+2020-06-12 15:38:24,698 INFO  [main] osgi.DefaultLdapCodecService (DefaultLdapCodecService.java:loadStockControls(121)) - Registered pre-bundled control factory: 2.16.840.1.113730.3.4.18
+2020-06-12 15:38:24,699 INFO  [main] osgi.DefaultLdapCodecService (DefaultLdapCodecService.java:loadStockControls(125)) - Registered pre-bundled control factory: 1.2.840.113556.1.4.319
+2020-06-12 15:38:24,699 INFO  [main] osgi.DefaultLdapCodecService (DefaultLdapCodecService.java:loadStockControls(129)) - Registered pre-bundled control factory: 2.16.840.1.113730.3.4.3
+2020-06-12 15:38:24,700 INFO  [main] osgi.DefaultLdapCodecService (DefaultLdapCodecService.java:loadStockControls(133)) - Registered pre-bundled control factory: 1.3.6.1.4.1.4203.1.10.1
+2020-06-12 15:38:24,701 INFO  [main] standalone.CodecFactoryUtil (CodecFactoryUtil.java:loadStockControls(102)) - Registered pre-bundled control factory: 1.3.6.1.4.1.18060.0.0.1
+2020-06-12 15:38:24,701 INFO  [main] standalone.CodecFactoryUtil (CodecFactoryUtil.java:loadStockControls(106)) - Registered pre-bundled control factory: 2.16.840.1.113730.3.4.7
+2020-06-12 15:38:24,702 INFO  [main] standalone.CodecFactoryUtil (CodecFactoryUtil.java:loadStockControls(110)) - Registered pre-bundled control factory: 2.16.840.1.113730.3.4.2
+2020-06-12 15:38:24,702 INFO  [main] standalone.CodecFactoryUtil (CodecFactoryUtil.java:loadStockControls(114)) - Registered pre-bundled control factory: 2.16.840.1.113730.3.4.18
+2020-06-12 15:38:24,702 INFO  [main] standalone.CodecFactoryUtil (CodecFactoryUtil.java:loadStockControls(118)) - Registered pre-bundled control factory: 1.2.840.113556.1.4.319
+2020-06-12 15:38:24,702 INFO  [main] standalone.CodecFactoryUtil (CodecFactoryUtil.java:loadStockControls(122)) - Registered pre-bundled control factory: 2.16.840.1.113730.3.4.3
+2020-06-12 15:38:24,702 INFO  [main] standalone.CodecFactoryUtil (CodecFactoryUtil.java:loadStockControls(126)) - Registered pre-bundled control factory: 1.3.6.1.4.1.4203.1.10.1
+2020-06-12 15:38:24,704 INFO  [main] standalone.CodecFactoryUtil (CodecFactoryUtil.java:loadStockControls(130)) - Registered pre-bundled control factory: 1.3.6.1.4.1.42.2.27.8.5.1
+2020-06-12 15:38:24,705 INFO  [main] standalone.CodecFactoryUtil (CodecFactoryUtil.java:loadStockControls(135)) - Registered pre-bundled control factory: 2.16.840.1.113730.3.4.9
+2020-06-12 15:38:24,708 INFO  [main] standalone.CodecFactoryUtil (CodecFactoryUtil.java:loadStockControls(140)) - Registered pre-bundled control factory: 2.16.840.1.113730.3.4.10
+2020-06-12 15:38:24,709 INFO  [main] standalone.CodecFactoryUtil (CodecFactoryUtil.java:loadStockControls(144)) - Registered pre-bundled control factory: 1.3.6.1.4.1.4203.1.9.1.3
+2020-06-12 15:38:24,709 INFO  [main] standalone.CodecFactoryUtil (CodecFactoryUtil.java:loadStockControls(148)) - Registered pre-bundled control factory: 1.3.6.1.4.1.4203.1.9.1.4
+2020-06-12 15:38:24,710 INFO  [main] standalone.CodecFactoryUtil (CodecFactoryUtil.java:loadStockControls(152)) - Registered pre-bundled control factory: 1.3.6.1.4.1.4203.1.9.1.1
+2020-06-12 15:38:24,711 INFO  [main] standalone.CodecFactoryUtil (CodecFactoryUtil.java:loadStockControls(156)) - Registered pre-bundled control factory: 1.3.6.1.4.1.4203.1.9.1.2
+2020-06-12 15:38:24,712 INFO  [main] standalone.CodecFactoryUtil (CodecFactoryUtil.java:loadStockControls(160)) - Registered pre-bundled control factory: 1.2.840.113556.1.4.473
+2020-06-12 15:38:24,712 INFO  [main] standalone.CodecFactoryUtil (CodecFactoryUtil.java:loadStockControls(164)) - Registered pre-bundled control factory: 1.2.840.113556.1.4.474
+2020-06-12 15:38:24,713 INFO  [main] standalone.CodecFactoryUtil (CodecFactoryUtil.java:loadStockControls(168)) - Registered pre-bundled control factory: 1.2.840.113556.1.4.841
+2020-06-12 15:38:24,715 INFO  [main] standalone.CodecFactoryUtil (CodecFactoryUtil.java:loadStockControls(172)) - Registered pre-bundled control factory: 1.2.840.113556.1.4.417
+2020-06-12 15:38:24,716 INFO  [main] standalone.CodecFactoryUtil (CodecFactoryUtil.java:loadStockControls(176)) - Registered pre-bundled control factory: 1.2.840.113556.1.4.1413
+2020-06-12 15:38:24,717 INFO  [main] standalone.CodecFactoryUtil (CodecFactoryUtil.java:loadStockControls(180)) - Registered pre-bundled control factory: 1.2.840.113556.1.4.528
+2020-06-12 15:38:24,719 INFO  [main] standalone.CodecFactoryUtil (CodecFactoryUtil.java:loadStockExtendedOperations(189)) - Registered pre-bundled extended operation factory: 1.3.6.1.1.8
+2020-06-12 15:38:24,720 INFO  [main] standalone.CodecFactoryUtil (CodecFactoryUtil.java:loadStockExtendedOperations(193)) - Registered pre-bundled extended operation factory: 1.3.6.1.4.1.18060.0.1.8
+2020-06-12 15:38:24,722 INFO  [main] standalone.CodecFactoryUtil (CodecFactoryUtil.java:loadStockExtendedOperations(197)) - Registered pre-bundled extended operation factory: 1.3.6.1.4.1.18060.0.1.3
+2020-06-12 15:38:24,723 INFO  [main] standalone.CodecFactoryUtil (CodecFactoryUtil.java:loadStockExtendedOperations(201)) - Registered pre-bundled extended operation factory: 1.3.6.1.4.1.18060.0.1.6
+2020-06-12 15:38:24,725 INFO  [main] standalone.CodecFactoryUtil (CodecFactoryUtil.java:loadStockExtendedOperations(205)) - Registered pre-bundled extended operation factory: 1.3.6.1.4.1.18060.0.1.5
+2020-06-12 15:38:24,726 INFO  [main] standalone.CodecFactoryUtil (CodecFactoryUtil.java:loadStockExtendedOperations(209)) - Registered pre-bundled extended operation factory: 1.3.6.1.4.1.4203.1.11.1
+2020-06-12 15:38:24,728 INFO  [main] standalone.CodecFactoryUtil (CodecFactoryUtil.java:loadStockExtendedOperations(213)) - Registered pre-bundled extended operation factory: 1.3.6.1.4.1.4203.1.11.3
+2020-06-12 15:38:24,729 INFO  [main] standalone.CodecFactoryUtil (CodecFactoryUtil.java:loadStockExtendedOperations(217)) - Registered pre-bundled extended operation factory: 1.3.6.1.4.1.1466.20037
+2020-06-12 15:38:25,351 ERROR [main] api.LdapNetworkConnection (LdapNetworkConnection.java:writeRequest(4153)) - Message failed : something wrong has occurred
+Exception in thread "main" org.apache.directory.ldap.client.api.exception.InvalidConnectionException: Error while sending some message : the session has been closed
+
+guardian主备
+kadmin 3.1 
+本地guardian3.2 ->先3.1再3.2 要先clean一下
+
+https://www.cnblogs.com/kongzhongqijing/articles/3625574.html
+
+-------------------------------------------------------------------------------<
+
+2020-06-12 20:58:37,511 ERROR org.apache.directory.server.KERBEROS_LOG: ERR_153 Error in request monitor
+java.lang.NullPointerException
+        at org.apache.directory.server.kerberos.kdc.authentication.AuthenticationService.monitorRequest(AuthenticationService.java:732)
+        at org.apache.directory.server.kerberos.kdc.authentication.AuthenticationService.execute(AuthenticationService.java:113)
+        at org.apache.directory.server.kerberos.protocol.KerberosProtocolHandler.messageReceived(KerberosProtocolHandler.java:212)
+        at org.apache.mina.core.filterchain.DefaultIoFilterChain$TailFilter.messageReceived(DefaultIoFilterChain.java:1019)
+        at org.apache.mina.core.filterchain.DefaultIoFilterChain.callNextMessageReceived(DefaultIoFilterChain.java:650)
+        at org.apache.mina.core.filterchain.DefaultIoFilterChain.access$1300(DefaultIoFilterChain.java:49)
+        at org.apache.mina.core.filterchain.DefaultIoFilterChain$EntryImpl$1.messageReceived(DefaultIoFilterChain.java:1141)
+        at org.apache.mina.filter.codec.ProtocolCodecFilter$ProtocolDecoderOutputImpl.flush(ProtocolCodecFilter.java:437)
+        at org.apache.mina.filter.codec.ProtocolCodecFilter.messageReceived(ProtocolCodecFilter.java:256)
+        at org.apache.mina.core.filterchain.DefaultIoFilterChain.callNextMessageReceived(DefaultIoFilterChain.java:650)
+        at org.apache.mina.core.filterchain.DefaultIoFilterChain.access$1300(DefaultIoFilterChain.java:49)
+        at org.apache.mina.core.filterchain.DefaultIoFilterChain$EntryImpl$1.messageReceived(DefaultIoFilterChain.java:1141)
+        at org.apache.mina.core.filterchain.IoFilterAdapter.messageReceived(IoFilterAdapter.java:122)
+        at org.apache.mina.core.filterchain.DefaultIoFilterChain.callNextMessageReceived(DefaultIoFilterChain.java:650)
+        at org.apache.mina.core.filterchain.DefaultIoFilterChain.fireMessageReceived(DefaultIoFilterChain.java:643)
+        at org.apache.mina.transport.socket.nio.NioDatagramAcceptor.readHandle(NioDatagramAcceptor.java:307)
+        at org.apache.mina.transport.socket.nio.NioDatagramAcceptor.processReadySessions(NioDatagramAcceptor.java:270)
+        at org.apache.mina.transport.socket.nio.NioDatagramAcceptor.access$700(NioDatagramAcceptor.java:68)
+        at org.apache.mina.transport.socket.nio.NioDatagramAcceptor$Acceptor.run(NioDatagramAcceptor.java:181)
+        at org.apache.mina.util.NamePreservingRunnable.run(NamePreservingRunnable.java:64)
+        at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+        at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:615)
+        at java.lang.Thread.run(Thread.java:745)
+2020-06-12 20:58:37,512 DEBUG org.apache.directory.server.KERBEROS_LOG: --> Selecting the EncryptionType
+2020-06-12 20:58:37,512 DEBUG org.apache.directory.server.KERBEROS_LOG: Encryption types requested by client [aes256-cts-hmac-sha1-96 (18), aes128-cts-hmac-sha1-96 (17), des3-cbc-sha1-kd (16), rc4-hmac (23), des-cbc-crc (1), des-cbc-md5 (3)].
+
+
+node215
+ kadmin.guardian -w123 -rTDH -q"delprinc -pau test002/TDH@aaa"
+
+qr, err := e.handleExec(ctx, session, sql, sqlInfo, bindVars, target)
+		if err != nil {
+			return nil, err
+		}
+
+0615
+
+
+工作周报 - 李镇邦 20200608 ~ 20200612
+
+完成：
+1. WARP-46294：[KunDB]支持强制访问语法show mac语句和metainfo
+2. WARP-46492:[guardian]kadmin.guardian增加互信域principal的增加和删除功能	
+
+其他：
+1.sla2-7772 tdh481与620互信失败
+2.sla3-7805 tdh512 inceptor orc表权限未审核
+3.sla2-7871 hdfs nn选主失败 报guardian的error
+4.sla-7878 扫描cve 添加身份验证hadoop的web ui
+5. 其他支持
+
+
+
+进行中：
+1. WARP-46359：guardian RM部分的review整理
+
+本周：
+guardian新jira，之前review的整改
+
+
+beeline -u "jdbc:hive2://localhost:10000/default;principal=hive/tw-node598@TDH"
+
+apacheds:
+entIp='172.26.5.97', result=SUCCESS
+2020-06-15 12:20:33,857 INFO ApacheDSAuditLogger: 2020-06-15 12:20:33,033 operation='AS_REQ', principal='hive/tw-node597@TDH', serverName='null', clientIp='172.26.5.97', result=SUCCESS
+2020-06-15 12:20:33,872 INFO ApacheDSAuditLogger: 2020-06-15 12:20:33,033 operation='TGS_REQ', principal='null', serverName='hive/tw-node599@TDH', clientIp='172.26.5.97', result=SUCCESS
+2020-06-15 12:20:42,437 INFO ApacheDSAuditLogger: 2020-06-15 12:20:42,042 operation='AS_REQ', principal='yarn/tw-node597@TDH', serverName='null', clientIp='172.26.5.97', result=SUCCESS
+2020-06-15 12:20:42,447 INFO ApacheDSAuditLogger: 2020-06-15 12:orc20:42,042 operation='TGS_REQ', principal='null', serverName='yarn/tw-node598@TDH', clientIp='172.26.5.97', result=SUCCESS
+2020-06-15 12:20:43,977 INFO ApacheDSAuditLogger: 2020-06-15 12:20:43,043 operation='AS_REQ', principal='hive/tw-node597@TDH', serverName='null', clientIp='172.26.5.97', result=SUCCESS
+2020-06-15 12:20:43,985 INFO ApacheDSAuditLogger: 2020-06-15 12:20:43,043 operation='TGS_REQ', principal='null', serverName='hive/tw-node598@TDH', clientIp='172.26.5.97', result=SUCCESS
+
+guardian:
+ster server connection later. ReadOnly is on. Try next pool.
+2020-06-15 12:33:07,375 INFO org.apache.directory.fortress.core.impl.RoleUtil: loadGraph initializing ROLE context [HOME]
+2020-06-15 12:33:07,375 WARN org.apache.directory.fortress.core.ldap.connection.LdapConnectionProvider: Error getting admin connection : Will retry master server connection later. ReadOnly is on. Try next pool.
+2020-06-15 12:33:07,377 WARN org.apache.directory.fortress.core.ldap.connection.LdapConnectionProvider: Error getting user connection : Will retry master server connection later. ReadOnly is on. Try next pool.
+2020-06-15 12:33:07,380 WARN org.apache.directory.fortress.core.ldap.connection.LdapConnectionProvider: Error getting admin connection : Will retry master server connection later. ReadOnly is on. Try next pool.
+2020-06-15 12:33:07,382 WARN io.transwarp.guardian.server.boot.controller.AuthenticationController: Searching groups of a non-existing user guardian/guardian
+2020-06-15 12:33:27,769 ERROR org.apache.directory.ldap.client.api.DefaultLdapConnectionFactory: unable to bind connection: Cannot connect to the server: Connection refused
+
+
+  private void processDelPrincsCmd(String subCmd) throws Exception {
+    String princ = subCmd
+            .replace("delprinc", "")
+            .replace("delete_principal", "")
+            .trim();
+    KadminV2 kadmin = getKadmin();
+    kadmin.delPrincipal(princ);
+  }
+
+https://www.cnblogs.com/xxwtfw/p/6698182.html
+
+@DeleteMapping("/**")
+@ApiIgnore
+@ResolvePath
+@ExtractSession
+@Auditable(field = AuditField.USER, requestClass = "DeleteUserRequest", level = AuditLevel.DELETE,
+    operationFormat = "delete user [%s]")
+public void deleteSpecialUser(@InjectValue @ApiIgnore SessionVo sessionVo, @ResolveValue String resolvedParam) throws GuardianException {
+  try {
+    String username = URLDecoder.decode(resolvedParam, "UTF-8");
+    userManager.deleteUser(sessionVo, username);
+  } catch (UnsupportedEncodingException e) {
+    throw new GuardianException(ErrorCodes.ILLEGAL_CHARACTER, "", resolvedParam);
+  }
+}
+
+docker run -it --network=host bash使用主机网络
+
+ kadmin.guardian -w123 -rTDH -q"delprinc -pau test002/TDH@aaa"
+
+docker run -it --network=host
+docker build -t xx:xx
+
+
+Mon 修改kadmin.guardian WARP-45079 45428 部分修改resource manager
+Tue WARP-46697 晚上resource-manager
+WED sla-7772 WARP-46697
+THURS resource-manager WARP-46633
+FRI WARP-46600
+
+
+SELECT ul.user, ll.level, tvl.* from _vt.table_or_view_label tvl left join _vt.label_level ll on ll.label = tvl.label left join _vt.user_level ul on ul.level >= ll.level
+
+if pass, err = e.checkMacTableObjInternal(ctx, session, user, o.Db, o.Value1); err != nil {
+		return err
+	}
+
+akka的actor模型是非抢占式调度，换句话说，如果某个actor内部存在阻塞操作，如果采用默认dispatcher配置，那么可能导致actor不并发。
+akka系统需要从dispatcher中拿出线程资源来进行actor之间的调度以及协调。可是receive中的Future占用了系统的dispatcher资源，可能把系统的dispatcher给阻塞掉了，由此导致akka系统本身被阻塞。
+WARP-28451
+
+beeline -u "jdbc:hive2://localhost:10000/default;principal=hive/tw-node598@TDH"
+
+xecutions ：需要记住的是，插件可能有多个目标。每个目标可能有一个单独的配置，甚至可能将插件的目标完全绑定到不同的阶段。执行配置插件的目标的执行。
+
+id: 执行目标的标识。
+goals: 像所有多元化的 POM 元素一样，它包含单个元素的列表。在这种情况下，这个执行块指定的插件目标列表。
+phase: 这是执行目标列表的阶段。这是一个非常强大的选项，允许将任何目标绑定到构建生命周期中的任何阶段，从而改变 maven 的默认行为。
+inherited: 像上面的继承元素一样，设置这个 false 会阻止 maven 将这个执行传递给它的子代。此元素仅对父 POM 有意义。
+configuration: 与上述相同，但将配置限制在此特定目标列表中，而不是插件下的所有目标。
+
+Wed.
+并发与并行
+并发：分配时间片
+并行机制下的并发
+
+ Map<String, Object> props = new HashMap<>();
+    props.put("a", 111);
+
+    QuotaVo quota1 = new QuotaVo("quotaTest1", Arrays.asList("FURION_SCHEDULER", "root"));
+    quota1.setProperties(props);
+    admin.addQuota(quota1);
+
+    QuotaVo quota2 = new QuotaVo("quotaTest2", Arrays.asList("CAPACITY_SCHEDULER", "root"));
+    quota2.setProperties(props);
+    admin.addQuota(quota2);
+
+Assert.assertTrue(permManager.check(new PrincipalVo(PrincipalType.USER, "admin"), new PermVo(inceptorGlobal, new PermActionVo("SELECT")), false));
+
+[PrincPermVo{princ=PrincipalVo{principal='admin', principalType=USER}, permVo=PermVo{resourceVo=ResourceVo{id=0, dataSource=[NodeVo{type='GLOBAL', value='*'}], serviceType='null', serviceName='jTLvgInceptorResMgrTestinceptor', externalId=0}, permActionVo=PermActionVo{action='SELECT'}}, grantOption=false}, PrincPermVo{princ=PrincipalVo{principal='admin', principalType=USER}, permVo=PermVo{resourceVo=ResourceVo{id=0, dataSource=[NodeVo{type='GLOBAL', value='*'}], serviceType='null', serviceName='jTLvgInceptorResMgrTestinceptor', externalId=0}, permActionVo=PermActionVo{action='ADMIN'}}, grantOption=false}, PrincPermVo{princ=PrincipalVo{principal='tdt', principalType=USER}, permVo=PermVo{resourceVo=ResourceVo{id=0, dataSource=[NodeVo{type='GLOBAL', value='*'}], serviceType='null', serviceName='jTLvgInceptorResMgrTestinceptor', ex
+Cannot lookup inceptor table resource using cached connection
+
+sed -i 's/ throws.*//g' testv2
+删除匹配throws字符后面的字符串
+sed -i '/^$/d' testv2
+删除空行
+sed -i '/\*/d' testv2 
+删除带*的行
+sed -i '/^\s*$/d' testv2
+删除带空格的空行
+wc -l testv2
+统计文件行数
+grep -i '.*group.*' testv1
+查找存在group的行
+
+api
+v1 
+addQuota
+readQuota 
+UPdateQuota
+deleteQuota -> findQuota
+searchQuotas
+
+v2 
+addQuota
+updateQuota
+deleteQuota
+getQuota
+SearchQuota
+
+inf
+v1
+  void addQuota(QuotaVo quotaVo) throws GuardianClientException;
+  void updateQuota(QuotaVo quotaVo) throws GuardianClientException
+  void deleteQuota(QuotaVo quotaVo) throws GuardianClientException;
+  void deleteQuota(QuotaVo quotaVo, boolean recursive) throws GuardianClientException;
+  void deleteQuotaComponent(String component) throws GuardianClientException;
+  QuotaVo readQuota(QuotaVo quotaVo) throws GuardianClientException;
+  List<QuotaVo> listQuotas(String component, List<String> dataSource) throws GuardianClientException;
+v2
+  void addQuota(QuotaVo quotaVo) throws GuardianClientException;
+  
+  void updateQuota(QuotaVo quotaVo) throws GuardianClientException;
+  
+  void deleteQuota(ResourceVo resourceVo) throws GuardianClientException;
+  
+  QuotaVo getQuota(ResourceVo resourceVo) throws GuardianClientException;
+  
+  List<QuotaVo> getDescendantResourceQuotas(ResourceVo resourceVo) throws GuardianClientException;
+
+List<GroupVo> findOwnedGroups(String username, boolean inherited)
+
+@Pathvariable和@RequestParam之间的区别
+
+jps查看java进程
+jstat -gcutil pid 1000 5 近1s统计gc信息5次
+
+jmap -histo pid | more
+
+ps -efww | grep 
+
+nc -v ip port  netcat查看ip的port是否开启
+nc -l 5000 > my.jpg
+nc host 5000 < my.jpg netcat传输文件
+free -m 以MB为单位显示内存使用情况。
+top -c Linux top命令用于实时显示 process 的动态。
+
+work34
+
+getparentdatasource->
+list<nodeVo>
+  // [<database system>] -> [<database system>]
+  // [<table system.bucket_v>] -> [<database system>, <table bucket_v>]
+  // [<pool root.default] -> [<scheduler *>, <queue root>, <queue default>]
+type, value
+TABLE -> db1.tb1
+%%context.getParentDataSource()
+
+getResourcesFromParentDataSource -> 
+
+
+geturi -> aa.bb
+aa -> prefix
+%% queue/pool
+
+Arrays.asList(new NodeVo(INCEPTOR.DATABASE, ), new NodeVo(INCEPTOR.TABLE_OR_VIEW, dbAndTable[1]))
+
+工作周报 - 李镇邦 20200615 ~ 20200619
+
+完成：
+1. WARP-46697: [KunDB]修复与添加MAC功能
+2. WARP-46633: [guardian] 统计并增加guardian两个版本quota部分的api
+3. WARP-43659: [guardian]修复增加RM部分单测
+
+其他：
+1. 帮助修复整理上周遗留的sla-7772
+2. 修改review后的代码WARP-45079 45428
+
+
+进行中：
+1. WARP-46600: [guardian]guardian server国际化
+
+本周：
+1. 完成WARP-46600的工作 
+2. 整理提交之前merge requese的代码
+
+@TestPropertySource 补充env配置
+完成WARP-43659 WARP-46600
+
+bean
+初始化回调
+
+org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'tccResourceSvc' defined in file [/home/transwarp/Downloads/work/guardian-backend/guardian/resource-manager/target/classes/io/transwarp/guardian/resource/tcc/TccResourceSvc.class]: Could not resolve matching constructor (hint: specify index/type/name arguments for simple parameters to avoid type ambiguities)
+
+	at org.springframework.beans.factory.support.ConstructorResolver.autowireConstructor(ConstructorResolver.java:243)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.autowireConstructor(AbstractAutowireCapableBeanFactory.java:1274)
+
+o.transwarp.guardian.common.exception.GuardianException: ErrorCode: 56001, ErrorMessage: Service [serviceType=YARN, serviceName=IacptResourceServiceManagerTestyarn] is not registered
+
+	at io.transwarp.guardian.resource.ResourceServiceManager.getInactiveSchedulerNodes(ResourceServiceManager.java:259)
+	at io.transwarp.guardian.resource.ResourceServiceManagerTest.registerAndRemoveTest(ResourceServiceManagerTest.java:109)
+
+
+?lang=zh_CN
+
+Accept-Language: zh-CN;q=0.9,*;q=0.8,zh;q=0.7
+
+curl -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' --header 'Accept-Language: zh-CN;q=0.9,zh;q=0.7' -d '{"username": "admin","password": "333","isSystem": false}' 'http://localhost:8380/api/v2/login'
+
+curl -X GET --header 'Content-Type: application/json' --header 'Accept: application/json' -b cookies.txt -d '{"dataSource": [ { "type": "GLOBAL","value": "*"}],"serviceName": "inceptor1", "serviceType": "INCEPTOR" }' 'http://localhost:8380/api/v2/perms/authorized-dataNodes?princ=admin&princType=USER&inheritance=false&subtree=false'
+
+transwarp@transwarp-lishinho-5480:~$ curl -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' --header 'Accept-Language: zh-CN;q=0.9,*;q=0.8,zh;q=0.7' -D cookies.txt -d '{"username": "admin","password": "333","isSystem": false}' 'http://localhost:8380/api/v2/login'
+{"returnCode":1013,"errorMessage":"ç»éå¤±è´¥ï¼å¯ç éè¯¯","detailMessage":""}transwarp@transwarp-lishinho-5480:~$ 62;c
+62: command not found
+c: command not found
+
+Content-Language: de-DE
+
+{"returnCode":1013,"errorMessage":"ç»éå¤±è´¥ï¼å¯ç éè¯¯","detailMessage":""}
+inceptor/silpstream hdfs
+
+ template = locale == DEFAULT_LOCALE ? ResourceBundle.getBundle(rbName, locale).getString(resourceKey) :
+          new String(ResourceBundle.getBundle(rbName, locale).getString(resourceKey).getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
+ 
+进程：
+
+message: 登录用户时缺少必要字段，请检查: corpId, userId, name, phone
+code: -1
+
+  int ADMIN_ROLE_ALREADY_EXIST = 53001;
+  int ADMIN_ROLE_NOT_FOUND = 53002;
+  int ADMIN_PERM_ALREADY_EXIST = 53003;
+  int ADMIN_PERM_NOT_FOUND = 53004;
+
+int PASSWORD_ERROR = 54011;
+  int AUTH_FAILED_USER_NOT_FOUND = 54012;
+  int INVALID_TOKEN = 54013;
+  int PWD_POLICY_VIOLATION = 54014;
+  int PWD_POLICY_MIN_AGE_TRIGGER = 54015;
+  int PWD_POLICY_MAX_AGE_TRIGGER = 54016;
+  int PWD_POLICY_MIN_LENGTH_TRIGGER = 54017;
+  int PWD_POLICY_IN_HISTORY_TRIGGER = 54018;
+  int PWD_POLICY_EXPIRE_WARNING_TRIGGER = 54019;
+  int PWD_POLICY_MAX_FAILURE_TRIGGER = 54020;
+  int PWD_POLICY_ALLOW_USER_CHANGE_TRIGGER = 54021;
+  int PWD_POLICY_LOCKOUT_DURATION_TRIGGER = 54022;
+  int PWD_POLICY_MIN_CLASSES_TRIGGER = 54023;
+
+
+    mvn install -DskipTests -DdistMgmtStagingId=public-transwarp-release \
+        -DdistMgmtStagingName=libs-release-local -DdistMgmtStagingUrl=http://172.16.1.168:8081/artifactory/libs-release-local \
+        -DdistMgmtSnapshotsId=public-transwarp-snapshots -DdistMgmtSnapshotsName=libs-snapshot \
+        -DdistMgmtSnapshotsUrl=http://172.16.1.168:8081/artifactory/libs-snapshot-local
+
+WARP-47032
+WARp-46600
+string matches优化 ->
+static方法是不是只加载一次
+
+IOC
+
+实例代码块会随着对象的创建而执行，即每个对象都会有自己的实例代码块，表现出来就是实例代码块的运行结果会影响当前对象的内容，并随着对象的销毁而消失(内存回收)；而静态代码块是当Java类加载到JVM内存中而执行的代码块，由于类的加载在JVM运行期间只会发生一次，所以静态代码块也只会执行一次。
+
+dummy := &ListNode{val : 0}
+dummy.next = head
+head = dummy
+
+var rmval int
+for head.next != nil && head.next.next != nil {
+  if head.next.val == head.next.next.val {
+    rmval = head.next.val
+    for head.next != nil && head.next.val == rmval {
+       head.next = head.next.next
+    }
+  } else {
+    head = head.next
+  }
+  return dummy.next
+}
+
+所以cas登录和OAuth2在流程上的最大区别就是，通过ST或者code去认证的时候，需不需要预先商量好的密码。
+
+- The `TGT` (Ticket Granting Ticket), stored in the `TGC` cookie, represents a SSO session for a user.
+- The `ST` (Service Ticket), transmitted as a `GET` parameter in urls, stands for the access granted by the CAS server to the *CASified* application for a specific user.
+
+springf security+ shiro + Oauth2 + native filter
+29139
+27561
+34172
+
+
+工作周报 - 李镇邦 20200622 ~ 20200624
+
+完成：
+1. WARP-46600: [guardian]guardian server国际化
+2. WARP-47032: [guardian]修改Guardian中部分错误码和实际错误不对应
+
+进行中：
+1. WARP-27572: [guardian federation]federation支持SLO
+
+本周：
+1. 讨论federation支持SLO的方案并完成
+2. 整理提交之前merge requese的代码
+
+sed -i 's/ throws.*//g' testv2
+删除匹配throws字符后面的字符串
+sed -i '/^$/d' testv2
+删除空行
+sed -i '/\*/d' testv2 
+删除带*的行
+sed -i '/^\s*$/d' testv2
+删除带空格的空行
+wc -l testv2
+统计文件行数
+grep -i '.*group.*' testv1
+查找存在group的行
+
+整理V2新提供的resource的API--，确定已有的API是否需要保留/修改--都需要留？，是否有有需求的API遗漏--需求？
+ResourceServiceController
+
+register 
+listservices v1 v2
+lookupresource v1 v2
+removeService
+removeServices
+unregisterService
+refreshYarnQueues
+genYarnSchedulerXmlConf
+getSchedulerType v1 v2
+getInactiveSchedulerNodes V1 v2
+getEffectiveServiceName
+getServiceMapping
+
+ResourceController
+
+getChildNodes
+getDescendantResources
+renameNode
+deleteResource
+deleteServiceResource
+
+
+单点登出的原理是，服务端收到登出请求时（请求中肯定会带tgt cookie），会向通过此tgt登入成功的service url（也就是所有通过此tgt登录成功的客户端）发出登出请求，此请求会有特殊的标记被客户端的filter捕获到，也就登出了
+
+    A: 浏览器请求 豆瓣读书的 /logout，豆瓣读书 删除Session相关内容，即清除局部会话。
+
+    B: 豆瓣读书 引导浏览器重定向到 用户中心的 /logout，携带Cookie中的CASTGC
+
+    C: 清除全局会话，删除 Cookie中的CASTGC，注销 TGC对应的TGT
+
+    D: 认证服务器 通知所有已登录的业务系统清除局部会话，找到TGT签发的ST，即所有已登录的业务系统（豆瓣电影、音乐），在后台，通知 所有有关的业务系统（Fire & Forget），携带ST
+
+    E: 业务系统 接到通知后 清除局部会话，用ST 清除 对应的Session，即 清除对应的局部会话
+
+泛型的主要目的之一就是用来约定集合要存储什么类型的对象，并且通过编译器确保规约得以满足。
+因此，与其使用 Object ，我们更希望先指定一个类型占位符，稍后再决定具体使用什么类型。要达到这个目的，需要使用类型参数，用尖括号括住，放在类名后面。然后在使用这个类时，再用实际的类型替换此类型参数。
+你只需告诉编译器要使用什么类型，剩下的细节交给它来处理。
+
+
+https://172.26.2.2:8383/federation-server/#/account/login
+
+http://localhost:8011/federation-server/
+
+http://localhost:9111/oauth-client-demo-sso/login
+
+password,authorization_code,refresh_token,implicit
+
+
+SLO保证federation server后端token删除或不可用 && federation client中局部session失效
+问题：
+1. delegation是跨租户用户访问client的功能么 是否会有影响？ ++
+2. guardian server怎么调用federation api ++
+3. 采用shiro和dummy的service怎么清除局部session +++
+4. 如何验证slo ++
+5. 采用refresh token的时候是否会影响 +
+6. guardian spring session是什么 ++
+
+spring session
+对于HTTP协议来说，Spring Session定义了HttpSessionStrategy接口以及两个默认实现，即CookieHttpSessionStrategy和HeaderHttpSessionStrategy，其中前者使用HTTP cookie将请求与session id关联，而后者使用HTTP header将请求与session关联。
+
+例如，如果请求是通过HTTP传递进来的，那么session可以通过HTTP cookie或HTTP Header信息与请求进行关联。如果使用HTTPS的话，那么可以借助SSL session id实现请求与session的关联。如果使用JMS的话，那么JMS的Header信息能够用来存储请求和响应之间的session id。
+
+http://localhost:8011/federation-server/swagger-ui.html#!/
+
+logincontroller->authenticate->attemptAuthentication-session-filter
+
+rememberme
+
+
+cas tgt放在cookie里 存储对应service关系
+
+Our idea is:
+
+Enhance the access token with the current session id
+If apps A or B want to logout a user, they redirect him to the logout page of O
+If the user gets logged out from O, all access tokens belonging to the current session on O are removed and the user gets redirected back to A or B
+The session on A or B gets destroyed
+A and B check for the validity of their OAuth access token on each request and destroy their session if the token is not valid any more
+Do you think this is a valid use case for OAuth 2? How you would you implement single sign off differently?
+
+
+token --- sessionID
+维持一个token-sessionid的map server端logout的时候失效所有与之session有关的token(session是怎么生成的，是否唯一）重定向到logout -service 
+简化 只需要重定向到各service的logout即可？异步返回消息
+
+HttpSession原理
+当用户第一次访问Servlet时,服务器端会给用户创建一个独立的Session
+并且生成一个SessionID,这个SessionID在响应浏览器的时候会被装进cookie中,从而被保存到浏览器中
+当用户再一次访问Servlet时,请求中会携带着cookie中的SessionID去访问
+服务器会根据这个SessionID去查看是否有对应的Session对象
+有就拿出来使用;没有就创建一个Session(相当于用户第一次访问)
+
+域的范围:
+    Context域 > Session域 > Request域
+    Session域 只要会话不结束就会存在 但是Session有默认的存活时间(30分钟)
+
+token
+
+sessionID-user-client-token
+
+cas怎么把报文发送给其他客户端？
+其他客户端收到报文请求后如何响应处理？
+
+或者其他部分怎么对client集中发送请求操作，比如单点登陆（并没有
+
+1. 放在federation内存中 Map<String, Service> 用于识别sessionID对应的client service ，federation登出时使用
+记录通过这个session登陆的client
+2. 登出时 server发送请求给其他client 登出消息(只要是logout就行
+
+
+1. mac 表和zk下的vschema的性质相同，都属于客体下的附加属性，drop db的时候同时删去。现没有在mac控制下限制db的ddl，所以不做权限管控，只做客体消失后的权限清理
+2. 
+drop tb/view先删掉在外部的附加属性 如global index 再删掉shard以及mfed下的表 
+按照这个逻辑处理 事务发生错误按当前方法一般处理，
+加上mac权限限制报错 防止没有mac权限的用户drop/alter table/view
+3.
+alter只删除表/视图 列上的权限且不删除表/视图本身的权限 
+
+https://suse02:8383/federation-server/TDH/oauth/authorize?client_id=guardian-TDH-HSswJ&redirect_uri=https%3A%2F%2F172.26.2.2%3A8380%2F&response_type=code&state=PzUeGD
+https://suse02:8383/federation-server/sessions/current
+
+
+http://localhost:8011/federation-server/sessions/current
+
+重定向直接到logout
+
+server直接发sessionID到client？
+client
+
+cas
+oauth
+session
+sessionID
+cookie
+bearer token
+httpsession
+servlet
+saml
+sso
+slo
+spring security
+spring session
+pac4j
+shiro
+tgt
+st
+包装器模式
+rest api
+
+https://172.16.1.114:8380/api/v1/logoutCAS
+http://172.16.1.114:50070/logout
+
+sendMessageToEndPoint-> performBackChannelLogout->handle（determineLogoutUrl， resolveService）-> performLogoutForTicket->performLogout(delete ticket)
+Perform a back channel logout for a given ticket granting ticket and returns all the logout requests.
+->LogoutManager
+final URL logoutUrl = this.singleLogoutServiceLogoutUrlBuilder.determineLogoutUrl(registeredService, selectedService);
+
+// 在数据库存一份 logouturl 如果没有存 会自己拼一份logout url
+
+server端
+// 每次登陆的时候在spring session中设置service属性
+// logout的时候调用logoutManager
+// logoutManager进行ticket中携带的service的处理以及之后ticket的销毁 -> federation中session的invalid和service的解析
+// handle拿到解析出来的service，从数据库中找register service 然后决定发送报文的url
+// 先从对应的registered service中拿logout url（存在txsql？）如果为空 解析得到的service中的logout url （remoteaddress+/logout？）
+// 封装msg 用httpclient发送异步post请求到logout url
+
+session过期时的处理？ -> 什么时候调用manager->session被清理的时候
+怎么解析url ->域名后+/logout
+
+
+
+
+client端
+//这一个传进来的server session 对应的token 对应的通过这个cookie创建的其他session
+// server转发的post请求和浏览器用户主动触发的logout请求一样么 不一样 认证过程
+// server端的session要和client端session对应
+// 处理通过Oauth指令使用token去认证产生的session
+
+// logout filter拦截到报文中有固定logout字段的请求
+// handler处理：收到的请求是否是认证token，如果是认证token，需要把这个session记录下来（federation需要做？），如果是logout 销毁session
+// listener处理：监听session的生命周期，失效后做后续工作
+
+//在不同框架中处理不同filter 拦截报文中有固定字段的logout标识符
+// 什么时候创建token，找到该session创建的token 并销毁该token下的session
+重定向时把federation的sessionid填到client的请求中 require token/delete token
+Map<sessionID, user>
+Map<user, session>
+a. 如何解析发送的url
+一，
+1.tgt的概念相当于共享cookie，内部维护映射的service，可以向区域中所有人认证自己的身份
+2. oauth2是证书式，认证发放token，信用关系集中存储在as，才用授权码加密 每次建立一对一的信任关系
+
+server需要维护用户和client关系（记录这个gf-session对应登陆的client）
+二，
+1. 确认是否要slo
+2. 记录client的logoutURL 去后端寻找对应-》自己解析
+
+url+报文标记
+b. 构造post请求发送给client
+c. 各个框架拿到报文的filter处理时机
+维护携带过来的sessionID->user->token->sessions 失效
+session本身失效的时候
+
+xxxxoooxoxooxooxoxoxoxooxoxooxoxoxooxxooxoxoxxoxxooxoxooxxxoxooxoxxxxxoxooxoxoxxoxxooooooxoxoxoxox
+

@@ -1,0 +1,498 @@
+functions:
+- name: funcGetInstallId
+  args: guardian
+  output: GUARDIAN_INSTALL_ID
+
+guardianConfigs:
+- secretName: all-tdh
+  guardianURL: "https://10.10.90.107/test/guardian/guardian"
+  user: "admin"
+  password: "123"
+  principals:
+  - HTTP/tos_test@test.TDH
+  - zookeeper/tos_test@test.TDH
+  - hdfs/tos_test@test.TDH
+  - hive/tos_test@test.TDH
+  - hbase/tos_test@test.TDH
+  - yarn/tos_test@test.TDH
+  - kafka/tos_test@test.TDH
+  - studio/tos_test@test.TDH
+  - workflow/tos_test@test.TDH
+  - tdt/tos_test@test.TDH
+  - rubik/tos_test@test.TDH
+  - elasticsearch/tos_test@test.TDH
+  krb5.conf: |
+    [logging]
+    default = FILE:/var/log/krb5libs.log
+    kdc = FILE:/var/log/krb5kdc.log
+    admin_server = FILE:/var/log/kadmind.log
+
+    [libdefaults]
+    default_realm = test.TDH
+    dns_lookup_realm = false
+    dns_lookup_kdc = false
+    ticket_lifetime = 24h
+    renew_lifetime = 7d
+    forwardable = true
+
+    [realms]
+    test.TDH ={
+      kdc = apacheds-master-hl-rrpz8.test.svc.transwarp.local:1088
+      kdc = apacheds-slave-2-hl-rrpz8.test.svc.transwarp.local:1088
+      kdc = apacheds-slave-1-hl-rrpz8.test.svc.transwarp.local:1088
+    }
+
+    [domain_realm]
+    apacheds-master-hl-rrpz8.test.svc.transwarp.local = test.TDH
+    apacheds-slave-2-hl-rrpz8.test.svc.transwarp.local = test.TDH
+    apacheds-slave-1-hl-rrpz8.test.svc.transwarp.local = test.TDH
+    tos_test = test.TDH
+    .test.pod.transwarp.local = test.TDH
+    .test.svc.transwarp.local = test.TDH
+
+projectConfigs:
+  commonValues:
+    Transwarp_License_Address: 172.16.1.40:2181
+    Transwarp_MSL_License_Address: https://172.16.1.40:60907/licence
+    Transwarp_Registry_Server: 172.16.3.231:5000
+  releases:
+  - name: "tdh-zookeeper"
+    repoName: stable
+    chartName: zookeeper
+    chartVersion: "6.0.x"
+    dependencies:
+      guardian: guardian
+    configValues:
+      App:
+        zookeeper:
+          image: 172.16.1.99/transwarp/zookeeper:transwarp-6.0.2-final
+          replicas: 3
+          resources:
+            cpu_limit: 2
+            cpu_request: 0.1
+            memory_limit: 4
+            memory_request: 1
+      Transwarp_Config:
+        Transwarp_Auto_Injected_Volumes:
+        - name: secret
+          secretname: all-tdh
+          volumeName: keytab
+        security:
+          auth_type: kerberos
+          cas_plugin_enable: "true"
+          guardian_permission_component: "tdh-zookeeper"
+          guardian_plugin_enable: "true"
+          guardian_principal_host: tos_test
+          guardian_principal_user: zookeeper
+          guardian_spnego_principal_host: tos_test
+          guardian_spnego_principal_user: HTTP
+          sssd_plugin_enable: "false"
+      Transwarp_License_Address: 172.16.3.231:2191
+      Transwarp_MSL_License_Address: https://172.16.3.231:60907/licence
+      Transwarp_Registry_Server: 172.16.3.231:5000
+  - name: "tdh-hdfs"
+    repoName: stable
+    chartName: hdfs
+    chartVersion: "6.0.x"
+    dependencies:
+      guardian: guardian
+    configValues:
+      App:
+        hdfsnamenode:
+          image: 172.16.1.99/transwarp/hdfs:transwarp-6.0.2-final
+          replicas: 2
+          resources:
+            cpu_limit: 2
+            cpu_request: 1
+            memory_limit: 8
+            memory_request: 4
+            storage:
+              data:
+                storageClass: silver
+                size: 100Gi
+        hdfszkfc:
+          image: 172.16.1.99/transwarp/hdfs:transwarp-6.0.2-final
+          resources:
+            cpu_limit: 0.5
+            cpu_request: 0.1
+            memory_limit: 1
+            memory_request: 0.5
+        hdfsjournalnode:
+          image: 172.16.1.99/transwarp/hdfs:transwarp-6.0.2-final
+          replicas: 3
+          resources:
+            cpu_limit: 2
+            cpu_request: 0.5
+            memory_limit: 4
+            memory_request: 1
+            storage:
+              data:
+                storageClass: silver
+                size: 200Gi            
+        hdfsdatanode:
+          image: 172.16.1.99/transwarp/hdfs:transwarp-6.0.2-final
+          replicas: 1
+          resources:
+            cpu_limit: 2
+            cpu_request: 0.5
+            memory_limit: 4
+            memory_request: 1
+            storage:
+              data:
+                disk_replicas: 2
+                storageClass: silver
+                size: 200Gi
+        httpfs:
+          image: 172.16.1.99/transwarp/httpfs:transwarp-6.0.2-final
+          replicas: 2
+          resources:
+            cpu_limit: 2
+            cpu_request: 0.5
+            memory_limit: 4
+            memory_request: 1
+      Transwarp_Config:
+        Transwarp_Auto_Injected_Volumes:
+        - name: secret
+          secretname: all-tdh
+          volumeName: keytab
+        Ingress:
+          path: /test/tdh-hdfs
+        security:
+          auth_type: kerberos
+          cas_plugin_enable: "true"
+          guardian_permission_component: "tdh-hdfs"
+          guardian_plugin_enable: "true"
+          guardian_principal_host: tos_test
+          guardian_principal_user: hdfs
+          guardian_spnego_principal_host: tos_test
+          guardian_spnego_principal_user: HTTP
+  - name: "tdh-yarn"
+    repoName: stable
+    chartName: yarn
+    chartVersion: "6.0.x"
+    dependencies:
+      guardian: guardian
+    configValues:
+      App:
+        yarnrm:
+          replicas: 1
+          image: 172.16.1.99/transwarp/yarn:transwarp-6.0.2-final
+          resources:
+            cpu_limit: 2
+            cpu_request: 1
+            memory_limit: 8
+            memory_request: 4
+        yarnnm:
+          replicas: 2
+          image: 172.16.1.99/transwarp/yarn:transwarp-6.0.2-final
+          resources:
+            cpu_limit: 2
+            cpu_request: 1
+            memory_limit: 8
+            memory_request: 4
+            storage:
+              data:
+                storageClass: silver
+                size: 200Gi
+        yarnts:
+          image: 172.16.1.99/transwarp/yarn:transwarp-6.0.2-final
+          replicas: 1
+          resources:
+            cpu_limit: 2
+            cpu_request: 0.5
+            memory_limit: 4
+            memory_request: 1
+        yarnhs:
+          image: 172.16.1.99/transwarp/yarn:transwarp-6.0.2-final
+          replicas: 1
+          resources:
+            cpu_limit: 2
+            cpu_request: 0.5
+            memory_limit: 4
+            memory_request: 1
+      Transwarp_Config:
+        Transwarp_Auto_Injected_Volumes:
+        - name: secret
+          secretname: all-tdh
+          volumeName: keytab
+        Ingress:
+          path: /test/tdh-yarn
+        security:
+          auth_type: kerberos
+          cas_plugin_enable: "true"
+          guardian_permission_component: "tdh-yarn"
+          guardian_plugin_enable: "true"
+          guardian_principal_host: tos_test
+          guardian_principal_user: yarn
+          guardian_spnego_principal_host: tos_test
+          guardian_spnego_principal_user: HTTP
+  - name: "tdh-hyperbase"
+    repoName: stable
+    chartName: hyperbase
+    chartVersion: "6.0.x"
+    dependencies:
+      guardian: guardian
+    configValues:
+      App:
+        master:
+          replicas: 3
+          image: 172.16.1.99/transwarp/hbase:transwarp-6.0.2-final
+          resources:
+            cpu_limit: 2
+            cpu_request: 1
+            memory_limit: 4
+            memory_request: 2
+        regionserver:
+          replicas: 3
+          image: 172.16.1.99/transwarp/hbase:transwarp-6.0.2-final
+          resources:
+            cpu_limit: 8
+            cpu_request: 2
+            memory_limit: 12
+            memory_request: 4
+        thrift:
+          replicas: 1
+          image: 172.16.1.99/transwarp/hbase:transwarp-6.0.2-final
+          resources:
+            cpu_limit: 4
+            cpu_request: 2
+            memory_limit: 4
+            memory_request: 2
+      Transwarp_Config:
+        Transwarp_Auto_Injected_Volumes:
+        - name: secret
+          secretname: all-tdh
+          volumeName: keytab
+        Ingress:
+          path: /test/tdh-hbase
+        security:
+          auth_type: kerberos
+          cas_plugin_enable: "true"
+          guardian_permission_component: "tdh-hbase"
+          guardian_plugin_enable: "true"
+          guardian_principal_host: tos_test
+          guardian_principal_user: hbase
+  - name: "tdh-elasticsearch"
+    repoName: stable
+    chartName: elasticsearch
+    chartVersion: "6.0.x"
+    dependencies:
+      guardian: guardian
+    configValues:
+      App:
+        elasticsearchmaster:
+          replicas: 3
+          image: 172.16.1.99/transwarp/search:transwarp-6.0.2-final
+          resources:
+            cpu_limit: 2
+            cpu_request: 1
+            memory_limit: 4
+            memory_request: 2
+        elasticsearchdata:
+          replicas: 3
+          image: 172.16.1.99/transwarp/search:transwarp-6.0.2-final
+          resources:
+            cpu_limit: 4
+            cpu_request: 2
+            memory_limit: 8
+            memory_request: 4
+            storage:
+              data:
+                disk_replicas: 2
+                storageClass: silver
+                size: 100Gi
+        elasticsearchclient:
+          replicas: 1
+          image: 172.16.1.99/transwarp/search:transwarp-6.0.2-final
+          resources:
+            cpu_limit: 2
+            cpu_request: 1
+            memory_limit: 4
+            memory_request: 2
+      Transwarp_Config:
+        Transwarp_Auto_Injected_Volumes:
+        - name: secret
+          secretname: all-tdh
+          volumeName: keytab
+        Ingress:
+          path: /test/tdh-search
+        security:
+          auth_type: kerberos
+          cas_plugin_enable: "true"
+          guardian_permission_component: "tdh-elasticsearch"
+          guardian_plugin_enable: "true"
+          guardian_principal_host: tos_test
+          guardian_principal_user: elasticsearch
+  - name: "tdh-txsql"
+    repoName: stable
+    chartName: txsql
+    chartVersion: "6.0.x"
+    configValues:
+      App:
+        txsql:
+          replicas: 3
+          image: 172.16.1.99/transwarp/txsql:transwarp-6.0.2-final
+          resources:
+            cpu_limit: 2
+            cpu_request: 1
+            memory_limit: 2
+            memory_request: 1
+  - name: "tdh-metastore"
+    repoName: stable
+    chartName: metastore
+    chartVersion: "6.0.x"
+    dependencies:
+      guardian: guardian
+    configValues:
+      App:
+        metastore:
+          image: 172.16.1.99/transwarp/inceptor:transwarp-6.0.2-final
+          resources:
+            cpu_limit: 2
+            cpu_request: 1
+            memory_limit: 8
+            memory_request: 4
+      Transwarp_Config:
+        Transwarp_Auto_Injected_Volumes:
+        - name: secret
+          secretname: all-tdh
+          volumeName: keytab
+        security:
+          auth_type: kerberos
+          cas_plugin_enable: "true"
+          guardian_permission_component: "tdh-metastore"
+          guardian_plugin_enable: "true"
+          guardian_principal_host: tos_test
+          guardian_principal_user: hive
+      Advance_Config:
+        inceptor_num: 1
+        argodb:
+          use_ladder: false
+        hive_site:
+          ngmr.local.job.record.timeout.ms: 120000
+  - name: "tdh-inceptor"
+    repoName: stable
+    chartName: inceptor
+    chartVersion: "6.0.x"
+    dependencies:
+      guardian: guardian
+    configValues:
+      App:
+        inceptor:
+          image: 172.16.1.99/transwarp/inceptor:transwarp-6.0.2-final
+          resources:
+            cpu_limit: 2
+            cpu_request: 1
+            memory_limit: 8
+            memory_request: 4
+        executor:
+          replicas: 3
+          image: 172.16.1.99/transwarp/inceptor:transwarp-6.0.2-final
+          resources:
+            cpu_limit: 8
+            cpu_request: 2
+            memory_limit: 14
+            memory_request: 8
+            storage:
+              data:
+                storageClass: silver
+                size: 100Gi
+      Transwarp_Config:
+        Transwarp_Auto_Injected_Volumes:
+        - name: secret
+          secretname: all-tdh
+          volumeName: keytab
+        Ingress:
+          path: /test/tdh-argodb
+        security:
+          auth_type: kerberos
+          cas_plugin_enable: "true"
+          guardian_permission_component: "tdh-inceptor"
+          guardian_plugin_enable: "true"
+          guardian_principal_host: tos_test
+          guardian_principal_user: hive
+      Advance_Config:
+        inceptor_num: 1
+        argodb:
+          use_ladder: false
+        hive_site:
+          ngmr.local.job.record.timeout.ms: 120000
+  - name: "tdh-kafka"
+    repoName: stable
+    chartName: kafka
+    chartVersion: "6.0.x"
+    dependencies:
+      guardian: guardian
+    configValues:
+      App:
+        kafka:
+          replicas: 3
+          image: 172.16.1.99/transwarp/kafka:transwarp-6.0.2-final
+          resources:
+            cpu_limit: 2
+            cpu_request: 1
+            memory_limit: 8
+            memory_request: 3
+            storage:
+              data:
+                disk_replicas: 3
+                size: '50Gi'
+      Transwarp_Config:
+        Transwarp_Auto_Injected_Volumes:
+        - name: secret
+          secretname: all-tdh
+          volumeName: keytab
+        Ingress:
+          path: /test/tdh-search
+        security:
+          auth_type: kerberos
+          cas_plugin_enable: "true"
+          guardian_permission_component: "tdh-kafka"
+          guardian_plugin_enable: "true"
+          guardian_principal_host: tos_test
+          guardian_principal_user: kafka
+  - name: "tdh-terminal"
+    repoName: stable
+    chartName: terminal
+    chartVersion: "2.1.x"
+    dependencies:
+      guardian: guardian
+    configValues:
+      App:
+        terminal:
+          image: 172.16.1.99/transwarp/terminal:tdc-2.1.1-final
+      Transwarp_Config:
+        security:
+          auth_type: kerberos
+          cas_plugin_enable: "true"
+          guardian_plugin_enable: "true"
+        Transwarp_Auto_Injected_Volumes:
+        - name: secret
+          secretname: all-tdh
+          volumeName: keytab
+        Ingress:
+          path: /test/tdh-terminal
+  - name: "tdh-dbaservice"
+    repoName: stable
+    chartName: dbaservice
+    chartVersion: "1.3.x"
+    dependencies:
+      guardian: guardian
+    configValues:
+      App:
+        dbaservice:
+          image: 172.16.1.99/transwarp/argodb-dbaservice:argodb-1.3.1-final
+      Transwarp_Config:
+        Transwarp_Auto_Injected_Volumes:
+        - name: secret
+          secretname: all-tdh
+          volumeName: keytab
+        Ingress:
+          path: /test/tdh-dbaservice
+        security:
+          auth_type: kerberos
+          cas_plugin_enable: "true"
+          guardian_permission_component: "tdh-inceptor"
+          guardian_plugin_enable: "true"
+          guardian_principal_host: tos_test
+          guardian_principal_user: hive
