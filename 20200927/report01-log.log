@@ -1,0 +1,68 @@
+2020/09/24 12:08:15 INFO  - jmeter.util.JMeterUtils: Setting Locale to en_US 
+2020/09/24 12:08:15 INFO  - jmeter.JMeter: Loading user properties from: /usr/share/jmeter/bin/user.properties 
+2020/09/24 12:08:15 INFO  - jmeter.JMeter: Loading system properties from: /usr/share/jmeter/bin/system.properties 
+2020/09/24 12:08:15 INFO  - jmeter.JMeter: Copyright (c) 1998-2014 The Apache Software Foundation 
+2020/09/24 12:08:15 INFO  - jmeter.JMeter: Version 2.11.20151206 
+2020/09/24 12:08:15 INFO  - jmeter.JMeter: java.version=1.8.0_265 
+2020/09/24 12:08:15 INFO  - jmeter.JMeter: java.vm.name=OpenJDK 64-Bit Server VM 
+2020/09/24 12:08:15 INFO  - jmeter.JMeter: os.name=Linux 
+2020/09/24 12:08:15 INFO  - jmeter.JMeter: os.arch=amd64 
+2020/09/24 12:08:15 INFO  - jmeter.JMeter: os.version=4.15.0-117-generic 
+2020/09/24 12:08:15 INFO  - jmeter.JMeter: file.encoding=UTF-8 
+2020/09/24 12:08:15 INFO  - jmeter.JMeter: Default Locale=English (United States) 
+2020/09/24 12:08:15 INFO  - jmeter.JMeter: JMeter  Locale=English (United States) 
+2020/09/24 12:08:15 INFO  - jmeter.JMeter: JMeterHome=/usr/share/jmeter 
+2020/09/24 12:08:15 INFO  - jmeter.JMeter: user.dir  =/home/transwarp/study/20200927 
+2020/09/24 12:08:15 INFO  - jmeter.JMeter: PWD       =/home/transwarp/study/20200927 
+2020/09/24 12:08:15 INFO  - jmeter.JMeter: IP: 127.0.1.1 Name: transwarp-lishinho-5480 FullName: transwarp-lishinho-5480 
+2020/09/24 12:08:15 INFO  - jmeter.services.FileServer: Default base='/home/transwarp/study/20200927' 
+2020/09/24 12:08:15 INFO  - jmeter.services.FileServer: Set new base='/home/transwarp/study/20200927' 
+2020/09/24 12:08:15 INFO  - jmeter.JMeter: Loading file: HTTP Request.jmx 
+2020/09/24 12:08:15 INFO  - jmeter.save.SaveService: Testplan (JMX) version: 2.2. Testlog (JTL) version: 2.2 
+2020/09/24 12:08:15 INFO  - jmeter.save.SaveService: Using SaveService properties file encoding UTF-8 
+2020/09/24 12:08:15 INFO  - jmeter.save.SaveService: Using SaveService properties version 2.6 
+2020/09/24 12:08:15 INFO  - jmeter.save.SaveService: Using SaveService properties file version 1554411 
+2020/09/24 12:08:15 INFO  - jmeter.save.SaveService: All converter versions present and correct 
+2020/09/24 12:08:15 INFO  - jmeter.protocol.http.sampler.HTTPSamplerBase: Cannot find .className property for htmlParser, using default 
+2020/09/24 12:08:15 INFO  - jmeter.protocol.http.sampler.HTTPSamplerBase: Parser for text/html is  
+2020/09/24 12:08:15 INFO  - jmeter.protocol.http.sampler.HTTPSamplerBase: Parser for application/xhtml+xml is  
+2020/09/24 12:08:15 INFO  - jmeter.protocol.http.sampler.HTTPSamplerBase: Parser for application/xml is  
+2020/09/24 12:08:15 INFO  - jmeter.protocol.http.sampler.HTTPSamplerBase: Parser for text/xml is  
+2020/09/24 12:08:15 INFO  - jmeter.protocol.http.sampler.HTTPSamplerBase: Parser for text/vnd.wap.wml is org.apache.jmeter.protocol.http.parser.RegexpHTMLParser 
+2020/09/24 12:08:15 INFO  - jmeter.protocol.http.control.CookieManager: Settings: Delete null: true Check: true Allow variable: true Save: false Prefix: COOKIE_ 
+2020/09/24 12:08:15 INFO  - jmeter.JMeter: Creating summariser <summary> 
+2020/09/24 12:08:15 INFO  - jmeter.JMeter: Configuring remote engine for 127.0.0.1 
+2020/09/24 12:08:15 FATAL - jmeter.JMeter: Failure connecting to remote host: 127.0.0.1 java.rmi.ConnectException: Connection refused to host: 127.0.0.1; nested exception is: 
+	java.net.ConnectException: Connection refused (Connection refused)
+	at sun.rmi.transport.tcp.TCPEndpoint.newSocket(TCPEndpoint.java:623)
+	at sun.rmi.transport.tcp.TCPChannel.createConnection(TCPChannel.java:216)
+	at sun.rmi.transport.tcp.TCPChannel.newConnection(TCPChannel.java:202)
+	at sun.rmi.server.UnicastRef.newCall(UnicastRef.java:343)
+	at sun.rmi.registry.RegistryImpl_Stub.lookup(RegistryImpl_Stub.java:116)
+	at java.rmi.Naming.lookup(Naming.java:101)
+	at org.apache.jmeter.engine.ClientJMeterEngine.getEngine(ClientJMeterEngine.java:54)
+	at org.apache.jmeter.engine.ClientJMeterEngine.<init>(ClientJMeterEngine.java:67)
+	at org.apache.jmeter.JMeter.doRemoteInit(JMeter.java:927)
+	at org.apache.jmeter.JMeter.runNonGui(JMeter.java:811)
+	at org.apache.jmeter.JMeter.startNonGui(JMeter.java:733)
+	at org.apache.jmeter.JMeter.start(JMeter.java:392)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at org.apache.jmeter.NewDriver.main(NewDriver.java:259)
+Caused by: java.net.ConnectException: Connection refused (Connection refused)
+	at java.net.PlainSocketImpl.socketConnect(Native Method)
+	at java.net.AbstractPlainSocketImpl.doConnect(AbstractPlainSocketImpl.java:350)
+	at java.net.AbstractPlainSocketImpl.connectToAddress(AbstractPlainSocketImpl.java:206)
+	at java.net.AbstractPlainSocketImpl.connect(AbstractPlainSocketImpl.java:188)
+	at java.net.SocksSocketImpl.connect(SocksSocketImpl.java:392)
+	at java.net.Socket.connect(Socket.java:607)
+	at java.net.Socket.connect(Socket.java:556)
+	at java.net.Socket.<init>(Socket.java:452)
+	at java.net.Socket.<init>(Socket.java:229)
+	at sun.rmi.transport.proxy.RMIDirectSocketFactory.createSocket(RMIDirectSocketFactory.java:40)
+	at sun.rmi.transport.proxy.RMIMasterSocketFactory.createSocket(RMIMasterSocketFactory.java:148)
+	at sun.rmi.transport.tcp.TCPEndpoint.newSocket(TCPEndpoint.java:617)
+	... 16 more
+

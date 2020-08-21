@@ -1,0 +1,158 @@
+=== {hdfs}安全
+'''
+
+{guardian}为{hdfs}提供了认证、授权、组映射以及配额管理，使得{hdfs}可以使用统一的用户、组和权限管理模型。
+
+==== 用户认证
+
+{hdfs}自己并不维护一套用户和用户组的信息，而是通过下面两种方式判断使用者的身份和用户组信息：
+
+* 当{hdfs}没有启用Kerberos认证时，{hdfs}通过使用者在服务器操作系统上的用户名判断他的身份，她所在的组即她在操作系统上所属的组。此时只能通过命令行的方式进行{hdfs}权限和资源配置。
+
+* 当{hdfs}启用了Kerberos认证，它通过使用者的principal判断她的身份。当{productinitials}集群上的{hdfs}服务需要获取用户所在的组信息时，{hdfs}会将用户的principal映射到NameNode所在服务器的操作系统上的用户，并通过服务器操作系统上的用户组信息判断用户所在的组。映射方式如下：alice/instance@realm和alice@realm都会被映射到操作系统上的alice用户。此时，如果alice在NameNode所在服务器的操作系统中没有对应用户，那么alice对{hdfs}来说则没有组信息。
+
+**{guardian}会将集群类型的用户和用户组以及它们之间的关系映射到集群中每台服务器的操作系统。对于任何集群类型用户，{hdfs}读取的操作系统用户组配置将和{guardian}中的用户组配置一致，也就是说{hdfs}可以使用{guardian}的组信息做认证。**
+
+===== 访问{hdfs}
+
+**{hdfs} Web UI** 
+
+访问{hdfs} Name Node或Data Node的Web UI，默认会跳转到{guardian} Federation的登录页，登录后页面的右上角会出现“Logout”字样，代表此时已经处于登录的状态。之后可以在页面中查看{hdfs}的各类信息。
+
+**命令行方式**
+
+* 如果您的{hdfs}已开启安全，并且参照《{tdh}安全手册》<<get-ticket-section, 通过Kerberos认证>>中的步骤获取到一张有效的TGT，那么您可以执行所需的操作{hdfs}的指令，例如：
++
+[source,bash]
+----
+hdfs dfs -ls /
+----
+
+**Web {hdfs}**
+
+* 同样，您也可以使用《{tdh}安全手册》<<get-guardian-token-section, 获取{guardian} Access Token>>中的步骤获取到{guardian} Access Token，访问Web HDFS服务：
++
+[source,bash]
+----
+curl "http://<hdfs_server_ip/hostname>:<port>/webhdfs/v1/?op=LISTSTATUS&guardian_access_token=<guardan_access_token>"
+// OR
+curl -H "Guardian-Access-Token:<guardian_access_token>" "http://<hdfs-server>:<port>/webhdfs/v1/?op=LISTSTATUS"
+----
++
+<guardian_access_token>处填写获取到的{guardian} Access Token的值。
+
+==== 权限配额管理
+
+===== {hdfs}权限管理操作（GUI）
+
+**权限管理**
+
+您可以通过两种方式对{hdfs}进行权限和配额管理：
+
+* 使用{guardian}的图形化界面
+* 使用命令行的方式
+
+点击{guardian}主页导航栏中的“权限”，在下拉列表中选择您要配置的{hdfs}服务（如hdfs1）。
+
+image::permission_hdfs.png[scaledwidth=95%]
+
+
+点击“权限”进入{hdfs}1权限配置页面，可以查看并修改{hdfs}的权限设置。通过在搜索栏中输入资源关键字，您可以快捷地找到相关的目录或文件。
+
+image::hdfs_permission.png[scaledwidth=95%]
+
+权限管理页面的第一项"GLOBAL"对应{hdfs}服务全局的权限，例如上图中，alice用户拥有对{hdfs}全局的READ权限和ADMIN权限；public角色具有ACCESS权限，因此拥有public角色的用户均获得了ACCESS权限（只有拥有ACCESS权限的用户才可以访问{hdfs}服务）。示例集群中通过对每个允许访问{hdfs}服务的用户都赋予public角色，来对ACCESS权限进行统一的管理。
+
+其余各项对应{hdfs}的目录项，实现目录层级的更细粒度的权限划分。例如您可以对alice赋予/user目录的READ权限，再单独赋予/user/alice目录的ADMIN权限。
+
+以下是各项权限的具体含义：
+
+* READ： 读权限
+* WRITE： 写权限
+* EXEC： 可执行权限
+* ADMIN： 当用户拥有某个目录ADMIN权限时，他可以赋予和修改其他用户对于这个目录的权限。
+* ACCESS： {guardian}提供了服务级别的权限控制，只有当用户对于服务拥有ACCESS权限的时候，才能访问相应的服务，否则即使拥有该服务资源的权限也是无法访问服务的，管理员可以从服务级别直接控制用户的访问。**ACCESS是服务级别的权限，只能在GLOBAL中进行权限编辑。**
+
+点击任意目录项或GLOBAL右侧的“编辑”，对该项的权限进行修改。对组的权限赋予相当于赋予了该组内所有用户同样的权限，对角色的权限赋予相当于赋予了拥有该角色的用户同样的权限。
+
+image::hdfs_edit_permission.png[scaledwidth=95%]
+
+以alice用户为例：
+
+* 为alice用户勾选READ权限，表示赋予alice对/training目录的写权限；
+* 取消选中所有权限或直接点击 image:delete_user_icon.png[25,25]，则删去alice对此目录的所有权限；
+* 点击用户列表最后一行末尾的 image:add_user_icon.png[25,25]，可以为其他用户赋予/training目录的权限。**只有对/training目录拥有ADMIN权限的用户才可以将此目录的权限赋予其他用户/组/角色。**
++
+image::hdfs_add_user.png[scaledwidth=95%]
+
+点击页面右侧的 image:add_permission_icon.png[40,75]按钮，此处以层级目录的形式展示文件系统，方便您在目录名称模糊时进行查找。
+
+image::hdfs_add_permission.png[scaledwidth=50%]
+
+选择多个目录路径，您将可以批量地为多个用户/组/角色配置多个目录的权限。
+
+image::hdfs_add_permission2.png[scaledwidth=50%]
+
+**配额管理**
+
+点击“配额”，切换到资源配额管理页面。此页面集中展示{hdfs}目录项的路径、分配空间和最大文件数量等信息，方便用户统一管理配额。通过在搜索栏中输入路径关键词，您可以快捷地检索到相关目录。
+
+image::hdfs_quota.png[scaledwidth=95%]
+
+例如需要修改"health-check-dir"目录的配额时，找到该项，点击操作栏中的 image:edit_quota_icon.png[25,25]开始修改配额。点击 image:delete_quota_icon.png[25,25]可直接删除对该项的配额管理。
+
+image::hdfs_edit_quota.png[scaledwidth=95%]
+
+点击页面右侧的 image:add_quota_icon.png[30,75]按钮，此处以层级目录的形式直观地展示文件系统。
+
+image::hdfs_add_quota1.png[scaledwidth=50%]
+
+勾选多个目录路径可以批量地进行配额管理，统一设置目录的空间和文件数量限制。
+
+image::hdfs_add_quota2.png[scaledwidth=50%]
+
+===== {hdfs}权限管理操作（命令行）
+
+{hdfs}提供目录和文件级别的权限管理。每个文件和目录都有一个owner（所有者）和一个group（用户组）。一个文件或目录可以对owner、所属group中的用户和其他所有用户开放不同的权限。
+
+* 对于一个文件，“r”代表读权限，“w”代表写权限。
+* 对于一个目录，“r”代表查看目录下内容的权限，“w”代表在目录中创建或删除新的文件或目录的权限，“x”代表访问该目录的子目录的权限。
+
+当您用hdfs dfs -ls /... 查看{hdfs}下的目录时，您通常会看到类似下面的输出：
+
+....
+drwxr-xr-x   - hdfs       hbase           0 2015-08-05 17:45 /test1
+....
+
+和权限有关的是“drwxr-xr-x”、“hdfs”和“hbase”这三个字段。其中：
+
+* 第一个字段“drwxr-xr-x”包含了下面信息：
+** 第一个字符显示该行末尾的路径是文件还是目录：如果第一个字符是“d”代表该路径对应一个目录；如果第一个字符是“-”则代表该路径对应一个文件。
+** 后九个字符可分为三组三个的字符：第一组的三个字符代表该路径的owner的权限；第二组的三个字符代表该路径所属的group的权限；第三组的三个字符代表所有其他用户对该路径拥有的权限。
+** 每组三个字符中的第一个对应“r”,第二个对应“w”，第三个对应“x”，如果对应的位置显示是字母，则代表对应用户有字母所代表的权限，如果是“-”则代表没有权限。
+
+* {hdfs}中“rwx”权限可以像操作系统下文件系统的“rwx”权限一样用数字表示——比如“rwxrwxrwx” = 777，“rwxr-xr-x” = 755等等。
+
+* 第二个字段“hdfs”对应着该行末尾路径的owner。
+
+* 第三个四段“hbase”对应该行末尾路径所属的group。
+
+{hdfs}的文件和目录权限管理和Linux文件系统操作非常相似，只需在相同操作前加 *hdfs dfs* 即可。例如 *hdfs dfs -chmod*。下面举一些简单例子。
+
+.修改目录/文件owner
+....
+hdfs dfs -chown alice /test
+....
+
+.修改目录/文件group
+....
+hdfs dfs -chgrp hadoop /test
+....
+
+.修改目录/文件权限
+....
+hdfs dfs -chmod 777 /test
+hdfs dfs -chmod g-r /test
+hdfs dfs -chmod o=r /test
+....
+

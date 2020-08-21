@@ -15,7 +15,7 @@
 
 3. 注意变量命名规范
 > 变量命名一般采用驼峰命名法，例如_currentTime_  
-> 变量命名要注意词汇意思的分隔与表达，例如_clientId_是client和id两个单词  
+> 变量命名要注意词汇意思的分隔与表达，例如【反例】_clientId_是client和id两个单词  
 > 变量名开头一定是小写  
 > 避免使用xxxList命名，可以使用变量名结尾+s表示复数
 
@@ -32,9 +32,10 @@
 > 要贴近于原项目的编程风格，不要个人编程色彩过重，不必要时，不要违反原项目规范
 > 枚举类型命名要先归类，然后仿造同类下的名字命名
 > 代码注释中不要出现中文，一律英文描述
+> configs里面的key一般用全小写加英文句号隔开，比如hive.service.id
 
 7. 注意命名大写的场合
-> 推荐使用单词缩写命名需要全大写,这个优先级没有其他命名规范高，比如_CasRestFormClient_
+> 推荐使用单词缩写命名需要全大写,这个优先级没有其他命名规范高，比如_CasRestFormClient_也是可以的
 > SQL里面的保留字或者关键字都大写
 
 8. 注意POJO规范
@@ -46,7 +47,7 @@
 
 ## 二，线程安全
 1. 采用合理的数据结构
-* 在业务逻辑采用单例的时候共享往往要考虑采用多线程安全的数据结构
+> 在业务逻辑采用单例的时候共享往往要考虑采用多线程安全的数据结构
 > 比如hashmap不保证多线程安全，需要使用concurrenthashmap  
 > arraylist在同时读写情况下会fastfail抛出异常，建议使用CopyOnWriteList
 
@@ -95,10 +96,20 @@
 
 ## 四，项目特性
 1. 考虑guardian federation通过_guardian.federation.service.session.enableSharing_配置来控制开关spring jdbc session
+
 > 在实现相关功能时要考虑开关共享session的不同情况，因此在dao层实现了数据库和内存两种实现方式
 
+
 2. 注意查看项目的具体实现，比如federtaion引用的shiro的单点登出逻辑与cas不同
+
 > shiro使用webcontext中的shiro session，而不是servlet session，处理方式也不相同
+
+> spring security以及native实现是servlet session
+
+
+3. guardian-plugin中inceptor的创建guardian client处理要注意共享metastore的情况
+
+> 多个inceptor可以共享一个metastore，argodb就是共享metastore实现的，所以注意global和access权限是检查metastore权限；队列是服务所有的权限
 
 
 

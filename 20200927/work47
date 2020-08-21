@@ -1,0 +1,210 @@
+work47
+
+reousrceController deleteResource
+quotaController deleteQuota -- resourceVo + recursive/includeDescendants
+
+工作周报李镇邦 20200914-20200918
+
+完成：
+1. WARP-46633: resource/resource-manager部分重构
+2. WARP-50729: 重构优化hdfs插件端的quota cache
+3. 集群测试guardian保留数据更改kerberos realm的方法，整理文档
+4. WARP-50492：根因分析补全
+
+
+其他：
+
+
+
+本周：
+1. 整理其他review
+2. 其他开发工作
+
+
+http && mvcc(
+
+permResourceVo
+
+action
+princType
+princ
+inheritance
+subtree -- recursive
+substring
+
+getAuthorizedDataNodes 2+3+4
+resourcevo+
+princType
+princ
+action
+inheritance
+substring
+
+searchAuthorizedPrincipals ##
+resourcevo+
+action
+princType
+inheritance
+
+listPermissions 1
+resourceVo+
+
+subtree
+
+getPrincPerms 1+2+3
+resourceVo+
+princType
+princ
+inheritance
+subtree
+substring
+
+getResourcePerms 1+2
+resourceVo+
+inheritance
+subtree
+substring
+
+1 subtree
+2 inheritance substring
+3 princType princ
+4 action
+
+3.1.2开始因为WARP-38625的改动放开了用户权限搜索结果只返回前1000条的限制，因此后端返回了大量的权限数据（20.4M，预估有十几万条）。并且前后端处理这么大的数据都有问题，导致后端响应慢 + 前端卡死
+
+给你一个字符串 S、一个字符串 T 。请你设计一种算法，可以在 O(n) 的时间复杂度内，从字符串 S 里面找出：包含 T 所有字符的最小子串。
+输入：S = "ADOBECODEBANC", T = "ABC"
+输出："BANC"
+str.contains('A') && str.contains('B') && str.contains('C')
+
+expand -- containsCharsInT || c.equals(left) -- shrink
+
+
+containsCharsInT
+for char c : T 
+  if(S.indexOf(c) < 0)
+    return false
+return true
+
+ public String minWindow(String s, String t) {
+        if (s.length()==0||t.length()>s.length()) return "";
+        HashMap<Character,Integer> map=new HashMap<>();
+        for (int i = 0; i <t.length(); i++) {
+            char c=t.charAt(i);
+            map.put(c,map.getOrDefault(c,0).intValue()+1);
+        }
+        int count=0;
+        HashMap<Character,Integer> map1=new HashMap<>();
+        int left =0,right=0,start=-1;
+
+        int len=Integer.MAX_VALUE;
+        while (right<s.length()){
+            char tmp=s.charAt(right);
+            right++;
+            if (map.containsKey(tmp)){
+                map1.put(tmp,map1.getOrDefault(tmp,0)+1);
+                if (map.get(tmp).intValue()==map1.get(tmp).intValue()){
+                    count++;
+                }
+            }
+
+            while (count==map.size()){
+                if (len>right-left){
+                    len=right-left;
+                    start=left;
+                }
+                char tmp1=s.charAt(left);
+                if (map.containsKey(tmp1)){
+                    if (map.get(tmp1).intValue()==map1.get(tmp1).intValue()){
+                        count--;
+                    }
+                    map1.put(tmp1,map1.get(tmp1).intValue()-1);
+                }
+                left++;
+            }
+        }
+        return len == Integer.MAX_VALUE ?
+                "" : s.substring(start, start+len);
+    }
+
+
+public String minWindow(String s, String t) {
+        int[] mp = new int[256];
+        for (char c : t.toCharArray()) mp[c] += 1;
+        int start = 0, end = 0;
+        int n = s.length(), m = t.length();
+        int cnt = 0;
+        int res = -1;
+        String ans = "";
+        while (end < n) {
+            char c = s.charAt(end);
+            mp[c] -= 1;
+            if (mp[c] >= 0) cnt += 1;
+            while (cnt == m) {
+                if (res == -1 || res > end - start + 1) {
+                    ans = s.substring(start, end + 1);
+                    res = end - start + 1;
+                }
+                c = s.charAt(start);
+                mp[c] += 1;
+                if (mp[c] >= 1) cnt -= 1;
+                start += 1;
+            }
+            end += 1;
+        }
+        return ans;
+    }
+
+bash configure --with-debug-level=slowdebug --enable-dtrace --with-jvm-variants=server --with-target-bits=64 --enable-ccache --with-num-cores=8 --with-memory-size=8000  --disable-warnings-as-errors
+
+
+https://172.26.5.46:8380/api/v1/quotas/component/inceptor1/dataSource/GLOBAL
+
+
+for i in `req 20`; do ab -n 800 -c 50 "https://172.26.5.99:8380/api/v1/quotas/search?component=hdfs1&pageSize=-1" 
+
+[ good md ] https://raw.githubusercontent.com/ZhuangZhu-74/ZhuangZhu-74/master/README.md
+
+需要有相关依赖的组件升级到fix版本：>=5.2.9或>=5.1.18或>=5.0.19或>=4.3.29。
+
+cas 4.3.12 ---> 4.3.29
+
+springSessionVersion 1.3.1.RELEASE 依赖4.3.4 framework 最高4.3.19
+-- > 2.1.13
+
+guardian-cas springboot 1.5.8 --> 2.1.17
+
+子系列最高的1.5.22 依赖4.3.25  --> 2.1.17
+
+docker run -d -p 3308:3306 --name mysql -e MYSQL_ROOT_PASSWORD=Transwarp01! -d 172.16.1.99/gold/mysql:transwarp-5.1
+
+docker-compose -f docker-compose-simple.yml up -d(同一目录下docker-compose文件与指定yaml合并）
+docker-compose up -d
+docker-compose config
+docker-compose down
+
+ext["springVersion"] = "4.3.29.RELEASE"
+ext["springSessionVersion"] = "2.1.13.RELEASE"
+
+020-09-24 16:53:37,206 INFO io.transwarp.guardian.client.cache.PeriodCacheUpdater: Fetch change version: 1459
+2020-09-24 16:53:37,206 INFO io.transwarp.guardian.client.cache.QuotaCache: Invalidate quota cache for SimpleQuotaVo{, dataSource='[PATH, /, test1]'}
+
+
+<property>
+    <name>guardian.hdfs.quota.check.enabled</name>
+    <value>true</value>
+</property>
+
+this.resourceVo = builder.resourceVo;
+    this.searchValue = builder.searchValue;
+    this.scope = builder.scope;
+    this.sorting = builder.sorting;
+    this.searchByPrefix = builder.searchByPrefix;
+    this.path = builder.path;
+    this.lengthLimit = builder.lengthLimit;
+
+hadoop fs -ls /
+hadoop fs -mkdir path
+hdfs dfs -put local_file path
+hadoop fs -rm -r path
+

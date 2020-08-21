@@ -1,0 +1,2 @@
+# JMeter generated Cookie file
+172.26.5.99	TRUE	/	TRUE	0	GUARDIAN_SESSIONID	node0uupursaqzeyfuf5nsvqp0xn6111537.node0

@@ -269,3 +269,57 @@ set ngmr.furion.pool=test1
 徐汇区虹漕路88号越虹广场B座11-12楼
 
 netstat -ant|awk '/^tcp/ {++S[$NF]} END {for(a in S) print (a,S[a])}'
+
+#!/bin/bash
+echo "use table1;">> c.sql
+for i in `seq 1 10`; do echo "create table tb$i(a int);">> c.sql; done
+SET ngmr.exec.mode = cluster;
+
+654
+
+2020-08-13 18:06:38,519 INFO  ql.Driver: (PerfLogger.java:PerfLogBegin(111)) [HiveServer2-Handler-Pool: Thread-190(SessionHandle=39f45849-fb19-48eb-acfd-1fc5b4e03802)] - <PERFLOG method=doAuthorization>
+2020-08-13 18:06:38,519 DEBUG inceptor.GuardianHiveAuthorizationValidator: (GuardianHiveAuthorizationValidator.java:checkPrivileges(57)) [HiveServer2-Handler-Pool: Thread-190(SessionHandle=39f45849-fb19-48eb-acfd-1fc5b4e03802)] - Checking privileges for operation QUERY by user test123 on  input objects [Object [type=TABLE_OR_VIEW, name=table1.tb5]] and output objects []. Context Info: HiveAuthzContext [userIpAddress=172.26.5.95, commandString=select count(*) from tb5]
+2020-08-13 18:06:38,519 DEBUG client.GuardianClient: (RestClientImpl.java:checkAccess(246)) [HiveServer2-Handler-Pool: Thread-190(SessionHandle=39f45849-fb19-48eb-acfd-1fc5b4e03802)] - Check Access Cache hit
+
+
+2020-08-14 10:48:26,026 WARN  scheduler.GuardianConfigurationBackend: (Logging.scala:logWarning(71)) [Inceptor Scheduler Guardian Backend-0()] - Invalid resource pool 'null' to set as default. Current active pools: 'SYSTEM,DEFAULT'.
+io.transwarp.nucleon.scheduler.furion.FurionDesc.setDefaultPool(FurionDesc.scala:82)
+io.transwarp.nucleon.scheduler.furion.Furion$.setDefaultPool(Furion.scala:191)
+io.transwarp.inceptor.scheduler.GuardianConfigurationBackend.io$transwarp$inceptor$scheduler$GuardianConfigurationBackend$$updateSchedulerProps(GuardianConfigurationBackend.scala:165)
+io.transwarp.inceptor.scheduler.GuardianConfigurationBackend$$anon$1.run(GuardianConfigurationBackend.scala:74)
+java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:511)
+java.util.concurrent.FutureTask.runAndReset(FutureTask.java:308)
+java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.access$301(ScheduledThreadPoolExecutor.java:180)
+java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:294)
+java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1142)
+java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:617)
+java.lang.Thread.run(Thread.java:745)
+
+
+
+beeline -u "jdbc:hive2://node546:10000/default;principal=hive/node546@TDH"
+set ngmr.furion.pool=test1;
+
+2020-08-14 11:46:02,905 WARN  scheduler.InceptorSchedulerImpl: (Logging.scala:logWarning(71)) [HiveServer2-Handler-Pool: Thread-220(SessionHandle=800821be-9368-43e2-a3f8-7eb5e239ee7d)] - No permitted pools configured for user 'admin' (target pool 'test1'), deprecated to default pool
+
+队列权限是inceptor service独有的 其他是global共享的
+
+@Target 表示自定义的注解，使用的地方。
+@Retention 表示编译程序如何处理自定义注解
+@Documented 将此注解包含在Javadoc中
+@Inherited 允许子类继承父类的注解。并不是说允许子注解类继承父注解类
+
+
+component=inceptor2&dataSource=FURION_SCHEDULER&dataSource=root&dataSource=test1&dataSource=test2&recursive=false
+
+  @Override
+  public void deleteUser(final String username) throws GuardianClientException {
+    runWithRelogin(new RestWork<Void>() {
+      @Override
+      public Void run() throws GuardianClientException {
+        httpClient.delete(USER_URL + "/" + encode(username));
+        return null;
+      }
+    });
+  }
+

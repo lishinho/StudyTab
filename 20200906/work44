@@ -1,0 +1,836 @@
+work44
+
+public String getEncoding() {
+        return this.encoding;
+    }
+
+    public void setEncoding(String encoding) {
+        this.encoding = encoding;
+    }
+
+    public String computeFinalLoginUrl(WebContext context) {
+        return this.urlResolver.compute(this.loginUrl, context);
+    }
+
+    public String getLoginUrl() {
+        return this.loginUrl;
+    }
+
+    public void setLoginUrl(String loginUrl) {
+        this.loginUrl = loginUrl;
+    }
+
+ public void setPrefixUrl(String prefixUrl) {
+        this.prefixUrl = prefixUrl;
+    }
+
+    public long getTimeTolerance() {
+        return this.timeTolerance;
+    }
+
+    public void setTimeTolerance(long timeTolerance) {
+        this.timeTolerance = timeTolerance;
+    }
+
+    public CasProtocol getProtocol() {
+        return this.protocol;
+    }
+
+    public void setProtocol(CasProtocol protocol) {
+        this.protocol = protocol;
+    }
+
+    public boolean isRenew() {
+        return this.renew;
+    }
+
+    public void setRenew(boolean renew) {
+        this.renew = renew;
+    }
+
+    public boolean isGateway() {
+        return this.gateway;
+    }
+
+    public void setGateway(boolean gateway) {
+        this.gateway = gateway;
+    }
+
+    public boolean isAcceptAnyProxy() {
+        return this.acceptAnyProxy;
+    }
+
+    public void setAcceptAnyProxy(boolean acceptAnyProxy) {
+        this.acceptAnyProxy = acceptAnyProxy;
+    }
+
+    public ProxyList getAllowedProxyChains() {
+        return this.allowedProxyChains;
+    }
+
+    public void setAllowedProxyChains(ProxyList allowedProxyChains) {
+        this.allowedProxyChains = allowedProxyChains;
+    }
+
+    public CasLogoutHandler getLogoutHandler() {
+        return this.logoutHandler;
+    }
+
+    public void setLogoutHandler(CasLogoutHandler logoutHandler) {
+        this.logoutHandler = logoutHandler;
+    }
+
+    public TicketValidator getDefaultTicketValidator() {
+        return this.defaultTicketValidator;
+    }
+
+    public void setDefaultTicketValidator(TicketValidator defaultTicketValidator) {
+        this.defaultTicketValidator = defaultTicketValidator;
+    }
+
+    public CasProxyReceptor getProxyReceptor() {
+        return this.proxyReceptor;
+    }
+
+    public void setProxyReceptor(CasProxyReceptor proxyReceptor) {
+        this.proxyReceptor = proxyReceptor;
+    }
+
+    public String computeFinalUrl(String url, WebContext context) {
+        return this.urlResolver.compute(url, context);
+    }
+
+    public String getPostLogoutUrlParameter() {
+        return this.postLogoutUrlParameter;
+    }
+
+    public void setPostLogoutUrlParameter(String postLogoutUrlParameter) {
+        this.postLogoutUrlParameter = postLogoutUrlParameter;
+    }
+
+    public String getRestUrl() {
+        return this.restUrl;
+    }
+
+    public void setRestUrl(String restUrl) {
+        this.restUrl = restUrl;
+    }
+
+    public String computeFinalRestUrl(WebContext context) {
+        return this.urlResolver.compute(this.restUrl, context);
+    }
+
+    public UrlResolver getUrlResolver() {
+        return this.urlResolver;
+    }
+
+    public void setUrlResolver(UrlResolver urlResolver) {
+        this.urlResolver = urlResolver;
+    }
+
+
+工作周报李镇邦 20200824~20200828
+
+完成：
+1. WARP-44993: 集群部署测试验证组件携带版本号到guardian，本地写通过api接收
+2. WARP-49933: servOAuth2-configuration.yml文件同一类加载器加载导入导致的不适配问题
+3. 测试cas在iframe下cookie跨域
+
+进行中: 
+4. WARP-46601: federation对接cas协议的delegation功能
+
+本周：
+1.收底实现WARP-46601的功能
+2.确定整理WARP-49933影响的组件版本，工程和metainfo统一提交
+3.值周支持工作
+
+ private static CasClient toCASClient(DelegationClient client) {
+    Map<String, String> attributes = client.getAttributes();
+    if (attributes.containsKey(LOGIN_URL)) {
+      CasConfiguration casConfiguration = attributes.containsKey(PREFIX_URL) ? new CasConfiguration(attributes.get(LOGIN_URL), attributes.get(PREFIX_URL))
+        : new CasConfiguration(attributes.get(LOGIN_URL));
+  
+      if (attributes.containsKey(IS_RENEW)) {
+        casConfiguration.setRenew(Boolean.parseBoolean(attributes.get(IS_RENEW)));
+      }
+      if (attributes.containsKey(POST_LOGOUT_URL_PARAMETER)) {
+        casConfiguration.setPostLogoutUrlParameter(attributes.get(POST_LOGOUT_URL_PARAMETER));
+      }
+      if (attributes.containsKey(REST_URL)) {
+        casConfiguration.setRestUrl(attributes.get(REST_URL));
+      }
+      if (attributes.containsKey(TIME_TOLERANCE)) {
+        casConfiguration.setTimeTolerance(Long.parseLong(attributes.get(TIME_TOLERANCE)));
+      }
+      if (attributes.containsKey(PROTOCOL)) {
+        casConfiguration.setProtocol(CasProtocol.valueOf(attributes.get(PROTOCOL)));
+      }
+      if (attributes.containsKey(IS_GATEWAY)) {
+        casConfiguration.setGateway(Boolean.parseBoolean(attributes.get(IS_GATEWAY)));
+      }
+      CasClient casClient = new CasClient(casConfiguration);
+      convertToIndirectClientCommon(client, casClient);
+      casClient.setName(attributes.get(CAS_CLIENT_NAME));
+      casClient.setCallbackUrl(buildCallbackUrlWithClientName(attributes.getOrDefault(REDIRECT_URI,
+        casClient.getCallbackUrl()), client.getClientName()));
+      return casClient;
+    } else {
+      throw new IllegalClientException(ErrorType.DelegationClientError.WRONG_ATTRIBUTES, client.getClientName());
+    }
+  }
+
+iframe配置-xframe_header/ 
+set cookie unsecure 
+https://stackoverflow.com/questions/39252924/add-secure-flag-to-jsessionid-cookie-in-spring-automatically
+
+server.servlet.session.cookie.secure=false
+
+权限认证
+
+
+那就先从需求入手
+我们是想避免偶尔的权限慢查询 -> 看截图没有看到的过分的慢查询
+业务
+
+批量导出数据
+1.
+
+
+首先说两种权限数据迁移会影响性能，总结是目前1. 只能通过脚本调用guardian api通过ldap来迁移权限数据。具体操作是通过GET /api/v1/perms/user/{username} GET /api/v1/perms/group/{groupname} GET /api/v1/perms/role/{rolename} 三个api分别拿到原metastore用户/组/角色/的权限 ，然后拼接成数据结构通过POST /api/v1/perms/grant api把权限赋到新的metastore id对应的数据中 或者2. 通过写guardian java client来获权赋权 逻辑和上边一样，具体的数据结构可以从swagger中有，然后构建jar包 写main方法运行 这种可能会更原子一点 不过要求可能有点高 至于用ldap apacheds内部迁移个人觉得还是不大可行，官方也没有成熟的案例
+
+XFrameOptionsMode
+guardian.federation.service.header.xframe.allow.regex
+
+{
+  "attributes": {"loginUrl":"https://172.26.5.95:8393/cas/login"},
+  "clientName": "cas-test1",
+  "tenant": "demo",
+  "type": "CAS"
+}
+
+ @Override
+  protected OAuth20Credentials retrieveCredentials(WebContext context) throws HttpAction {
+    try {
+      OAuth20Credentials credentials = getCredentialsExtractor().extract(context);
+      if (credentials == null) {
+        return null;
+      }
+      getAuthenticator().validate(credentials, context);
+      return credentials;
+    } catch (CredentialsException e) {
+      logger.warn("Failed to retrieve or validate OAuth2 credentials: {}", e.getMessage());
+      throw new DelegationException(e, ErrorType.DelegationError.NO_CREDENTIALS);
+    }
+  }
+
+
+ try {
+            final C credentials = this.credentialsExtractor.extract(context);
+            if (credentials == null) {
+                return null;
+            }
+            this.authenticator.validate(credentials, context);
+            return credentials;
+        } catch (CredentialsException e) {
+            logger.info("Failed to retrieve or validate credentials: {}", e.getMessage());
+            logger.debug("Failed to retrieve or validate credentials", e);
+
+            return null;
+        }
+
+tomcat.embed-core
+org.apache.catalina.core
+ApplicationSessionCookieConfig
+Request
+
+class Solution {
+    public int lengthOfLIS(int[] nums) {
+        int len = nums.length;
+        if (len < 2) {
+            return len;
+        }
+        int[] dp = new int[len];
+        // 自己一定是一个子序列
+        Arrays.fill(dp, 1);
+        for (int i = 1; i < len; i++) {
+            // 看以前的，比它小的，说明可以接在后面形成一个更长的子序列
+            // int curMax = Integer.MIN_VALUE; 不能这样写，万一前面没有比自己小的，
+            // 这个值就得不到更新
+            for (int j = 0; j < i; j++) {
+                if (nums[j] < nums[i]) {
+                    dp[i] = Math.max(dp[j] + 1, dp[i]);
+                }
+            }
+        }
+
+        int res = dp[0];
+        for (int i = 0; i < len; i++) {
+            res = Math.max(res, dp[i]);
+        }
+        return res;
+    }
+}
+
+class Solution {
+    public int lengthOfLIS(int[] nums) {
+        /**
+        dp[i]: 所有长度为i+1的递增子序列中, 最小的那个序列尾数.
+        由定义知dp数组必然是一个递增数组, 可以用 maxL 来表示最长递增子序列的长度. 
+        对数组进行迭代, 依次判断每个数num将其插入dp数组相应的位置:
+        1. num > dp[maxL], 表示num比所有已知递增序列的尾数都大, 将num添加入dp
+           数组尾部, 并将最长递增序列长度maxL加1
+        2. dp[i-1] < num <= dp[i], 只更新相应的dp[i]
+        **/
+        int maxL = 0;
+        int[] dp = new int[nums.length];
+        for(int num : nums) {
+            // 二分法查找, 也可以调用库函数如binary_search
+            int lo = 0, hi = maxL;
+            while(lo < hi) {
+                int mid = lo+(hi-lo)/2;
+                if(dp[mid] < num)
+                    lo = mid+1;
+                else
+                    hi = mid;
+            }
+            dp[lo] = num;
+            if(lo == maxL)
+                maxL++;
+        }
+        return maxL;
+    }
+}
+
+cookie的httpOnly属性和secure
+
+public static List<NodeVo> toRealDatasource(List<String> rawDataSource) {
+    if (rawDataSource == null || rawDataSource.isEmpty()) {
+      return Collections.emptyList();
+    }
+    List<NodeVo> res = new ArrayList<>();
+    for (String ds : rawDataSource) {
+      int tokenIndex = ds.indexOf(' ');
+      if (tokenIndex > 0 && tokenIndex + 1 < ds.length()) {
+        res.add(new NodeVo(ds.substring(0, tokenIndex), ds.substring(tokenIndex+1)));
+      } else {
+        res.add(new NodeVo(ds, null));
+      }
+    }
+    return res;
+  }
+
+
+getResourcePermActions
+getAuthorizedDataNodes
+searchAuthorizedPrincipals
+getPrincPerms
+getResourcePerms
+deletePerm
+
+class Solution {
+    public int search(int[] nums, int target) {
+        int left = 0;
+        int right = nums.length - 1;
+        while(left <= right){
+            int mid = left + (right-left)/2;
+            // int mid = (left + right)/2;
+            if(nums[mid] > target){
+                right = mid - 1;
+            }else if(nums[mid] < target){
+                left = mid + 1;
+            }else{
+                return mid;
+            }
+        }
+        return -1;
+    }
+}
+
+if (!serverProperties.getServlet().getSession().getCookie().getSecure()) {
+              request.getSession().getServletContext().getSessionCookieConfig().setSecure(false);
+            }
+
+https://172.16.3.11/tdc/ignitor/  test211/aa123456
+root/gzj@123456
+
+lzhu9wj
+
+clus-39-metastore-6-0-3549
+clus-39-metastore-6-0-3549
+
+slipstream-9q99b-6bd869fb7c-j9ngf
+
+clus-39-metastore-6-0-3549
+metastore-hl-b64qg.sb29lb5.svc
+
+sb29lb5
+
+  "metastore_client_config": {
+        "guardian_client_config": {
+          "database": "guardian",
+          "domain": "dc=tdh",
+          "enable_tls": "true",
+          "guardian_site": {
+            "guardian.client.auth.mode": "SPNEGO",
+            "guardian.client.cache.enabled": "true",
+            "guardian.client.http.principal": "guardian/guardian_sb29lb5",
+            "guardian.client.keytab": "/etc/keytabs/keytab",
+            "guardian.client.principal": "hive/tos_sb29lb5",
+            "guardian.connection.client.impl": "REST",
+            "guardian.permission.component": "clus-39-metastore-6-0-3549",
+            "guardian.server.address": "guardian-server-hl-hvgps.sb29lb5.svc:8380",
+            "guardian.server.tls.enabled": "true"
+          },
+          "kdc_port": 1088,
+          "kdc_server_addresses": "apacheds-master-hl-hvgps.sb29lb5.svc:1088,apacheds-slave-1-hl-hvgps.sb29lb5.svc:1088,apacheds-slave-2-hl-hvgps.sb29lb5.svc:1088",
+          "ldap_master": "apacheds-master-hl-hvgps.sb29lb5.svc",
+          "ldap_port": 10389,
+
+"metastore": {
+          "database": "metastore_inceptor1",
+          "javax_jdo_option_connection_password": "passwd",
+          "javax_jdo_option_connection_username": "hiveuser",
+          "metastore_addresses": "metastore-hl-b64qg.sb29lb5.svc"
+        },
+
+  752  kubectl  -n sb29lb5  delete  pods es-client-6q6pc-6b77ccb68b-p8jdc  es-data-6q6pc-0 es-data-6q6pc-1 es-data-6q6pc-2  es-master-6q6pc-0  es-master-6q6pc-1  es-master-6q6pc-2
+  766  kubectl  -n sb29lb5  delete  pods inceptor-9mvqm-65b4b85f8-c42r
+  768  kubectl  -n sb29lb5  delete  pods executor-9mvqm-0 executor-9mvqm-1  executor-9mvqm-2
+  984  kubectl  -n lzhu9wj    delete  pod zookeeper-vdrgz-2
+  986  kubectl  -n lzhu9wj    delete  pod zookeeper-hmrxp-2
+ 1021  kubectl  -n lzhu9wj    delete  pod slipstream-9q99b-6bd869fb7c-j9ngf
+ 1058  kubectl delete po metastore-b64qg-57b5fddc8b-pnrcj
+
+=========slipstream
+[root@slipstream-9q99b-6bd869fb7c-gm85p keytabs]# cat /etc/krb5.conf 
+[logging]
+default = FILE:/var/log/krb5libs.log
+kdc = FILE:/var/log/krb5kdc.log
+admin_server = FILE:/var/log/kadmind.log
+
+[libdefaults]
+default_realm = LZHU9WJ.TDH
+dns_lookup_realm = false
+dns_lookup_kdc = false
+ticket_lifetime = 24h
+renew_lifetime = 7d
+forwardable = true
+allow_weak_crypto = true
+default_tkt_enctypes = des-cbc-md5 des-cbc-crc des3-cbc-sha1
+default_tgs_enctypes = des-cbc-md5 des-cbc-crc des3-cbc-sha1
+permitted_enctypes = des-cbc-md5 des-cbc-crc des3-cbc-sha1
+
+[realms]
+SB29LB5.TDH ={
+    kdc = apacheds-master-hl-hvgps.sb29lb5.svc.transwarp.local:1088
+    kdc = apacheds-slave-2-hl-hvgps.sb29lb5.svc.transwarp.local:1088
+    kdc = apacheds-slave-1-hl-hvgps.sb29lb5.svc.transwarp.local:1088
+}
+TDCSYS.TDH = {
+    kdc = apacheds-master-hl-szlkw.tdcsys.svc:1088
+    kdc = apacheds-slave-1-hl-szlkw.tdcsys.svc:1088
+}
+LZHU9WJ.TDH = {
+    kdc = apacheds-master-hl-xmfv6.lzhu9wj.svc.transwarp.local:1088
+    kdc = apacheds-slave-2-hl-xmfv6.lzhu9wj.svc.transwarp.local:1088
+    kdc = apacheds-slave-1-hl-xmfv6.lzhu9wj.svc.transwarp.local:1088
+}
+[domain_realm]
+
+apacheds-master-hl-xmfv6.lzhu9wj.svc.transwarp.local = LZHU9WJ.TDH
+apacheds-slave-2-hl-xmfv6.lzhu9wj.svc.transwarp.local = LZHU9WJ.TDH
+apacheds-slave-1-hl-xmfv6.lzhu9wj.svc.transwarp.local = LZHU9WJ.TDH
+
+tos_lzhu9wj = LZHU9WJ.TDH
+.lzhu9wj.pod.transwarp.local = LZHU9WJ.TDH
+.lzhu9wj.svc.transwarp.local = LZHU9WJ.TDH
+
+
+apacheds-master-hl-hvgps.sb29lb5.svc.transwarp.local = SB29LB5.TDH
+apacheds-slave-2-hl-hvgps.sb29lb5.svc.transwarp.local = SB29LB5.TDH
+apacheds-slave-1-hl-hvgps.sb29lb5.svc.transwarp.local = SB29LB5.TDH
+tos_sb29lb5 = SB29LB5.TDH
+.sb29lb5.pod.transwarp.local = SB29LB5.TDH
+.sb29lb5.svc.transwarp.local = SB29LB5.TDH
+
+apacheds-master-hl-szlkw.tdcsys.svc = TDCSYS.TDH
+apacheds-slave-1-hl-szlkw.tdcsys.svc = TDCSYS.TDH
+tos_tdcsys = TDCSYS.TDH
+.tdcsys.pod.transwarp.local = TDCSYS.TDH
+.tdcsys.svc.transwarp.local = TDCSYS.TDH
+apacheds-master-hl-xmfv6.lzhu9wj.svc.transwarp.local = LZHU9WJ.TDH
+apacheds-slave-2-hl-xmfv6.lzhu9wj.svc.transwarp.local = LZHU9WJ.TDH
+apacheds-slave-1-hl-xmfv6.lzhu9wj.svc.transwarp.local = LZHU9WJ.TDH
+tos_lzhu9wj = LZHU9WJ.TDH
+.lzhu9wj.pod.transwarp.local = LZHU9WJ.TDH
+.lzhu9wj.svc.transwarp.local = LZHU9WJ.TDH
+
+====================================
+
+[root@slipstream-9q99b-6bd869fb7c-gm85p keytabs]# klist -kt keytab
+Keytab name: FILE:keytab
+KVNO Timestamp           Principal
+---- ------------------- ------------------------------------------------------
+   0 09/03/2020 12:01:26 HTTP/tos_lzhu9wj@LZHU9WJ.TDH
+   0 09/03/2020 12:01:26 HTTP/tos_lzhu9wj@LZHU9WJ.TDH
+   0 09/03/2020 12:01:26 HTTP/tos_lzhu9wj@LZHU9WJ.TDH
+   0 09/03/2020 12:01:26 HTTP/tos_lzhu9wj@LZHU9WJ.TDH
+   0 09/03/2020 12:01:26 HTTP/tos_lzhu9wj@LZHU9WJ.TDH
+   0 09/03/2020 12:01:26 hive/tos_lzhu9wj@LZHU9WJ.TDH
+   0 09/03/2020 12:01:26 hive/tos_lzhu9wj@LZHU9WJ.TDH
+   0 09/03/2020 12:01:26 hive/tos_lzhu9wj@LZHU9WJ.TDH
+   0 09/03/2020 12:01:26 hive/tos_lzhu9wj@LZHU9WJ.TDH
+   0 09/03/2020 12:01:26 hive/tos_lzhu9wj@LZHU9WJ.TDH
+
+=======inceptor
+
+[root@inceptor-b4bzl-bf6fc5d4-flf4l ~]# cat /etc/krb5.conf 
+[logging]
+default = FILE:/var/log/krb5libs.log
+kdc = FILE:/var/log/krb5kdc.log
+admin_server = FILE:/var/log/kadmind.log
+
+[libdefaults]
+default_realm = LZHU9WJ.TDH
+dns_lookup_realm = false
+dns_lookup_kdc = false
+ticket_lifetime = 24h
+renew_lifetime = 7d
+forwardable = true
+allow_weak_crypto = true
+default_tkt_enctypes = des-cbc-md5 des-cbc-crc des3-cbc-sha1
+default_tgs_enctypes = des-cbc-md5 des-cbc-crc des3-cbc-sha1
+permitted_enctypes = des-cbc-md5 des-cbc-crc des3-cbc-sha1
+
+[realms]
+SB29LB5.TDH ={
+    kdc = apacheds-master-hl-hvgps.sb29lb5.svc.transwarp.local:1088
+    kdc = apacheds-slave-2-hl-hvgps.sb29lb5.svc.transwarp.local:1088
+    kdc = apacheds-slave-1-hl-hvgps.sb29lb5.svc.transwarp.local:1088
+}
+TDCSYS.TDH = {
+    kdc = apacheds-master-hl-szlkw.tdcsys.svc:1088
+    kdc = apacheds-slave-1-hl-szlkw.tdcsys.svc:1088
+}
+LZHU9WJ.TDH = {
+    kdc = apacheds-master-hl-xmfv6.lzhu9wj.svc.transwarp.local:1088
+    kdc = apacheds-slave-2-hl-xmfv6.lzhu9wj.svc.transwarp.local:1088
+    kdc = apacheds-slave-1-hl-xmfv6.lzhu9wj.svc.transwarp.local:1088
+}
+[domain_realm]
+
+apacheds-master-hl-xmfv6.lzhu9wj.svc.transwarp.local = LZHU9WJ.TDH
+apacheds-slave-2-hl-xmfv6.lzhu9wj.svc.transwarp.local = LZHU9WJ.TDH
+apacheds-slave-1-hl-xmfv6.lzhu9wj.svc.transwarp.local = LZHU9WJ.TDH
+
+tos_lzhu9wj = LZHU9WJ.TDH
+.lzhu9wj.pod.transwarp.local = LZHU9WJ.TDH
+.lzhu9wj.svc.transwarp.local = LZHU9WJ.TDH
+
+
+apacheds-master-hl-hvgps.sb29lb5.svc.transwarp.local = SB29LB5.TDH
+apacheds-slave-2-hl-hvgps.sb29lb5.svc.transwarp.local = SB29LB5.TDH
+apacheds-slave-1-hl-hvgps.sb29lb5.svc.transwarp.local = SB29LB5.TDH
+tos_sb29lb5 = SB29LB5.TDH
+.sb29lb5.pod.transwarp.local = SB29LB5.TDH
+.sb29lb5.svc.transwarp.local = SB29LB5.TDH
+
+apacheds-master-hl-szlkw.tdcsys.svc = TDCSYS.TDH
+apacheds-slave-1-hl-szlkw.tdcsys.svc = TDCSYS.TDH
+tos_tdcsys = TDCSYS.TDH
+.tdcsys.pod.transwarp.local = TDCSYS.TDH
+.tdcsys.svc.transwarp.local = TDCSYS.TDH
+apacheds-master-hl-xmfv6.lzhu9wj.svc.transwarp.local = LZHU9WJ.TDH
+apacheds-slave-2-hl-xmfv6.lzhu9wj.svc.transwarp.local = LZHU9WJ.TDH
+apacheds-slave-1-hl-xmfv6.lzhu9wj.svc.transwarp.local = LZHU9WJ.TDH
+tos_lzhu9wj = LZHU9WJ.TDH
+.lzhu9wj.pod.transwarp.local = LZHU9WJ.TDH
+.lzhu9wj.svc.transwarp.local = LZHU9WJ.TDH
+
+
+==================================metastore
+[root@metastore-b64qg-57b5fddc8b-qzzrz ~]# cat /etc/krb5.conf 
+[logging]
+default = FILE:/var/log/krb5libs.log
+kdc = FILE:/var/log/krb5kdc.log
+admin_server = FILE:/var/log/kadmind.log
+
+[libdefaults]
+default_realm = SB29LB5.TDH
+dns_lookup_realm = false
+dns_lookup_kdc = false
+ticket_lifetime = 24h
+renew_lifetime = 7d
+forwardable = true
+
+[realms]
+SB29LB5.TDH ={
+    kdc = apacheds-master-hl-hvgps.sb29lb5.svc.transwarp.local:1088
+    kdc = apacheds-slave-2-hl-hvgps.sb29lb5.svc.transwarp.local:1088
+    kdc = apacheds-slave-1-hl-hvgps.sb29lb5.svc.transwarp.local:1088
+}
+TDCSYS.TDH = {
+    kdc = apacheds-master-hl-szlkw.tdcsys.svc:1088
+    kdc = apacheds-slave-1-hl-szlkw.tdcsys.svc:1088
+}
+LZHU9WJ.TDH = {
+    kdc = apacheds-master-hl-xmfv6.lzhu9wj.svc.transwarp.local:1088
+    kdc = apacheds-slave-2-hl-xmfv6.lzhu9wj.svc.transwarp.local:1088
+    kdc = apacheds-slave-1-hl-xmfv6.lzhu9wj.svc.transwarp.local:1088
+}
+
+
+ <name>hive.server2.authentication.kerberos.principal</name>\n
+    \   <value>{{ getv \"/security/guardian_principal_user\" \"hive\" }}/{{ getv \"/security/guardian_principal_host\"
+    \"tos\" }}@{{ getv \"/security/guardian_client_config/realm\" \"TDH\" }}</value>\n
+
+
+<property>
+    <name>hive.server2.authentication.kerberos.principal</name>
+    <value>{{ getv "/security/guardian_principal_user" "hive" }}/{{ getv "/security/guardian_principal_host" "tos" }}@{{ getv "/security/guardian_client_config/realm" "TDH" }}</value>
+  </property>
+  <property>
+
+
+<property>
+    <name>hive.server2.authentication.kerberos.principal</name>
+    <value>hive/tos_lzhu9wj@LZHU9WJ.TDH</value>
+  </property>
+<property>
+    <name>hive.metastore.kerberos.principal</name>
+    <value>hive/tos_lzhu9wj@LZHU9WJ.TDH</value>
+  </property>
+  <property>
+    <name>hive.metastore.kerberos.keytab.file</name>
+    <value>/etc/keytabs/keytab</value>
+  </property>
+
+    \"\" }}</value>\n  </property>\n\n\n  <property>\n    <name>hive.server2.authentication.kerberos.principal</name>\n
+    \   <value>{{ getv \"/security/guardian_principal_user\" \"hive\" }}/{{ getv \"/security/guardian_principal_host\"
+    \"tos\" }}@{{ getv \"/security/guardian_client_config/realm\" \"TDH\" }}</value>\n
+    \ </property>\n  <property>\n    <name>hive.server2.authentication.kerberos.keytab</name>\n
+    \   <value>/etc/keytabs/keytab</value>\n  </property>\n\n  <property>\n    <name>hive.metastore.kerberos.principal</name>\n
+    \   <value>{{ getv \"/metastore_client_config/guardian_client_config/guardian_site/guardian.client.principal\"
+    \"hive\" }}/{{ getv \"/metastore_client_config/guardian_client_config/guardian_site/guardian.client.principal\"
+    \"tos\" }}@{{ getv \"/metastore_client_config/guardian_client_config/realm\" \"TDH\"
+    }}</value>\n 
+
+----slipstream^
+----inceptor
+ <property>
+    <name>hive.server2.authentication.kerberos.principal</name>
+    <value>hive/tos_lzhu9wj@LZHU9WJ.TDH</value>
+  </property>
+<property>
+    <name>hive.metastore.kerberos.principal</name>
+    <value>hive/tos_sb29lb5@SB29LB5.TDH</value>
+  </property>
+<property>
+    <name>hive.metastore.kerberos.keytab.file</name>
+    <value>/etc/keytabs/keytab</value>
+  </property>
+
+<property>
+        <name>hive.metastore.kerberos.principal</name>
+        <value>{{ getv "/metastore_client_config/guardian_client_config/guardian_site/guardian.client.principal" "hive/tos" }}@{{ getv "/metastore_client_config/guardian_client_config/realm" "TDH" }}</value>
+      </property>
+
+     <property>
+        <name>hive.server2.authentication.kerberos.principal</name>
+        <value>{{ getv "/security/guardian_principal_user" "hive" }}/{{ getv "/security/guardian_principal_host" "tos" }}@{{ getv "/security/guardian_client_config/realm" "TDH" }}</value>
+      </property>
+      <property>
+        <name>hive.server2.authentication.kerberos.keytab</name>
+        <value>/etc/keytabs/keytab</value>
+      </property>
+
+      <property>
+        <name>hive.metastore.kerberos.principal</name>
+        <value>{{ getv "/metastore_client_config/guardian_client_config/guardian_site/guardian.client.principal" "hive/tos" }}@{{ getv "/metastore_client_config/guardian_client_config/realm" "TDH" }}</value>
+      </property>
+
+
+
+
+[root@inceptor-b4bzl-bf6fc5d4-flf4l ~]# cat /etc/krb5.conf 
+[logging]
+default = FILE:/var/log/krb5libs.log
+kdc = FILE:/var/log/krb5kdc.log
+admin_server = FILE:/var/log/kadmind.log
+
+[libdefaults]
+default_realm = LZHU9WJ.TDH
+dns_lookup_realm = false
+dns_lookup_kdc = false
+ticket_lifetime = 24h
+renew_lifetime = 7d
+forwardable = true
+allow_weak_crypto = true
+default_tkt_enctypes = des-cbc-md5 des-cbc-crc des3-cbc-sha1
+default_tgs_enctypes = des-cbc-md5 des-cbc-crc des3-cbc-sha1
+permitted_enctypes = des-cbc-md5 des-cbc-crc des3-cbc-sha1
+
+[realms]
+SB29LB5.TDH ={
+    kdc = apacheds-master-hl-hvgps.sb29lb5.svc.transwarp.local:1088
+    kdc = apacheds-slave-2-hl-hvgps.sb29lb5.svc.transwarp.local:1088
+    kdc = apacheds-slave-1-hl-hvgps.sb29lb5.svc.transwarp.local:1088
+}
+TDCSYS.TDH = {
+    kdc = apacheds-master-hl-szlkw.tdcsys.svc:1088
+    kdc = apacheds-slave-1-hl-szlkw.tdcsys.svc:1088
+}
+LZHU9WJ.TDH = {
+    kdc = apacheds-master-hl-xmfv6.lzhu9wj.svc.transwarp.local:1088
+    kdc = apacheds-slave-2-hl-xmfv6.lzhu9wj.svc.transwarp.local:1088
+    kdc = apacheds-slave-1-hl-xmfv6.lzhu9wj.svc.transwarp.local:1088
+}
+[domain_realm]
+
+apacheds-master-hl-xmfv6.lzhu9wj.svc.transwarp.local = LZHU9WJ.TDH
+apacheds-slave-2-hl-xmfv6.lzhu9wj.svc.transwarp.local = LZHU9WJ.TDH
+apacheds-slave-1-hl-xmfv6.lzhu9wj.svc.transwarp.local = LZHU9WJ.TDH
+
+tos_lzhu9wj = LZHU9WJ.TDH
+.lzhu9wj.pod.transwarp.local = LZHU9WJ.TDH
+.lzhu9wj.svc.transwarp.local = LZHU9WJ.TDH
+
+
+apacheds-master-hl-hvgps.sb29lb5.svc.transwarp.local = SB29LB5.TDH
+apacheds-slave-2-hl-hvgps.sb29lb5.svc.transwarp.local = SB29LB5.TDH
+apacheds-slave-1-hl-hvgps.sb29lb5.svc.transwarp.local = SB29LB5.TDH
+tos_sb29lb5 = SB29LB5.TDH
+.sb29lb5.pod.transwarp.local = SB29LB5.TDH
+.sb29lb5.svc.transwarp.local = SB29LB5.TDH
+
+apacheds-master-hl-szlkw.tdcsys.svc = TDCSYS.TDH
+apacheds-slave-1-hl-szlkw.tdcsys.svc = TDCSYS.TDH
+tos_tdcsys = TDCSYS.TDH
+.tdcsys.pod.transwarp.local = TDCSYS.TDH
+.tdcsys.svc.transwarp.local = TDCSYS.TDH
+apacheds-master-hl-xmfv6.lzhu9wj.svc.transwarp.local = LZHU9WJ.TDH
+apacheds-slave-2-hl-xmfv6.lzhu9wj.svc.transwarp.local = LZHU9WJ.TDH
+apacheds-slave-1-hl-xmfv6.lzhu9wj.svc.transwarp.local = LZHU9WJ.TDH
+tos_lzhu9wj = LZHU9WJ.TDH
+.lzhu9wj.pod.transwarp.local = LZHU9WJ.TDH
+.lzhu9wj.svc.transwarp.local = LZHU9WJ.TDH
+
+
+
+	... 10 more
+Found KeyTab /etc/keytabs/keytab for hive/tos_sb29lb5@SB29LB5.TDH
+Found ticket for hive/tos_sb29lb5@SB29LB5.TDH to go to krbtgt/SB29LB5.TDH@SB29LB5.TDH expiring on Fri Sep 04 15:57:30 CST 2020
+Entered Krb5Context.acceptSecContext with state=STATE_NEW
+Looking for keys for: hive/tos_sb29lb5@SB29LB5.TDH
+Added key: 17version: 0
+Found unsupported keytype (3) for hive/tos_sb29lb5@SB29LB5.TDH
+Added key: 18version: 0
+Added key: 23version: 0
+Added key: 16version: 0
+>>> EType: sun.security.krb5.internal.crypto.Des3CbcHmacSha1KdEType
+20/09/03 16:14:14 ERROR transport.TSaslTransport: SASL negotiation failure
+javax.security.sasl.SaslException: GSS initiate failed [Caused by GSSException: Failure unspecified at GSS-API level (Mechanism level: Checksum failed)]
+	at com.sun.security.sasl.gsskerb.GssKrb5Server.evaluateResponse(GssKrb5Server.java:199)
+	at org.apache.thrift.transport.TSaslTransport$SaslParticipant.evaluateChallengeOrResponse(TSaslTransport.java:539)
+	at org.apache.thrift.transport.TSaslTransport.open(TSaslTransport.java:283)
+	at org.apache.thrift.transport.TSaslServerTransport.open(TSaslServerTransport.java:41)
+	at org.apache.thrift.transport.TSaslServerTransport$Factory.getTransport(TSaslServerTransport.java:216)
+	at org.apache.hadoop.hive.thrift.HadoopThriftAuthBridge$Server$TUGIAssumingTransportFactory$1.run(HadoopThriftAuthBridge.java:750)
+	at org.apache.hadoop.hive.thrift.HadoopThriftAuthBridge$Server$TUGIAssumingTransportFactory$1.run(HadoopThriftAuthBridge.java:747)
+	at java.security.AccessController.doPrivileged(Native Method)
+	at javax.security.auth.Subject.doAs(Subject.java:360)
+	at org.apache.hadoop.security.UserGroupInformation.doAs(UserGroupInformation.java:1976)
+	at org.apache.hadoop.hive.thrift.HadoopThriftAuthBridge$Server$TUGIAssumingTransportFactory.getTransport(HadoopThriftAuthBridge.java:747)
+	at org.apache.thrift.server.TThreadPoolServer$WorkerProcess.run(TThreadPoolServer.java:268)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1142)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:617)
+	at java.lang.Thread.run(Thread.java:745)
+Caused by: GSSException: Failure unspecified at GSS-API level (Mechanism level: Checksum failed)
+	at sun.security.jgss.krb5.Krb5Context.acceptSecContext(Krb5Context.java:853)
+	at sun.security.jgss.GSSContextImpl.acceptSecContext(GSSContextImpl.java:342)
+	at sun.security.jgss.GSSContextImpl.acceptSecContext(GSSContextImpl.java:285)
+	at com.sun.security.sasl.gsskerb.GssKrb5Server.evaluateResponse(GssKrb5Server.java:167)
+	... 14 more
+Caused by: KrbException: Checksum failed
+	at sun.security.krb5.internal.crypto.Des3CbcHmacSha1KdEType.decrypt(Des3CbcHmacSha1KdEType.java:96)
+	at sun.security.krb5.internal.crypto.Des3CbcHmacSha1KdEType.decrypt(Des3CbcHmacSha1KdEType.java:88)
+	at sun.security.krb5.EncryptedData.decrypt(EncryptedData.java:175)
+	at sun.security.krb5.KrbApReq.authenticate(KrbApReq.java:291)
+	at sun.security.krb5.KrbApReq.<init>(KrbApReq.java:159)
+	at sun.security.jgss.krb5.InitSecContextToken.<init>(InitSecContextToken.java:108)
+	at sun.security.jgss.krb5.Krb5Context.acceptSecContext(Krb5Context.java:826)
+	... 17 more
+Caused by: java.security.GeneralSecurityException: Checksum failed
+	at sun.security.krb5.internal.crypto.dk.DkCrypto.decrypt(DkCrypto.java:362)
+	at sun.security.krb5.internal.crypto.Des3.decrypt(Des3.java:79)
+	at sun.security.krb5.internal.crypto.Des3CbcHmacSha1KdEType.decrypt(Des3CbcHmacSha1KdEType.java:94)
+	... 23 more
+20/09/03 16:14:14 ERROR server.TThreadPoolServer: Error occurred during processing of message.
+java.lang.RuntimeException: org.apache.thrift.transport.TTransportException: GSS initiate failed
+	at org.apache.thrift.transport.TSaslServerTransport$Factory.getTransport(TSaslServerTransport.java:219)
+	at org.apache.hadoop.hive.thrift.HadoopThriftAuthBridge$Server$TUGIAssumingTransportFactory$1.run(HadoopThriftAuthBridge.java:750)
+	at org.apache.hadoop.hive.thrift.HadoopThriftAuthBridge$Server$TUGIAssumingTransportFactory$1.run(HadoopThriftAuthBridge.java:747)
+	at java.security.AccessController.doPrivileged(Native Method)
+	at javax.security.auth.Subject.doAs(Subject.java:360)
+	at org.apache.hadoop.security.UserGroupInformation.doAs(UserGroupInformation.java:1976)
+	at org.apache.hadoop.hive.thrift.HadoopThriftAuthBridge$Server$TUGIAssumingTransportFactory.getTransport(HadoopThriftAuthBridge.java:747)
+	at org.apache.thrift.server.TThreadPoolServer$WorkerProcess.run(TThreadPoolServer.java:268)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1142)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:617)
+	at java.lang.Thread.run(Thread.java:745)
+Caused by: org.apache.thrift.transport.TTransportException: GSS initiate failed
+	at org.apache.thrift.transport.TSaslTransport.sendAndThrowMessage(TSaslTransport.java:232)
+	at org.apache.thrift.transport.TSaslTransport.open(TSaslTransport.java:316)
+	at org.apache.thrift.transport.TSaslServerTransport.open(TSaslServerTransport.java:41)
+	at org.apache.thrift.transport.TSaslServerTransport$Factory.getTransport(TSaslServerTransport.java:216)
+	... 10 more
+
+server.servlet.session.cookie.secure=false
+guardian.federation.service.headerXframeDeny.enabled=false
+
+
+
+http://172.16.1.41:10080/InfraTools/transpedia-doc/tree/transwarp-7.0-security
+
+https://docs.qq.com/doc/DRm1rV2pPbUpUTEZO
+
+1. servlet cookie
+
+1. 基于hive的 show databases/tables 的权限管理
+2. 基于fortress的登陆密码复杂度设计
+3. 基于分片式OLTP数据库的MAC策略
+4. 基于分片式OLTP数据库的ip限制和空闲时间限制
+5. 基于多权限控制的ABAC和RBAC权限混合模型的设计
+6. 基于分片式OLTP数据库的SQL flex&bison语法分析构造
+7. 基于OAuth2协议的单点登出系统
+8. 基于跨CAS和OAuth2协议的认证系统委派功能
+
+
+序号  SLA级别-编号  客户  环境  描述  原因分析  解决方法
+
+Guardian权限认证慢，导致inceptor执行SQL时间长
+
+图集群的inceptor 访问server4040界面报错，HTTP probe failed with statuscode 500 
+
+安全模式，shell脚本调用跑批任务失败
+
+tdh扩容后增加executor，inceptor server启动报错，describe pod readiness probe failed
+
+1. 相关的逻辑在CoreEngine项目中
+2. SparkUI.scala中判断是否从guardian检查用户权限的配置项hive-site中的spark.ui.guardian.enabled
+3. GuardianPlugins.scala中判断是否接入CAS认证的配置项是guardian-site中的guardian.server.cas.authentication.enabled
+4. 从guardian-3.1.2版本开始，guardian server的默认SSO从CAS切到了Guardian Federation，但是metastore的client端的guardian-site模板渲染时会读取server端该项配置，导致slipstream conf下guardian-site的guardian.server.cas.authentication.enabled值为false，因此不会加载CAS相关的filter
+5. 访问4044时，由于缺少CAS 的filter意味着没有经过认证，但是spark.ui.guardian.enabled又true，因此会拿到一个null的用户名去检查权限，抛出NPE
+
+
+func coinChange(coins []int, amount int) int {
+
+}
+
+func generateParenthesis(n int) []string {
+
+}
+
+()()()()
+
+

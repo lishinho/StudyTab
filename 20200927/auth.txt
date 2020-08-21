@@ -1,0 +1,3 @@
+# JMeter generated Authorization file
+172.26.5.97	admin	123			BASIC_DIGEST
+172.26.5.95	admin				BASIC_DIGEST

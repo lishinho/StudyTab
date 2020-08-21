@@ -1,0 +1,386 @@
+work42
+
+工作周报 - 李镇邦 20200810 ~ 20200814
+
+完成：
+1. WARP-49288: guardian单点登出客户端的对接
+2. WARP-49295: 解决inceptor插件共享metastore时，队列缓存拉不到正确的数据
+3. WARP-46633: 重构v2的delete quota api不带body
+
+其他：
+1. 整理guardian开发手册http://172.16.1.168:8090/pages/viewpage.action?pageId=24603699
+2. 结束上周支持未完成的工作
+
+
+本周：
+1. 完成所有review后代码的修改工作
+2. 继续guardian-3.2.2的开发任务
+
+@Override
+  public String toString() {
+    return "NodeVo{" +
+            "type='" + type.toUpperCase() + '\'' +
+            ", value='" + value + '\'' +
+            '}';
+  }
+
+.principals = kadminLocal.listPrincipals(KRBTGT);
+      for (String principal : principals) {
+        if (principal.matches(KRBTGT + "/.*@" + realm)) {
+          result.add(principal.split("@")[0].split("/")[1]);
+        }
+      }
+
+deleteServiceQuota(final String serviceType, final String serviceName)
+
+sed -i 's/ throws.*//g' testv2
+删除匹配throws字符后面的字符串
+sed -i '/^$/d' testv2
+删除空行
+sed -i '/\*/d' testv2 
+删除带*的行
+sed -i '/^\s*$/d' testv2
+删除带空格的空行
+wc -l testv2
+统计文件行数
+grep -i '.*group.*' testv1
+查找存在group的行
+
+authorized-resources
+resourceVo遵循vo设计datasource不为空
+改动1: listPermissions用于展示一个资源下所有的权限类型
+v1接口
+List<PermissionVo> listPermissions() 已禁用
+List<PermissionVo> listPermissions(String component) 
+List<PermissionVo> listPermissions(String component, List<String> dataSource)
+List<PermissionVo> listPermissions(String component, List<String> dataSource, boolean subtree)
+
+listpermission 查找resource下对应的权限Vo
+有三层 component-datasource-subtree
+listPermissions(component, null, true)
+listPermissions(component, dataSource, true)
+listPermissions(component, dataSource, subtree)
+
+
+v2对应接口
+（subtree为true）
+List<PermVo> listPermissions(String serviceName) throws GuardianClientException;
+List<PermVo> listPermissions(ResourceVo resourceVo) throws GuardianClientException;
+(Subtree为false）
+List<PermActionVo> getResourcePermActions(ResourceVo resourceVo) throws GuardianClientException;
+
+改动2: List<PrincPermVo> getPrincPerms(PrincipalVo principalVo, final ResourceVo resourceVo,boolean inheritance, boolean subtree)把却掉的subtree和substring补上
+List<PrincPermVo> getPrincPerms(PrincipalVo principalVo, ResourceVo resourceVo, boolean inheritance, boolean subtree, String substring) throws GuardianClientException;
+List<PrincPermVo> getPrincPerms(PrincipalVo principalVo, ResourceVo resourceVo, boolean inheritance, boolean subtree) throws GuardianClientException;
+并修改api
+
+
+listPermission系列的subtree为true
+List<PermVo> listPermissions(String serviceName) throws GuardianClientException;
+
+A payload within a GET request message has no defined semantics;
+   sending a payload body on a GET request might cause some existing
+   implementations to reject the request.
+
+
+List<PermissionVo> userPermissions(String username, String component, List<String> dataSource, boolean subtree, String substring)
+查询用户权限，resource作为过滤
+
+List<PrincPermVo> getAuthorizedPrincs(PrincipalType principalType, PermVo permVo, boolean inheritance)
+
+PrincipalsVo searchAuthorizedPrincipals(final String component, final List<String> dataSource, final String action, final boolean inheritance)
+
+List<PrincPermVo> getAuthorizedPrincs(PrincipalType principalType, PermVo permVo, boolean inheritance)
+
+
+  @Override
+  public List<PermVo> listPermissions(String serviceType, String serviceName) throws GuardianClientException {
+    final QueryString qs = new QueryString();
+    qs.add("serviceType", serviceType);
+    qs.add("serviceName", serviceName);
+    List<PermVo> permVos = runWithRelogin(new RestWork<List<PermVo>>() {
+      @Override
+      public List<PermVo> run() throws GuardianClientException {
+        return httpClient.get(LIST_PERMS_URL + qs, new TypeReference<List<PermVo>>(){});
+      }
+    });
+    return permVos;
+  }
+
+  @Override
+  public List<PermVo> listPermissions(ResourceVo resourceVo) throws GuardianClientException {
+    final QueryString qs = new QueryString();
+    qs.add("serviceName", resourceVo.getServiceName());
+    qs.add("serviceType", resourceVo.getServiceType());
+    if (resourceVo.getDataSource() != null) {
+      for (NodeVo ds : resourceVo.getDataSource()) {
+        qs.add("dataSource", ds.getType() + " " + ds.getValue());
+      }
+    }
+    List<PermVo> permVos = runWithRelogin(new RestWork<List<PermVo>>() {
+      @Override
+      public List<PermVo> run() throws GuardianClientException {
+        return httpClient.get(LIST_PERMS_URL + qs, new TypeReference<List<PermVo>>(){});
+      }
+    });
+    return permVos;
+  }
+
+@Override
+  public List<PrincPermVo> getPrincPerms(PrincipalVo principalVo, final ResourceVo resourceVo, boolean inheritance, boolean subtree, String substring) throws GuardianClientException {
+    final QueryString qs = new QueryString();
+    qs.add("princ", principalVo.getPrincipal());
+    qs.add("princType", principalVo.getPrincipalType().toString());
+    qs.add("serviceType", resourceVo.getServiceType());
+    qs.add("serviceName", resourceVo.getServiceName());
+    if (resourceVo.getDataSource() != null) {
+      for (NodeVo ds : resourceVo.getDataSource()) {
+        qs.add("dataSource", ds.getType() + " " + ds.getValue());
+      }
+    }
+    qs.add("inheritance", inheritance);
+    qs.add("subtree", subtree);
+    qs.add("substring", substring);
+    return runWithRelogin(new RestWork<List<PrincPermVo>>() {
+      @Override
+      public List<PrincPermVo> run() throws GuardianClientException {
+        return httpClient.get(PRINC_RESOURCE_PERMS_URL + qs, new TypeReference<List<PrincPermVo>>() {
+        });
+      }
+    });
+  }
+
+ @Override
+  public List<PrincPermVo> getPrincPerms(PrincipalVo principalVo, boolean inheritance) throws GuardianClientException {
+    final QueryString qs = new QueryString();
+    qs.add("princ", principalVo.getPrincipal());
+    qs.add("princType", principalVo.getPrincipalType().toString());
+    qs.add("inheritance", inheritance);
+    return runWithRelogin(new RestWork<List<PrincPermVo>>() {
+      @Override
+      public List<PrincPermVo> run() throws GuardianClientException {
+        return httpClient.get(PRINC_PERMS_URL + qs, new TypeReference<List<PrincPermVo>>() {
+        });
+      }
+    });
+  }
+
+  
+  @Override
+  public List<PrincPermVo> getPrincPerms(final ResourceVo resourceVo, boolean inheritance) throws GuardianClientException {
+    final QueryString qs = new QueryString();
+    qs.add("inheritance", inheritance);
+    return runWithRelogin(new RestWork<List<PrincPermVo>>() {
+      @Override
+      public List<PrincPermVo> run() throws GuardianClientException {
+        return httpClient.get(RESOURCE_PRINC_PERMS + qs, resourceVo, new TypeReference<List<PrincPermVo>>() {
+        });
+      }
+    });
+  }
+
+
+  // refactor
+  // List<PrincPermVo> getPrincPerms(PrincipalVo principalVo, ResourceVo resourceVo, boolean inheritance)
+  // List<PrincPermVo> getPrincPerms(PrincipalVo principalVo, boolean inheritance)
+  // List<PrincPermVo> getPrincPerms(ResourceVo resourceVo, boolean inheritance)
+
+Results :
+
+Failed tests:   testDeleteResourcePerms(io.transwarp.guardian.client.v2.RestClientPermTest): expected:<1> but was:<3>
+  testGetResourcePrincPerms(io.transwarp.guardian.client.v2.RestClientPermTest): expected:<11> but was:<0>
+  testDeleteServicePerms(io.transwarp.guardian.client.v2.RestClientPermTest): expected:<1> but was:<3>
+
+Tests in error: 
+  getPrincPermAuthTest(io.transwarp.guardian.client.v2.RestClientPermTest): ErrorCode: 403, ErrorMessage: Permission denied: getPrincPerm
+  getPermActionAuthTest(io.transwarp.guardian.client.v2.RestClientPermTest): ErrorCode: 51015, ErrorMessage: User [iztJdRestClientPermTestu] in Guardian already exists
+  testPermOps(io.transwarp.guardian.client.v2.RestClientPermTest): ErrorCode: 51015, ErrorMessage: User [iztJdRestClientPermTestu] in Guardian already exists
+  getAuthorizedPrincAuthTest(io.transwarp.guardian.client.v2.RestClientPermTest): ErrorCode: 51015, ErrorMessage: User [iztJdRestClientPermTestu] in Guardian already exists
+  grantRevokePermAuthTest(io.transwarp.guardian.client.v2.RestClientPermTest): ErrorCode: 51015, ErrorMessage: User [iztJdRestClientPermTestu] in Guardian already exists
+  addDeletePermAuthTest(io.transwarp.guardian.client.v2.RestClientPermTest): ErrorCode: 51015, ErrorMessage: User [iztJdRestClientPermTestu] in Guardian already exists
+  grantNewPermTest(io.transwarp.guardian.client.v2.RestClientPermTest): ErrorCode: 51015, ErrorMessage: User [iztJdRestClientPermTestu] in Guardian already exists
+  getPrincAllPermAuthTest(io.transwarp.guardian.client.v2.RestClientPermTest): ErrorCode: 51015, ErrorMessage: User [iztJdRestClientPermTestu] in Guardian already exists
+
+key value
+
+
+permOpsTest
+UserVo userVo = new UserVo(PREFIX + "u", "123");
+    guardianClient.addUser(userVo);
+    RoleVo roleVo = new RoleVo(PREFIX + "r");
+    guardianClient.addRole(roleVo);
+    GroupVo groupVo = new GroupVo(PREFIX + "g");
+    guardianClient.addGroup(groupVo);
+
+deleteServicePermsTest
+deleteResourcePermsTest
+getResourcePrincPermsTest
+
+addDeletePermAuthTest
+UserVo userVo = new UserVo(PREFIX + "u", "123");
+    guardianClient.addUser(userVo);
+
+grantRevokePermAuthTest
+UserVo userVo = new UserVo(PREFIX + "u", "123");
+    guardianClient.addUser(userVo);
+    GroupVo groupVo = new GroupVo(PREFIX + "g");
+    guardianClient.addGroup(groupVo);
+    guardianClient.assignGroup(PrincGroupVo.userGroup(userVo.getUsername(), groupVo));
+
+grantNewPermTest
+UserVo userVo = new UserVo(PREFIX + "u", "123");
+    guardianClient.addUser(userVo);
+    RoleVo roleVo = new RoleVo(PREFIX + "r");
+    guardianClient.addRole(roleVo);
+    guardianClient.assignRole(new UserRoleVo(userVo.getUsername(), roleVo.getRoleName()));
+
+getPermActionAuthTest
+UserVo userVo = new UserVo(PREFIX + "u", "123");
+    guardianClient.addUser(userVo);
+    GroupVo groupVo = new GroupVo(PREFIX + "g");
+    guardianClient.addGroup(groupVo);
+    RoleVo roleVo = new RoleVo(PREFIX + "r");
+
+getAuthorizedPrincAuthTest
+UserVo userVo = new UserVo(PREFIX + "u", "123");
+    guardianClient.addUser(userVo);
+
+getAuthorizedResourceAuthTest
+UserVo userVo = new UserVo(PREFIX + "u", "123");
+    guardianClient.addUser(userVo);
+    GroupVo groupVo = new GroupVo(PREFIX + "g");
+    guardianClient.addGroup(groupVo);
+    RoleVo roleVo = new RoleVo(PREFIX + "r");
+    guardianClient.addRole(roleVo);
+
+getPrincPermAuthTest
+UserVo userVo = new UserVo(PREFIX + "u", "123");
+    guardianClient.addUser(userVo);
+    GroupVo groupVo = new GroupVo(PREFIX + "g");
+    guardianClient.addGroup(groupVo);
+    RoleVo roleVo = new RoleVo(PREFIX + "r");
+
+getPrincAllPermAuthTest
+UserVo userVo = new UserVo(PREFIX + "u", "123");
+    guardianClient.addUser(userVo);
+    GroupVo groupVo = new GroupVo(PREFIX + "g");
+    guardianClient.addGroup(groupVo);
+    RoleVo roleVo = new RoleVo(PREFIX + "r");
+    guardianClient.addRole(roleVo);
+
+//test getAuthorizedDataNodes
+
+    //test searchAuthorizedPrincipals
+
+    //test searchPrincPerms
+
+    //test listPermissions
+
+//test getResourcePerms
+
+ @Test
+  public void listPermissionsTest() throws GuardianClientException {
+    PermVo hdfsGlobalAdmin = new PermVo(hdfsGlobal, GuardianConstants.ADMIN_PERM_ACTION);
+    PermVo hdfsTmpRead = new PermVo(hdfsTmp, READ);
+    PermVo hdfsFileWrite = new PermVo(hdfsFile, WRITE);
+    PermVo yarnGlobalAdmin = new PermVo(yarnGlobal, GuardianConstants.ADMIN_PERM_ACTION);
+    PermVo yarnDefaultSubmit = new PermVo(yarnDefault, SUBMIT);
+    PermVo yarnDepDelete = new PermVo(yarnDep, DELETE);
+
+    guardianClient.addPerm(hdfsGlobalAdmin);
+    guardianClient.addPerm(hdfsTmpRead);
+    guardianClient.addPerm(hdfsFileWrite);
+    guardianClient.addPerm(yarnGlobalAdmin);
+    guardianClient.addPerm(yarnDefaultSubmit);
+    guardianClient.addPerm(yarnDepDelete);
+
+    List<PermVo> listPerms = guardianClient.listPermissions(hdfsGlobal.getServiceType(), hdfsGlobal.getServiceName());
+    Assert.assertEquals(3, listPerms.size());
+    Assert.assertTrue(listPerms.contains(hdfsGlobalAdmin));
+    listPerms = guardianClient.listPermissions(yarnGlobal.getServiceType(), yarnGlobal.getServiceName());
+    Assert.assertEquals(3, listPerms.size());
+    Assert.assertTrue(listPerms.contains(yarnGlobalAdmin));
+    listPerms = guardianClient.listPermissions(hdfsTmp);
+    Assert.assertEquals(1, listPerms.size());
+    Assert.assertTrue(listPerms.contains(hdfsTmpRead));
+
+    guardianClient.deleteServiceResource(hdfsTmp.getServiceName());
+    guardianClient.deleteServicePerms(hdfsTmp.getServiceName());
+  }
+
+
+delete api:
+searchPrincPerms
+getAuthorizedPrincs
+
+List<PrincipalVo> hdfsGlobalAdminPrincs = guardianClient.searchAuthorizedPrincipals(hdfsGlobalAdmin.getResourceVo(), hdfsGlobalAdmin.getPermActionVo(), USER, false);
+    Assert.assertEquals(1, hdfsGlobalAdminPrincs.size());
+    Assert.assertTrue(hdfsGlobalAdminPrincs.contains(PrincipalVo.user(userVo.getUsername())));
+    List<PrincipalVo> yarnDepDeletePrincs = guardianClient.searchAuthorizedPrincipals(yarnDepDelete.getResourceVo(), yarnDepDelete.getPermActionVo(), USER, true);
+    Assert.assertEquals(1, yarnDepDeletePrincs.size());
+    Assert.assertTrue(yarnDepDeletePrincs.contains(PrincipalVo.user(userVo.getUsername())));
+    
+    hdfsGlobalAdminPrincs = guardianClient.searchAuthorizedPrincipals(hdfsGlobalAdmin.getResourceVo(), hdfsGlobalAdmin.getPermActionVo(), PrincipalType.GROUP, false);
+    Assert.assertEquals(1, hdfsGlobalAdminPrincs.size());
+    Assert.assertTrue(hdfsGlobalAdminPrincs.contains(PrincipalVo.group(groupVo.getGroupName())));
+    yarnDepDeletePrincs = guardianClient.searchAuthorizedPrincipals(yarnDepDelete.getResourceVo(), yarnDepDelete.getPermActionVo() ,PrincipalType.GROUP, true);
+    Assert.assertEquals(1, yarnDepDeletePrincs.size());
+    Assert.assertTrue(yarnDepDeletePrincs.contains(PrincipalVo.group(groupVo.getGroupName())));
+  
+    hdfsGlobalAdminPrincs = guardianClient.searchAuthorizedPrincipals(hdfsGlobalAdmin.getResourceVo(), hdfsGlobalAdmin.getPermActionVo(), PrincipalType.ROLE, true);
+    Assert.assertEquals(1, hdfsGlobalAdminPrincs.size());
+    Assert.assertTrue(hdfsGlobalAdminPrincs.contains(PrincipalVo.role(roleVo.getRoleName())));
+    yarnDepDeletePrincs = guardianClient.searchAuthorizedPrincipals(yarnDepDelete.getResourceVo(), yarnDepDelete.getPermActionVo(), PrincipalType.ROLE, false);
+    Assert.assertEquals(1, yarnDepDeletePrincs.size());
+    Assert.assertTrue(yarnDepDeletePrincs.contains(PrincipalVo.role(roleVo.getRoleName())));
+
+@RequestBody
+deletePerm
+deleteResourcePerms
+getResourcePermActions
+getAuthorizedDataNodes
+
+
+List<PrincipalVo> searchAuthorizedPrincipals(ResourceVo resourceVo, PermActionVo actionVo, PrincipalType principalType, boolean inheritance)
+
+
+public static Map<String, Object> json2Map(String jsonStr) {
+        Map<String, Object> map = new HashMap<>();
+        if(jsonStr != null && !"".equals(jsonStr)){
+            //最外层解析
+            JSONObject json = JSONObject.fromObject(jsonStr);
+            for (Object k : json.keySet()) {
+                Object v = json.get(k);
+                //如果内层还是数组的话，继续解析
+                if (v instanceof JSONArray) {
+                    List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+                    Iterator<JSONObject> it = ((JSONArray) v).iterator();
+                    while (it.hasNext()) {
+                        JSONObject json2 = it.next();
+                        list.add(json2Map(json2.toString()));
+                    }
+                    map.put(k.toString(), list);
+                } else {
+                    map.put(k.toString(), v);
+                }
+            }
+            return map;
+        }else{
+            return null;
+        }
+    }
+}
+
+fromJsonStatement
+
+component
+  name, route, serviceType, datasourcePrefix
+
+enumMap<enum, List<Struct>>
+enum(init)
+struct
+
+k - v
+string - List<struct>
+struct
+
