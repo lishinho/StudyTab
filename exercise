@@ -15,14 +15,63 @@ int n = i; // 装箱
 注意拆箱时的integer.cache会缓存-128~127的值
 
 
+###自定义注解
+元注解
+- @Target
+定义注解能够应用于源码的哪些位置
+比如
+类或接口：ElementType.TYPE；
+字段：ElementType.FIELD；
+方法：ElementType.METHOD；
+构造方法：ElementType.CONSTRUCTOR；
+方法参数：ElementType.PARAMETER
+
+
+- @Retension
+定义注解生命周期
+仅编译期：RetentionPolicy.SOURCE；
+仅class文件：RetentionPolicy.CLASS；
+运行期：RetentionPolicy.RUNTIME
+
+- @Repeatable
+定义注解是否可重复
+
+
+- @Inherited
+用@Inherited定义子类是否可继承父类定义的Annotation
+
+
+###红黑树
+- 红黑树原则
+
+-变色/左旋/右旋
 
 
 
 
+=========
+go
+=========
+go channel
 
+- channel
+goroutines之间的通信和同步
+channel有buffer构造器/非buffered
 
+-- making channels
+hchan struct
+buf -- 环状队列
+sendx -- 发送指针
+recvx -- 接收指针
+lock -- 互斥锁
+sendq -- 发送队列
+recvq -- 接收队列
 
+程序内存 高地址为栈 低地址为堆
+hchan分配内存到堆中
 
+缓存满了-用户级线程 调度器
+并存在一个sudog的数据结构放在等待队列中
 
 
 
@@ -34,7 +83,8 @@ int n = i; // 装箱
 - 底层数据结构组成 数组加链表 k-v数据结构叫entry/node
 
 - /put过程/get过程
-输入 计算哈希后的index equals方法找entry key
+输入 通过key的hashcode（高16位抑或低16位）进行hash（hash&数组长度）得到entry位置，添加节点，如果发生碰撞，通过equals方法去链表/树
+
 
 - 哈希碰撞 为什么需要链表
 
@@ -98,12 +148,14 @@ java对象头 monitor mutex
 
 - synchronized锁升级策略
 偏向锁-自旋轻量级锁-重量级锁
-JVM 使用了锁升级的优化方式，就是先使用偏向锁优先同一线程然后再次获取锁，如果失败，就升级为 CAS 轻量级锁，如果失败就会短暂自旋，防止线程被系统挂起。最后如果以上都失败就升级为重量级锁。
+JVM 使用了锁升级的优化方式，就是先使用偏向锁优先同一线程然后再次获取锁，如果失败，就升级为 CAS 轻量级锁，如果失败就会短暂自旋，防止线程被系统挂起。
+最后如果以上都失败就升级为重量级锁。
 
 - threadlocal
 
 threadlocal数据隔离 数据结构模型 弱引用 哈希冲突解决 内存泄漏
 没有链表的hashmap
+线程中维护数组，每个数组元素维护链表，每个链表元素的entry，entry的key是一个弱引用的threadlocal
 - 软引用的key会导致内存泄漏
 
 - volatile
@@ -117,14 +169,15 @@ volatile jmm 缓存一致性 内存可见性 内存屏障防止指令重排 单�
 核心线程池是否已满 - 阻塞队列是否已满 - 线程池是否已满
 -- 新建线程 - 队列等待（队列满了会新建线程）核心线程数外的线程会按keepalivetime 策略 - 异常处理策略
 
-**线程池的创建** ThreadPoolExecutor类 executors的几个参数 如何设置线程池大小 1线程池中核心线程数 2最大 3用于缓存任务的阻塞队列 4空闲线程的存活时间/5单位 6线程工厂 7拒绝策略处理
+**线程池的创建** ThreadPoolExecutor类 executors的几个参数 如何设置线程池大小 1线程池中核心线程数 2最大 3用于缓存任务的阻塞队列 
+4空闲线程的存活时间/5单位 6线程工厂 7拒绝策略处理
+
 **合理配置** 
-    任务的性质：CPU 密集型任务，IO 密集型任务和混合型任务
+任务的性质：CPU 密集型任务，IO 密集型任务和混合型任务
 CPU 密集型任务 - 尽可能少的线程数量，如配置Ncpu+1个线程的线程池。
 IO 密集型任务 - 尽可能多的线程，如2xNcpu。
 混合型的任务，如果可以拆分，则将其拆分成一个 CPU 密集型任务和一个 IO 密集型任务
 
-Worker是通过继承AQS，使用AQS来实现独占锁这个功能。
 
 - forkjoin -mapreduce -分治法/工作窃取算法 WorkStealingPool
 // forkJoinPool is a special thread pool which the numbers of thread depends on CPU cores
@@ -137,16 +190,15 @@ Worker是通过继承AQS，使用AQS来实现独占锁这个功能。
 -- SynchronousQueue 并不是队列 维护cache线程 任务直接交付 用于newCachedThreadPool （无）
 
 ### J.U.C
-- reentrantlock（可重入独占锁） - lock - AQS队列阻塞队列
-ReentrantLock 就是基于 AQS 实现的，ReentrantLock 内部有公平锁和非公平锁两种实现，差别就在于新来的线程是否比已经在同步队列中的等待线程更早获得锁。
-互斥锁
 
-- 读写锁
-
-公平锁 严格先进先出/非公平 由底层os调度 影响吞吐量
 
 - AQS 
 CLH队列 先进先出 双向 自旋轮询前驱状态
+
+AQS主要是采用state，通过对state的CAS判断来获取锁和解锁，
+并且存在等待队列和条件等待队列来park相关线程之后入队等待，有公平和非公平两者模式来唤醒等待的线程。
+主要是为了封装和抽象，通过封装了公共的方法，减少重复代码。
+
 
 AQS可以说是一个给予实现同步锁、同步器的一个框架，很多实现类都在它的的基础上构建的
 在AQS中实现了对等待队列的默认实现，子类只要重写部分的代码即可实现
@@ -161,6 +213,12 @@ AQS可以说是一个给予实现同步锁、同步器的一个框架，很多�
 --- 同步队列 sync-queue
 --- 条件等待队列 condition-queue
 -- 独占模式/共享模式
+
+
+- reentrantlock（可重入独占锁） - lock - AQS队列阻塞队列
+ReentrantLock 就是基于 AQS 实现的，ReentrantLock 内部有公平锁和非公平锁两种实现，差别就在于新来的线程是否比已经在同步队列中的等待线程更早获得锁。
+默认非公平，因为效率更高，更不容易被阻塞，在CLH队列中善用cpu的时间片
+公平锁 严格先进先出/非公平 由底层os调度 影响吞吐量
 
 
 - 读写锁/COWlist CopyOnWriteArrayList
@@ -206,12 +264,26 @@ hotspot
 1.8 元空间
 
 - 四种引用类型 引用计数 可达性分析
-- 分代收集原理 对象在新生代分配/触发minor gc 幸存区 存活年龄 空间分配担保 fullgc stop the world 
+
+- CMS收集器
+serial/serailOld； parnew/CMS； G1
+标记清除
+
+- G1收集器
+标记整理
+标记整理/大对象直接进老年区/空间分配担保/可指定stop the world时间
+分代收集原理 对象在新生代分配/触发minor gc 幸存区 存活年龄 空间分配担保 fullgc stop the world 
+
 老年代占2/3
 新生对象分配空间在edeneden-survivor（复制算法/年龄）
-- 垃圾回收算法
 
-- serial/serailOld； parnew/CMS； G1（标记整理/大对象直接进老年区/可指定stop the world时间
+
+
+- 如何标记垃圾
+可达性分析
+gc root
+初始标记- 并发标记- 重新标记 - 筛选回收
+
 
 ### 破坏双亲委派
 线程上下文类加载器 osgi用网状的类加载结构
@@ -219,14 +291,20 @@ hotspot
 ### 类加载过程
 加载-链接-初始化/验证-运行时（JIT/编译/动态连接）
 
+### gc调优
+- minor gc频繁
+新生代空间太小
+- major gc频繁/回收比很大
+新生代调整
+- full gc频繁 且回收内存仅一点点
+内存泄露
+
+### tlab是堆的eden区为每个线程初始化一块独享区域
 
 
-
-
-
-
-
-
+### 类文件放在哪里？
+- 字节码文件结构
+魔数+版本号+常量池+访问标志
 
 
 
@@ -240,9 +318,12 @@ hotspot
 =========
 - Spirng AOP
 
+
 静态AOP是指AspectJ实现的AOP，他是将切面代码直接编译到Java类文件中
 Spring AOP采用的是动态代理，在运行期间对业务方法进行增强，所以不会生成新类，
+
 动态代理
+spring aop是运行时生成代理对象来织入
 Spring AOP提供了对JDK动态代理的支持以及CGLib的支持 可以通过xml或注解的方式实现
 
 如果目标对象实现了接口，默认情况下会采用JDK的动态代理实现AOP, 没有接口时只能通过cglib实现aop动态代理
@@ -257,13 +338,15 @@ Spring AOP提供了对JDK动态代理的支持以及CGLib的支持 可以通过x
 @RestController=@ResponseBody+@Controller，该注解类下的所有函数都返回的是json类型数据，不再返回页面。
 @Api swagger用覆盖路径值打tag description一直可用
 @Configuration
-Spring的@Bean注解用于告诉方法，产生一个Bean对象，然后这个Bean对象交给Spring管理。产生这个Bean对象的方法Spring只会调用一次，随后这个Spring将会将这个Bean对象放在自己的IOC容器中。
+Spring的@Bean注解用于告诉方法，产生一个Bean对象，然后这个Bean对象交给Spring管理。产生这个Bean对象的方法Spring只会调用一次，
+随后这个Spring将会将这个Bean对象放在自己的IOC容器中。
 @Autowired
 @Component
 @NestedConfigurationProperty，该注解会为basicProperties生成单独的一个属性组。如果不添加该注解，则不会生成单独的属性组，而是形成如下的一个属性节点：
 @JsonUnwrapped @JsonUnwrapped: 作用在属性字段或方法上，用来将子JSON对象的属性添加到封闭的JSON对象。
 @ConfigurationProperties适用与注入配置文件整个对应bean的全部属性，而@Value正如其名称一样，适合注入配置文件单个值
 @TestPropertySource spring 在单测中envirionment注入优先
+　@RequestMapping 访问这个controller需要的方法/url/参数/header
 
 - spring controller重定向网页的方式
 使用ModelAndView
@@ -299,19 +382,91 @@ BASE
 PAXOS 投票 三阶段
 
 大数据组件
+### kafka
+发消息默认不是一条一条发，是等一波再发
+吞吐更高，并且适合大数据场景，不适合业务
 
 
 
+### zookeeper
+- zk能用来做什么？
+Eureka的注册中心，实现分布式锁，kafka使用zk管理元数据配置
+即统一配置管理、统一命名服务、分布式锁、集群管理。
+通用中间件解决分布式节点管理
 
 
+- zk的数据结构
+ZooKeeper的数据结构，跟Unix文件系统非常类似，可以看做是一颗树，每个节点叫做ZNode。每一个节点可以通过路径来标识
+znode分为两种
+1. 短暂/临时节点： 当client和server断开连接时，创建的znode自动删除
+2. 持久节点： 断开链接不会删除
 
 
+- 监听器
+常见的监听场景有以下两项：
+监听Znode节点的数据变化
+监听子节点的增减变化
 
 
+- zk工作
+znode+监听器
+1. 统一配置管理
+把统一配置文件放到znode节点中，各系统监听数据变化，变更及时响应
+监听器监听数据变化-写数据库-客户端点击更新配置-从数据库读配置
+
+2. 统一命名服务
+统一命名服务的理解其实跟域名一样，是我们为这某一部分的资源给它取一个名字，别人通过这个名字就可以拿到对应的资源。
+host-ip
+
+3. 分布式锁
+zkid是有序的
+各系统同时访问同一znode下资源，创建带顺序的临时节点
+每个临时节点判断自己是不是最小节点
+
+如果是，拿到锁，释放后删掉临时节点
+
+如果不是，在自己前一个临时节点放置监听器，监听节点状态
+
+- 分布式锁
+临时节点解决死锁
+过半数可用实现高可用
+顺序节点实现阻塞
+带线程信息可实现锁的可重入
+客户端重试防止网络抖动的羊群效应
 
 
+4. 集群状态
+以三个系统A、B、C为例，在ZooKeeper中创建临时节点即可
+只要系统A挂了，那/groupMember/A这个节点就会删除，通过监听groupMember下的子节点，系统B和C就能够感知到系统A已经挂了。
+
+- zab协议
+zk集群角色
+Leader
+follower
+observer（不参加选举）
+每个角色有其对应的状态
+zk服务状态
+looking 没有leader时 准备选举
+following / leading /observing
+
+zxid
+全局有序id = epoch+counter
+
+zab状态
+ELECTION
+DISCOVERY
+SYNCHRONIZATION
+BROADCAST
+
+选举过程
+通过规则，接受一半投票
 
 
+选举结束之后follower要连接leader，然后进行数据同步
+
+
+广播
+可靠性/有序性
 
 
 
@@ -341,10 +496,19 @@ redis
 
 
 
+解决热点key访问
+- 不同的热点key分配随机的过期时间
+- redis分布式锁
+- 通过hash分key
+- 一致性hash
+- 本地缓存
 
-
-
-
+缓存种类
+- ehcache
+- guava cache
+- memcached
+- redis
+- spring注解
 
 
 
@@ -366,13 +530,14 @@ mysql
 - 行锁
 - 支持外键
 - 支持非锁定读
+innodb主键是聚簇索引，采用b+树结构，非叶节点存的是主键和指向子节点的指针，叶子节点存的就是整体行数据，整体都是有序的，通过主键扫描根据树查找，最终落到叶子节点，命中然后返回
 
 - 实现mvcc乐观锁 提高并发 
 MVCC会给每行元组加一些辅助字段，记录创建版本号和删除版本号。
 而每一个事务在启动的时候，都有一个唯一的递增的版本号。每开启一个新事务，事务的版本号就会递增。
 
 - 聚集索引
-叶子节点存放整张表的行记录数据 利于主键排序查找和范围查找
+主键索引的叶子结点中保存的数据为整行数据，利于主键排序查找和范围查找。而非主键索引叶子节点保存的是主键的值。
 
 - B+树
 兄弟叶节点会维持索引

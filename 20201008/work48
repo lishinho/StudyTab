@@ -1,0 +1,129 @@
+work48
+github个人首页整理
+java大并发+zookeeper原理
+
+工作周报李镇邦 20200914-20200918
+
+完成：
+1. WARP-43659: resource-manager单测review修改完成
+2. WARP-50729: hdfs quota-cache性能评测(加锁与不加锁） guardian listquota api性能测试
+3. WARP-50927: hdfs/yarn, hbase的单点登出接入
+
+
+本周：
+1. 轮值支持
+2. 其他开发工作
+
+dp[i][k][0 or 1]
+0 <= i <= n-1, 1 <= k <= K
+n 为天数，大 K 为最多交易数
+此问题共 n × K × 2 种状态，全部穷举就能搞定。
+
+for 0 <= i < n:
+    for 1 <= k <= K:
+        for s in {0, 1}:
+            dp[i][k][s] = max(buy, sell, rest)
+比如说 dp[3][2][1] 的含义就是：今天是第三天，我现在手上持有着股票，至今最多进行 2 次交易。
+最终答案是 dp[n - 1][K][0]
+
+dp[i][k][0] = max(dp[i-1][k][0], dp[i-1][k][1] + prices[i])
+              max(   选择 rest  ,             选择 sell      )
+
+解释：今天我没有持有股票，有两种可能：
+要么是我昨天就没有持有，然后今天选择 rest，所以我今天还是没有持有；
+要么是我昨天持有股票，但是今天我 sell 了，所以我今天没有持有股票了。
+
+dp[i][k][1] = max(dp[i-1][k][1], dp[i-1][k-1][0] - prices[i])
+              max(   选择 rest  ,           选择 buy         )
+
+解释：今天我持有着股票，有两种可能：
+要么我昨天就持有着股票，然后今天选择 rest，所以我今天还持有着股票；
+要么我昨天本没有持有，但今天我选择 buy，所以今天我就持有股票了。
+
+base case：
+dp[-1][k][0] = dp[i][0][0] = 0
+dp[-1][k][1] = dp[i][0][1] = -infinity
+
+状态转移方程：
+dp[i][k][0] = max(dp[i-1][k][0], dp[i-1][k][1] + prices[i])
+dp[i][k][1] = max(dp[i-1][k][1], dp[i-1][k-1][0] - prices[i])
+
+lc-188
+dp[i][2][0] = max(dp[i-1][2][0], dp[i-1][2][1] + prices[i])
+dp[i][2][1] = max(dp[i-1][2][1], dp[i-1][1][0] - prices[i])
+dp[i][1][0] = max(dp[i-1][1][0], dp[i-1][1][1] + prices[i])
+dp[i][1][1] = max(dp[i-1][1][1], -prices[i])
+
+int maxProfit_k_2(int[] prices) {
+    int dp_i10 = 0, dp_i11 = Integer.MIN_VALUE;
+    int dp_i20 = 0, dp_i21 = Integer.MIN_VALUE;
+    for (int price : prices) {
+        dp_i20 = Math.max(dp_i20, dp_i21 + price);
+        dp_i21 = Math.max(dp_i21, dp_i10 - price);
+        dp_i10 = Math.max(dp_i10, dp_i11 + price);
+        dp_i11 = Math.max(dp_i11, -price);
+    }
+    return dp_i20;
+}
+
+int maxProfit_k_any(int max_k, int[] prices) {
+    int n = prices.length;
+    if (max_k > n / 2) 
+        return maxProfit_k_inf(prices);
+
+    int[][][] dp = new int[n][max_k + 1][2];
+    for (int i = 0; i < n; i++) 
+        for (int k = max_k; k >= 1; k--) {
+            if (i - 1 == -1) { /* 处理 base case */ }
+            dp[i][k][0] = max(dp[i-1][k][0], dp[i-1][k][1] + prices[i]);
+            dp[i][k][1] = max(dp[i-1][k][1], dp[i-1][k-1][0] - prices[i]);     
+        }
+    return dp[n - 1][max_k][0];
+}
+
+int maxProfit_k_inf(int[] prices) {
+    int n = prices.length;
+    int dp_i_0 = 0, dp_i_1 = Integer.MIN_VALUE;
+    for (int i = 0; i < n; i++) {
+        int temp = dp_i_0;
+        dp_i_0 = Math.max(dp_i_0, dp_i_1 + prices[i]);
+        dp_i_1 = Math.max(dp_i_1, temp - prices[i]);
+    }
+    return dp_i_0;
+}
+
+"guardian.client.cache.expired.time"
+guardian.client.cache.update.period"
+
+
+cas.authn.pac4j.autoRedirect=true
+
+cas.authn.pac4j.cas[0].loginUrl=https://172.26.5.95:8393/cas/login
+
+cas.authn.pac4j.cas[0].protocol=CAS30
+
+cas.authn.pac4j.cas[0].clientName=CAS2
+
+/usr/bin/pre_rollback.sh
+/usr/bin/pre_upgrade.sh
+
+利于主键排序查找和范围查找
+
+SLA-10327 guardian安装txsql没起来
+tdh-622集群报错lost connection。。 且本地mysql客户端连不上，确定不是密码或数据的问题，其他txsql能起来，之前了解txsql问题已修复，关于网卡的ip适配，但guardian用的是guardian-3.1.2的txsql 对应tdh6.2.x的txsql，直接在/usr/bin/目录下添加pre_*的脚本换镜像重启生效
+
+
+http://172.16.1.168:8090/pages/viewpage.action?pageId=18686670
+
+https://github.com/lishinho/LMS1.0
+
+- 👯 I’m looking to collaborate on ...
+- 🤔 I’m looking for help with ...
+- 💬 Ask me about ...
+- 📫 How to reach me: ...
+- 😄 Pronouns: ...
+- ⚡ Fun fact: ...
+
+- 我的项目
+- 目前状态
+

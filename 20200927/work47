@@ -208,3 +208,87 @@ hadoop fs -mkdir path
 hdfs dfs -put local_file path
 hadoop fs -rm -r path
 
+web.xml
+
+httpServer.addFilter(CasFilterProvider.FILTER_SLO_NAME, SingleSignOutFilter.class.getName(), new String[] { "/*" },
+              casFilterProvider.getSloParams());
+
+/var/lib/transwarp-manager/master/content/meta/services/HDFS/transwarp-7.0.1-final/templates
+
+====================================
+1.
+manager不能显式更新
+
+2020-09-27 21:24:13,726 ERROR org.mortbay.log: Error for /
+java.lang.AbstractMethodError: org.mortbay.jetty.Request.logout()V
+        at javax.servlet.http.HttpServletRequestWrapper.logout(HttpServletRequestWrapper.java:338)
+        at io.transwarp.guardian.federation.utils.oauth2.web.filter.OAuth2SingleLogoutHandler$Servlet30LogoutStrategy.logout(OAuth2SingleLogoutHandler.java:152)
+        at io.transwarp.guardian.federation.utils.oauth2.web.filter.OAuth2SingleLogoutHandler.destroySession(OAuth2SingleLogoutHandler.java:108)
+        at io.transwarp.guardian.federation.utils.oauth2.web.filter.OAuth2SingleLogoutHandler.process(OAuth2SingleLogoutHandler.java:43)
+        at io.transwarp.guardian.federation.utils.oauth2.web.filter.OAuth2SingleLogoutFilter.doFilter(OAuth2SingleLogoutFilter.java:29)
+        at org.mortbay.jetty.servlet.ServletHandler$CachedChain.doFilter(ServletHandler.java:1212)
+        at org.apache.hadoop.hbase.http.ClickjackingPreventionFilter.doFilter(ClickjackingPreventionFilter.java:48)
+        at org.mortbay.jetty.servlet.ServletHandler$CachedChain.doFilter(ServletHandler.java:1212)
+        at org.apache.hadoop.hbase.http.HttpServer$QuotingInputFilter.doFilter(HttpServer.java:1438)
+版本不适配
+
+datanode没有接收grantcode 是根据绑定的导致没有对应session清理
+
+
+slo自定义过期时间
+
+===================================
+ <dependency>
+      <groupId>io.transwarp.guardian.federation</groupId>
+      <artifactId>federation-utils</artifactId>
+      <version>guardian-3.1.5</version>
+      <exclusions>
+        <exclusion>
+          <groupId>commons-beanutils</groupId>
+          <artifactId>commons-beanutils</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.jasig.cas.client</groupId>
+      <artifactId>cas-client-core</artifactId>
+      <version>3.5.1-guardian-3.1.5</version>
+    </dependency>
+
+customAuthenticationFilter
+OAuth2AuthenticationHandler
+HttpServer2
+CasFilterProvider
+OAuth2Conf
+OAuth2FilterProvider
+AuthUtil
+
+
+ private void setupAuthFilter() throws IOException {
+    AuthFilterProvider provider = AuthUtil.createAuthFilterProvider(httpServer, conf);
+    if (provider != null) {
+      if (WebHdfsFileSystem.isEnabled(conf, HttpServer2.LOG)) {
+        httpServer.getFilterMappingPaths().add("/");
+        httpServer.getFilterMappingPaths().add("*.html");
+        httpServer.getFilterMappingPaths().add("*.jsp");
+      } else {
+        provider.addFilterOnDefaultPath();
+      }
+      provider.addFilterOnMappingPath();
+    }
+  }
+
+
+$JAVA_HOME/bin/java -Xms1024m -Xmx2048m \
+  -cp config:../examples/target/*:../examples/target/lib/*:../guardian-server-boot/target/* \
+  -XX:+UseConcMarkSweepGC -XX:+PrintGCDetails -XX:+PrintGCDateStamps -Xloggc:guardian-server_gc.log \
+  -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=. \
+  -javaagent:/usr/lib/jacoco/jacocoagent.jar \
+  io.transwarp.guardian.examples.StandaloneEnv
+
+jdk8/bin/java -Xms1024m -Xmx2048m   -cp /root/guardian-tool  -jar /root/guardian-tool/guardian-tool-0.0.2.jar io.transwarp.guardiantool.GuardianToolApplication
+
+数据库+应用服务+消息队列+缓存+用户上传的文件+日志+等等都扔在一台主机上
+
+到底是发一次还是发N次，客户端可以很灵活的决定。因为不管怎么发都是符合HTTP协议的，因此我们应该视为这种优化是一种实现细节，而不用扯到GET和POST本身的区别上。
+
