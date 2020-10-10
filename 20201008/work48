@@ -127,3 +127,40 @@ https://github.com/lishinho/LMS1.0
 - 我的项目
 - 目前状态
 
+resourcetreecache & CheckAccessCache
+1. oom
+2. 清理下边invalid状态的node
+
+
+v1
+CheckAccessCache
+<UserPermKey, boolean>
+UserPermKey -> (userName, SimplePermVo(dataSource, action))
+
+v2
+ResourceTreeCache
+<service, ResourceNode>
+<userName, Map<PermNode, PermGrant>>
+PermNode(NodeStatus)
+PermGrant(granted, withGrantOption)
+
+1. 加锁效率
+ConcurrentHashMap 的 get 方法是非常高效的，因为整个过程都不需要加锁
+2. 没有最大限制
+
+
+1. checkInterServicePerms 返回的details一一对应么
+2. checkAnyAccess -》 
+
+ResourceNode
+private Map<NodeVo, ResourceNode> children = new HashMap<>();
+    private Map<PermActionVo, PermNode> perms = new HashMap<>();
+    private QuotaNode quota = null;
+
+
+boolean inheritance, boolean subtree
+
+hunter需要依赖 golang项目构建有两种方式 一种是go module golang.org/x/需要翻墙 可以设置GOPROXY 
+export GOPROXY=https://goproxy.io
+另一种是vendor缓存 需要go mod vendor
+开启gomodule  export GO111MODULE=on
