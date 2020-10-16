@@ -1,0 +1,77 @@
+{{define "report.tmpl"}}
+    <html lang="en">
+    <link rel="stylesheet" href="table.css">
+    <head>
+        <meta charset="UTF-8">
+        <title>Hunter, the best vulnerability scan tool in Transwarp</title>
+    </head>
+    <body class="btbg1">
+    <table width="100%" border="1" cellspacing="0" cellpadding="3" align="center">
+        <tr>
+            <td align="center" class="biaoti" height="60">Hunter Common Vulnerabilities and Exposures Scanning Report</td>
+        </tr>
+    </table>
+
+    <table width="100%" border="1" cellspacing="0" cellpadding="5" class="tabtop13" align="center">
+        <tr>
+            <td width="10%" class="btbg font-center">GeneratedAt</td>
+            <td width="90%" class="btbg font-center">{{ .GeneratedAt }}</td>
+        </tr>
+        <tr>
+            <td width="10%" class="btbg font-center">Artifact</td>
+            <td width="90%" class="btbg font-center">{{ .Artifact }}</td>
+        </tr>
+        <tr>
+            <td width="10%" class="btbg font-center">Scanner</td>
+            <td width="90%" class="btbg font-center">{{ .Scanner }}</td>
+        </tr>
+        <tr>
+            <td width="10%" class="btbg font-center">Severity</td>
+            <td width="90%" class="btbg font-center">{{ .Severity }}</td>
+        </tr>
+        <tr>
+            <td colspan="2" class="btbg font-center titfont">Vulnerabilities</td>
+        </tr>
+        <tr>
+            <td width="10%" class="btbg font-center">ID</td>
+            <td width="90%" class="btbg font-center">{{ .Vulnerabilities.ID }}</td>
+        </tr>
+        <tr>
+            <td width="10%" class="btbg font-center">Pkg</td>
+            <td width="90%" class="btbg font-center">{{ .Vulnerabilities.Pkg }}</td>
+        </tr>
+        <tr>
+            <td width="10%" class="btbg font-center">Version</td>
+            <td width="90%" class="btbg font-center">{{ .Vulnerabilities.Version }}</td>
+        </tr>
+        <tr>
+            <td width="10%" class="btbg font-center">FixVersion</td>
+            <td width="90%" class="btbg font-center">{{ .Vulnerabilities.FixVersion }}</td>
+        </tr>
+        <tr>
+            <td width="10%" class="btbg font-center">Severity</td>
+            <td width="90%" class="btbg font-center">{{ .Vulnerabilities.Severity }}</td>
+        </tr>
+        <tr>
+            <td width="10%" class="btbg font-center">Description</td>
+            <td width="90%" class="btbg font-center">{{ .Vulnerabilities.Description }}</td>
+        </tr>
+        <tr>
+            <td width="10%" class="btbg font-center">Links</td>
+            <td width="90%" class="btbg font-center">{{ .Vulnerabilities.Links }}</td>
+        </tr>
+        <tr>
+            <td width="10%" class="btbg font-center">Layer</td>
+            <td width="90%" class="btbg font-center">{{ .Vulnerabilities.Layer }}</td>
+        </tr>
+        <tr>
+            <td width="10%" class="btbg font-center">CVSS</td>
+            <td width="90%" class="btbg font-center">{{ .Vulnerabilities.CVSS }}</td>
+        </tr>
+
+    </table>
+
+    </body>
+    </html>
+
+{{end}}

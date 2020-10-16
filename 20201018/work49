@@ -1,0 +1,403 @@
+work49
+
+./registry-client -registry_url https://172.16.1.99/v2 -repository gold/tdh-baseimage -tag dev -insecure_skip_verify=true -scheduler_url http://172.26.0.98:18888 -report_path /tmp/reports -scanner_urls http://172.26.0.93:58888,http://172.26.0.95:58888,
+http://172.26.0.96:58888,http://172.26.0.98:58888
+
+工作周报李镇邦 20200928 ~ 20201010 
+
+完成：
+1. SLA支持及其他支持工作
+2. WARP-46601: federation的delegation功能增加cas客户端
+3. WARP-46633: 对接修改check接口后的quota api重构完成
+
+
+
+1.scheduler 增加rest api分别1可展示和2下载报告。
+
+2.scheduler 代替命令行client向scanner发送相应请求。3
+
+3.报告格式从json通过模板渲染为html。
+
+4.修改相关wiki。
+
+func GetNextScanner() *Client {
+	if scanners == nil {
+		return nil
+	}
+	var s *Client
+	mutex.Lock()
+	currentScannerIdx = (currentScannerIdx + 1) % len(scanners)
+	s = scanners[currentScannerIdx]
+	mutex.Unlock()
+	return s
+}
+
+
+var (
+	repositoryName = flag.String("repository", "", "Harbor repository")
+	tag = flag.String("tag", "", "Docker image tag")
+	registryURL = flag.String("registry_url", "", "Registry URL")
+	username = flag.String("username", "", "Harbor username")
+	password = flag.String("password", "", "Harbor password")
+	insecureSkipVerify = flag.Bool("insecure_skip_verify", false, "Skip verify registry cert")
+	reportPath = flag.String("report_path", ".", "Report Path")
+	schedulerURL = flag.String("scheduler_url", "", "Scheduler URL")
+	scanFS = flag.Bool("scan_fs", false, "scan host filesystem")
+)
+
+gin框架
+Distributed Cache - GeeCache
+
+=======================
+添加api完毕
+添加swagger
+运行出效果
+MarshalIndent
+=======================
+
+registry-client/main 获取参数 - scanner-client 发送rest请求 ScanRequest - 返回model的scan report
+
+
+
+// GET  /api/v1/report/{jobId}  获得scan report 
+// GET  /api/v1/download/{jobId}  下载scan report
+// POST /api/v1/scan/   body{registry}  发送scan request请求
+
+
+r := New()
+	r.POST("/api/v1/report/", func(context *Context) {
+		context.JSON(http.StatusOK, &map[string]string{
+			"repositoryName":     context.PostForm("repositoryName"),
+			"tag":                context.PostForm("tag"),
+			"registryURL":        context.PostForm("registryURL"),
+			"username":           context.PostForm("username"),
+			"password":           context.PostForm("password"),
+			"insecureSkipVerify": context.PostForm("insecureSkipVerify"),
+			"reportPath":         context.PostForm("reportPath"),
+			"schedulerURL":       context.PostForm("schedulerURL"),
+			"scanFS":             context.PostForm("scanFS"),
+		})
+	})
+	r.Run(":9999")
+
+scanClient - registry-client/main(request) - main 
+meta.jobId
+
+schedulerClient - handler - scanClient
+schedulerClient - handler - scanClient
+
+func (c *Client) ScanReport(scanRequestID string) (model.ScanReport, error) {
+
+req, err := http.NewRequest(http.MethodGet, fmt.Sprintf(c.URL + scanReportPath, scanRequestID), nil)
+
+给定一个字符串 s ，找到其中最长的回文子序列，并返回该序列的长度。可以假设 s 的最大长度为 1000 。
+
+示例 1:
+输入:
+
+"bbbab"
+
+输出:
+
+4
+
+一个可能的最长回文子序列为 "bbbb"。
+
+如何判断字符串为回文字符串
+str.substring(0, len/2).equals(str.substring(len/2))
+dp[i] 从0到i长度字符串中最长回文子序列
+dp[0] = 0, dp[1] = 1, dp[2]=2
+dp[i] = str + dp[i] 为回文 dp[i]=dp[i-1]+1
+str + dp[i]不为回文 是否更新str dp[i]=dp[i-1] 
+
+=============
+装swagger
+json美化
+启动
+=============
+
+hunter需要依赖 golang项目构建有两种方式 一种是go module golang.org/x/需要翻墙 可以设置GOPROXY 
+export GOPROXY=https://goproxy.io
+另一种是vendor缓存 需要go mod vendor
+开启gomodule  export GO111MODULE=on
+
+
+func main() {
+	var scannerURLs []string
+	flag.Var(utils.NewSliceValue([]string{}, &scannerURLs), "scanner_urls", "Scanner URLs")
+	flag.Parse()
+
+	var scannerClients []scanner.Client
+	for _, scannerURL := range scannerURLs {
+		scannerClients = append(scannerClients, scanner.Client{
+			Client: &http.Client{
+				CheckRedirect: func(req *http.Request, via []*http.Request) error {
+					return errors.New(HttpDenyRedirect)
+				}},
+			URL: scannerURL,
+		})
+	}
+
+	regURL, err := url.Parse(*registryURL)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	rs := RegistryScanner{
+		url: regURL,
+		transport: &http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: *insecureSkipVerify,
+			},
+		},
+		creds:  &credentialStore{
+			username: *username,
+			password: *password,
+			refreshTokens: make(map[string]string),
+		},
+		manager: challenge.NewSimpleManager(),
+		scheduler: scheduler.Client{
+			Client: http.DefaultClient,
+			URL:    *schedulerURL,
+		},
+		scanners: scannerClients,
+		currentScannerIdx: -1,
+	}
+
+	if *scanFS {
+		// ensure empty url
+		// scan local operation system
+		rs.url = &url.URL{}
+		for i := range rs.scanners {
+			if err = rs.request(&rs.scanners[i], "", "", "", nil); err != nil {
+				log.Fatal(err)
+			}
+		}
+	} else {
+		// TDH local image
+		if *registryURL == "" {
+			if err = rs.parseHostImages(*repositoryName, *tag); err != nil {
+				log.Fatal(err)
+			}
+		} else {
+			// registry api harbor image
+			_, err = rs.ping("Docker-Distribution-Api-Version")
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			if *repositoryName == "" {
+				err = rs.parseRegistry()
+			} else {
+				err = rs.parseRepository(*repositoryName, *tag)
+			}
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
+	}
+
+	if err = rs.getReports(*reportPath); err != nil {
+		log.Fatal(err)
+	}
+}
+
+make
+
+go module在transwarp.io/hunter
+make 失败
+go version需要1.15
+pkg/scanner/trivy/wrapper.go:86:33: cmd.ProcessState.ExitCode undefined (type *os.ProcessState has no field or method ExitCode)
+pkg/scanner/trivy/wrapper.go:94:32: cmd.ProcessState.ExitCode undefined (type *os.ProcessState has no field or method ExitCode)
+pkg/scanner/trivy/wrapper.go:129:33: cmd.ProcessState.ExitCode undefined (type *os.ProcessState has no field or method ExitCode)
+pkg/scanner/trivy/wrapper.go:137:32: cmd.ProcessState.ExitCode undefined (type *os.ProcessState has no field or method ExitCode)
+pkg/scanner/trivy/wrapper.go:261:33: cmd.ProcessState.ExitCode undefined (type *os.ProcessState has no field or method ExitCode)
+
+https://www.sunzhongwei.com/golang-upgraded-version-113-to-114
+
+go list -m: can't compute 'all' using the vendor directory
+external libraries里没有添加vendor文件 删除go.mod和vendor重新导入
+
+
+
+func (rs *RegistryScanner) downloadReport(reportPath string) error {
+	for _, meta := range rs.metas {
+		if meta.digest != "" {
+			log.Infof("request %s@%s report from scanner %s with id %s", meta.repo, meta.digest, meta.scanner.URL, meta.jobID)
+		} else if meta.tag != "" {
+			log.Infof("request %s:%s report from scanner %s with id %s", meta.repo, meta.tag, meta.scanner.URL, meta.jobID)
+		} else {
+			log.Infof("request host filesystem report from scanner %s with id %s", meta.scanner.URL, meta.jobID)
+		}
+		for {
+			time.Sleep(5 * time.Second)
+			// get scan report from jobID
+			scanReport, err := meta.scanner.ScanReport(meta.jobID)
+			if err != nil {
+				if !strings.HasSuffix(err.Error(), HttpDenyRedirect) {
+					log.Warn(err)
+					break
+				}
+			} else {
+				// download report to reportPath
+				b, err := json.Marshal(scanReport)
+				if err != nil {
+					return err
+				}
+				rp := reportPath
+				if rs.url.Host != "" {
+					rp += "/" + rs.url.Host
+				} else {
+					u, err := url.Parse(meta.scanner.URL)
+					if err != nil {
+						return err
+					}
+					rp += "/" + u.Hostname()
+				}
+				if meta.digest != "" {
+					rp += "/" + meta.repo + "@" + meta.digest + ".json"
+				} else if meta.tag != "" {
+					rp += "/" + meta.repo + ":" + meta.tag + ".json"
+				} else {
+					rp += "/filesystem.json"
+				}
+				dir := path.Dir(rp)
+				if err = os.MkdirAll(dir, 0755); err != nil {
+					return err
+				}
+				if err = ioutil.WriteFile(rp, b, 0644); err != nil {
+					return err
+				}
+				if meta.digest != "" {
+					log.Infof("write %s@%s report to %s", meta.repo, meta.digest, rp)
+				} else if meta.tag != "" {
+					log.Infof("write %s:%s report to %s", meta.repo, meta.tag, rp)
+				} else {
+					log.Infof("write host filesystem report to %s", rp)
+				}
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+# 启用 Go Modules 功能
+go env -w GO111MODULE=on 
+# 配置 GOPROXY 环境变量
+go env -w GOPROXY=https://goproxy.io,direct
+
+
+tmpl := template.Must(template.New("").ParseGlob("templates/*"))
+	if err = tmpl.ExecuteTemplate(rw, "custom_func.tmpl", b); err != nil {
+		log.Error(err)
+	}
+
+registry_url https://172.16.1.99/v2 repository gold/tdh-baseimage -tag dev -insecure_skip_verify=true -scheduler_url http://172.26.0.98:18888 -report_path /tmp/reports -scanner_urls http://172.26.0.93:58888,http://172.26.0.95:58888,http://172.26.0.96:58888,http://172.26.0.98:58888
+
+{
+	"ScanRegistry": {
+		"scan_fs": "true",
+		"scheduler_url": "http://172.26.0.98:18888/",
+		"tag": "dev",
+		"insecure_skip_verify": "true",
+		"scheduler_url": "http://172.26.0.98:18888",
+		"scanner_urls": "http://172.26.0.93:58888,http://172.26.0.95:58888,http://172.26.0.96:58888,http://172.26.0.98:58888"
+	}
+}
+=====
+优化
+队列
+swagger
+=====
+
+https://github.com/overnote/over-golang.git
+
+-scan_fs=true -scheduler_url http://172.26.0.98:18888/ -report_path /tmp/reports -scanner_urls http://172.26.0.93:58888,http://172.26.0.95:58888,http://172.26.0.96:58888,http://172.26.0.98:58888
+
+
+type SchedulerScanner struct {
+	url       *url.URL
+	transport http.RoundTripper
+	creds *credentialStore
+	manager challenge.Manager
+	scanners []scanner.Client
+	currentScannerIdx int
+	metas []scanMeta
+}
+
+// methodHandler writes the method string in response.
+func methodHandler(method string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte(method))
+	}
+}
+
+		log.WithFields(log.Fields{
+			"param": value,
+		}).Error("Error while parsing path variable")
+		h.WriteJSONError()
+
+
+type Error struct {
+	HTTPCode int    `json:"-"`
+	Message  string `json:"message"`
+}
+
+model.Error{
+			HTTPCode: http.StatusInternalServerError,
+			Message:  fmt.Sprintf("enqueuing scan job: %s", err.Error()),
+		}
+
+h.WriteJSON(model.ScanResponse{ID: scanJob.ID}, http.StatusAccepted)
+
+func (h *BaseHandler) WriteJSONError(res http.ResponseWriter, err model.Error) {
+	data := struct {
+		Err model.Error `json:"error"`
+	}{err}
+
+
+type SchedulerScanner struct {
+	url       *url.URL
+	transport http.RoundTripper
+	creds *credentialStore
+	manager challenge.Manager
+	scanners []scanner.Client
+	currentScannerIdx int
+	metas []scanMeta
+}
+
+rw.Header().Set("Content-Disposition", "attachment; filename=report.html")
+		rw.Header().Set("Content-Type", req.Header.Get("Content-Type"))
+
+// GET   /api/v1/report/{scan_request_id}
+	// POST  /api/v1/report_dl/{scan_request_id}
+	// POST  /api/v1/scanTask   with body{registry}
+
+ad1c539c2521c2c30e54276d
+
+generated_at
+artifact 
+Scanner
+Severity
+Vulnerabilities
+{
+	ID          string              `json:"id"`
+	Pkg         string              `json:"package"`
+	Version     string              `json:"version"`
+	FixVersion  string              `json:"fix_version,omitempty"`
+	Severity    Severity            `json:"severity"`
+	Description string              `json:"description"`
+	Links       []string            `json:"links"`
+	Layer       *Layer              `json:"layer"`
+	CVSS        map[string]CVSSInfo `json:"cvss,omitempty"`
+}
+
+type ScanReport struct {
+	GeneratedAt     time.Time           `json:"generated_at"`
+	Artifact        Artifact            `json:"artifact"`
+	Scanner         Scanner             `json:"scanner"`
+	Severity        Severity            `json:"severity"`
+	Vulnerabilities []VulnerabilityItem `json:"vulnerabilities"`
+}
