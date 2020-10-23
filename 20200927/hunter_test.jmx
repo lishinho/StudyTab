@@ -17,7 +17,7 @@
           <boolProp name="LoopController.continue_forever">false</boolProp>
           <stringProp name="LoopController.loops">1</stringProp>
         </elementProp>
-        <stringProp name="ThreadGroup.num_threads">5</stringProp>
+        <stringProp name="ThreadGroup.num_threads">3</stringProp>
         <stringProp name="ThreadGroup.ramp_time">1</stringProp>
         <longProp name="ThreadGroup.start_time">1600861028000</longProp>
         <longProp name="ThreadGroup.end_time">1600861028000</longProp>
@@ -26,7 +26,7 @@
         <stringProp name="ThreadGroup.delay"></stringProp>
       </ThreadGroup>
       <hashTree>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="HTTP Request" enabled="true">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="HTTP Request" enabled="false">
           <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
             <collectionProp name="Arguments.arguments"/>
           </elementProp>
@@ -111,7 +111,7 @@
           </ResultCollector>
           <hashTree/>
         </hashTree>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="HTTP Request" enabled="false">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="HTTP Request" enabled="true">
           <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
           <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
             <collectionProp name="Arguments.arguments">
@@ -119,12 +119,9 @@
                 <boolProp name="HTTPArgument.always_encode">false</boolProp>
                 <stringProp name="Argument.value">{&#xd;
 	&quot;ScanRegistry&quot;: {&#xd;
-		&quot;registry_url&quot;: &quot;https://172.16.1.99/v2&quot;,&#xd;
-		&quot;repository&quot;: &quot;gold/tdh-baseimage&quot;,&#xd;
-		&quot;tag&quot;: &quot;dev&quot;,&#xd;
+		&quot;scan_fs&quot;: &quot;true&quot;,&#xd;
 		&quot;insecure_skip_verify&quot;: &quot;true&quot;,&#xd;
-		&quot;scheduler_url&quot;: &quot;http://172.26.0.98:18888&quot;,&#xd;
-		&quot;scanner_urls&quot;: &quot;http://172.26.0.93:58888,http://172.26.0.95:58888,http://172.26.0.96:58888,http://172.26.0.98:58888&quot;&#xd;
+		&quot;scanner_urls&quot;: &quot;http://127.0.0.1:8080&quot;&#xd;
 	}&#xd;
 }</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
@@ -132,7 +129,7 @@
             </collectionProp>
           </elementProp>
           <stringProp name="HTTPSampler.domain">127.0.0.1</stringProp>
-          <stringProp name="HTTPSampler.port">8080</stringProp>
+          <stringProp name="HTTPSampler.port">9000</stringProp>
           <stringProp name="HTTPSampler.connect_timeout"></stringProp>
           <stringProp name="HTTPSampler.response_timeout"></stringProp>
           <stringProp name="HTTPSampler.protocol"></stringProp>

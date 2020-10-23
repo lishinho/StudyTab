@@ -217,6 +217,8 @@ https://www.sunzhongwei.com/golang-upgraded-version-113-to-114
 
 go list -m: can't compute 'all' using the vendor directory
 external libraries里没有添加vendor文件 删除go.mod和vendor重新导入
+go mod init
+通过git直接把go mod修复
 
 
 

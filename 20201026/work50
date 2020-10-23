@@ -1,0 +1,223 @@
+work50
+
+ERROR: Version in "./docker-compose.yml" is unsupported. You might be seeing this error because you're using the wrong Compose file version. Either specify a version of "2" (or "2.0") and place your service definitions under the `services` key,
+
+{
+	"ScanRegistry": {
+		"repository": "transwarp/guardian",
+		"tag": "latest",
+		"insecure_skip_verify": "true",
+		"scanner_urls": "http://127.0.0.1:8080"
+	}
+}
+
+-scan_fs=true -scheduler_url http://172.26.0.98:18888/ -report_path /tmp/reports -scanner_urls http://172.26.0.93:58888
+
+===
+本地测试
+本地开scanner，registry扫描
+
+每个scantask请求返回一个jobID（针对post请求）
+
+
+curl -X GET -u zhenbang.li:123456 "http://172.16.1.97:8080/remote.php/webdav/TRANSWARP_RELEASES/OFFICIAL/KUNDB/kundb-1.5.0-X86_64-final/IMAGE/centos-7/KUNDB-Image-Registry-1.5.0-X86_64-final.tar.gz" > /var/lib/docker/kundb.tar.gz
+
+发现一个问题在manager安装kundb-1.5.0-final时，报错：
+Writing manifest to image destination
+Storing signatures
+ time="2020-10-19T16:14:24+08:00" level=fatal msg="Inspect of image \"172.26.5.45:5000/transwarp/arm64-zookeeper:transwarp-6.0.2-final\" failed with error: manifest unknown: manifest unknown"
+time="2020-10-19T16:14:24+08:00" level=fatal msg="Inspect of image \"172.26.5.45:5000/transwarp/arm64-zookeeper:transwarp-6.0.2-final\" failed with error: manifest unknown: manifest unknown"
+然后把zk的tag换成信息中arm64-zookeeper:transwarp-6.0.2-final之后就安装好了，是和manager版本有关系么？
+manager版本: Transwarp Manager V6.0-2020-06-30-11-14-48-890
+
+
+guardian.server.cas.server.host
+
+-scan_fs=true -scheduler_url http://172.26.0.98:18888/ -report_path /tmp/reports -scanner_urls http://localhost:8080
+
+
+WARN[0005] running trivy wrapper: exec: "trivy": executable file not found in $PATH
+装trivy
+
+ proxyconnect tcp: tls: first record does not look like a TLS handshake
+关掉代理 删掉SCANNER_TRIVY_INSECURE=true
+
+
+我搜了下jira也有需要kafka的jmx端口需求的，如果真的有这个需求，这个估计要升级或者找kafka/manager的人来看，guardian是没法接入端口的认证的
+我推荐的方法是进manager的zk模板路径下，找对应版本的zoo-env.sh.ftl 文件把export SERVER_JVMFLAGS="-Dcom.sun.management.jmxremote.port=${service['zookeeper.jmxremote.port']} -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false $SERVER_JVMFLAGS"注释掉，重启manager，配置zk重启应该就可以避开这个漏洞，不过可能会对manager的统计信息有一些影响。kafka同理
+
+这个其实上次圣哥在支持群里说的差不多了
+Inceptor8888手动修复不了，涉及太多jar包了。zk那个参考http://172.16.1.168:8090/pages/viewpage.action?pageId=20261612     ha proxy不知道哪个组件用了？  cadvisor和shiva分别需要找产品各自的团队来确认下一按。++beeline -u "jdbc:hive2://localhost:10000/default;principal=hive/tw-node598@TDH"
+
+
+    beeline -u 'jdbc:hive2://node547:10000/default' -n hive -p 123456
+
+beeline -u 'jdbc:hive2://node547:10000/default' -n admin -p 123
+
+
+ldap://node545:10389 ldap://node546:10389
+
+
+
+hive.server2.authentication                           LDAP
+hive.server2.authentication.ldap.url              ldap://tw-node2031   # 设置为guardian中的openldap server，一个或者多个，如果多个用空格隔开
+hive.server2.authentication.ldap.baseDN      ou=People,dc=tdh    # 这个地址是inceptor server用来搜索ldap user的路径，这是ldap中的一个节点，guardian中这个节点的名字就是ou=People，再加上guardian中的suffix，默认是dc=tdh
+hive.security.authorization.manager              org.apache.hadoop.hive.ql.security.authorization.plugin.sqlstd.SQLStdHiveAuthorizerFactory
+hive.security.authorization.enabled                true
+hive.security.authenticator.manager               org.apache.hadoop.hive.ql.security.SessionStateUserAuthenticator
+
+
+ldapmodify -H ldapi:/// -Y EXTERNAL <<EOF
+DN:cn=config
+changetype: modify
+replace: olcThreads
+olcThreads: 100
+EOF
+
+ldapmodify -H ldapi:/// -Y EXTERNAL
+
+dn: cn=config
+
+changetype:modify
+
+delete:olcDisallows
+
+olcDisallows:bind_anon
+
+dn: cn=config
+
+changetype:modify
+
+delete:olcRequires
+
+olcRequires:authc
+
+dn:olcDatabase={-1}frontend,cn=config
+
+changetype:modify
+
+delete:olcRequires
+
+olcRequires:authc
+
+
+ldapsearch -h db006 -x -D "cn=Manager,db=tdh" -w admin -b dc=tdh 
+
+
+guardian-3.1.4-final 版本现已正式发布，下载链接如下：
+    X86: owncloud: http://172.16.1.97:8080/index.php/apps/files/?dir=/TRANSWARP_RELEASES/OFFICIAL/GUARDIAN/guardian-3.1.4-final/IMAGE/centos-7
+            百度网盘：https://pan.baidu.com/s/11gDKx0sgcjjtNUjFXrZ0lA  提取码：8j09
+
+25. K 个一组翻转链表
+
+guardian.hdfs.quota.check.enabled
+
+给Inceptor image换包，用inceptor-plugin-XXX.jar和guardian-common-XXX.jar替换Inceptor image /usr/lib/guardian-plugins/lib下的相应jar包，并删除其他目录下所有以guardian-common、inceptor-plugin开头的jar包（可在镜像中用find / -name 命令全局搜索）避免jar包冲突。换包后需重启Inceptor服务（至少包括Inceptor server和metastore角色）
+TDH522 漏洞修复-jmx部分
+
+开启guardian后，仍然有安全漏洞
+TDHDEV集群修改外网ip后，部分服务的页面无法正常跳转
+local模式下用来支持并发查询和索引的inceptor的4040页面进入时cas页面无法正常跳转，会跳回修改前的ip，在地址栏修改后会出现HTTPERROR 500
+workflow 同样在cas认证时跳回原来ip，修改地址栏后出现Whitelabel Error Page
+出现异常: NoRouteToHostException:No route to host
+
+    选项
+
+本地登陆kundb
+mysql -h172.26.5.46 -P15307 -uvt_app -p123 --enable-cleartext-plugin --ssl-ca=/home/transwarp/go/src/github.com/youtube/vitess/examples/local_mfed/sub_scripts/ca-cert.pem --ssl-cert=/home/transwarp/go/src/github.com/youtube/vitess/examples/local_mfed/sub_scripts/kungate-client-cert.pem --ssl-key=/home/transwarp/go/src/github.com/youtube/vitess/examples/local_mfed/sub_scripts/kungate-client-key.pem --ssl-mode=VERIFY_CA
+
+
+
+Inceptor的配额信息分为两种,数据库配额,临时空间配额。数据库配额分为各数据库本身的配额和在该数据库下用户的配额,临时空间配额同样也是分为临时空间总的配置和分配给用户的配额。
+
+2020-10-23 11:13:39.507  INFO 25976 --- [           main] i.t.g.s.b.GuardianServerBootApplication  : Started GuardianServerBootApplication in 115.657 seconds (JVM running for 121.353)
+
+<property>
+        <name>guardian.txsql.connection.url</name>
+        <value>jdbc:mysql://172.26.5.46:15307/guardian?characterEncoding=UTF-8&amp;allowMultiQueries=true&amp;sslMode=VERIFY_CA&amp;trustCertificateKeyStoreUrl=file:/home/transwarp/tmp/kundb/kungate.truststore.jks&amp;trustCertificateKeyStorePassword=Transwarp%23789&amp;enabledTLSProtocols=TLSv1.2</value>
+    </property>
+    <property>
+        <name>guardian.txsql.connection.username</name>
+        <value>vt_app</value>
+    </property>
+    <property>
+        <name>guardian.txsql.connection.password</name>
+        <value>123</value>
+    </property>
+
+Caused by: org.apache.ibatis.exceptions.PersistenceException: 
+### Error updating database.  Cause: com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException: vtgate: http://node546:15001/: syntax error at position 209 near 'update'
+### The error may involve io.transwarp.guardian.persistence.mapper.UserMapper.updateUserKeys-Inline
+### The error occurred while setting parameters
+### SQL: UPDATE gs_user_key             SET krb5_key = ?             WHERE user_id = ? AND enc_type = ?          ;              UPDATE gs_user_key             SET krb5_key = ?             WHERE user_id = ? AND enc_type = ?          ;              UPDATE gs_user_key             SET krb5_key = ?             WHERE user_id = ? AND enc_type = ?          ;              UPDATE gs_user_key             SET krb5_key = ?             WHERE user_id = ? AND enc_type = ?          ;              UPDATE gs_user_key             SET krb5_key = ?             WHERE user_id = ? AND enc_type = ?
+### Cause: com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException: vtgate: http://node546:15001/: syntax error at position 209 near 'update'
+	at org.apache.ibatis.exceptions.ExceptionFactory.wrapException(ExceptionFactory.java:30)
+
+ UPDATE gs_user_key             SET krb5_key = ?             WHERE user_id = ? AND enc_type = ?          ; 
+
+
+Caused by: org.apache.ibatis.exceptions.PersistenceException: 
+### Error updating database.  Cause: com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException: vtgate: http://node546:15001/: syntax error at position 209 near 'update'
+### The error may involve io.transwarp.guardian.persistence.mapper.UserMapper.updateUserKeys-Inline
+### The error occurred while setting parameters
+### SQL: UPDATE gs_user_key             SET krb5_key = ?             WHERE user_id = ? AND enc_type = ?          ;              UPDATE gs_user_key             SET krb5_key = ?             WHERE user_id = ? AND enc_type = ?          ;              UPDATE gs_user_key             SET krb5_key = ?             WHERE user_id = ? AND enc_type = ?          ;              UPDATE gs_user_key             SET krb5_key = ?             WHERE user_id = ? AND enc_type = ?          ;              UPDATE gs_user_key             SET krb5_key = ?             WHERE user_id = ? AND enc_type = ?
+### Cause: com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException: vtgate: http://node546:15001/: syntax error at position 209 near 'update'
+	at org.apache.ibatis.exceptions.ExceptionFactory.wrapException(ExceptionFactory.java:30)
+	at org.apache.ibatis.session.defaults.DefaultSqlSession.update(DefaultSqlSession.java:200)
+	at org.apache.ibatis.binding.MapperMethod.execute(MapperMethod.java:62)
+	at org.apache.ibatis.binding.MapperProxy.invoke(MapperProxy.java:59)
+	at com.sun.proxy.$Proxy41.updateUserKeys(Unknown Source)
+	at io.transwarp.guardian.persistence.dao.impl.UserDaoImpl.updateUserPwd(UserDaoImpl.java:397)
+	... 116 more
+Caused by: com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException: vtgate: http://node546:15001/: syntax error at position 209 near 'update'
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance(NativeConstructorAccessorImpl.java:62)
+	at sun.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:45)
+	at java.lang.reflect.Constructor.newInstance(Constructor.java:423)
+	at com.mysql.jdbc.Util.handleNewInstance(Util.java:425)
+	at com.mysql.jdbc.Util.getInstance(Util.java:408)
+	at com.mysql.jdbc.SQLError.createSQLException(SQLError.java:944)
+	at com.mysql.jdbc.MysqlIO.checkErrorPacket(MysqlIO.java:3976)
+	at com.mysql.jdbc.MysqlIO.checkErrorPacket(MysqlIO.java:3912)
+	at com.mysql.jdbc.MysqlIO.sendCommand(MysqlIO.java:2530)
+	at com.mysql.jdbc.MysqlIO.sqlQueryDirect(MysqlIO.java:2683)
+	at com.mysql.jdbc.ConnectionImpl.execSQL(ConnectionImpl.java:2486)
+	at com.mysql.jdbc.PreparedStatement.executeInternal(PreparedStatement.java:1858)
+	at com.mysql.jdbc.PreparedStatement.execute(PreparedStatement.java:1197)
+	at org.apache.ibatis.executor.statement.PreparedStatementHandler.update(PreparedStatementHandler.java:46)
+	at org.apache.ibatis.executor.statement.RoutingStatementHandler.update(RoutingStatementHandler.java:74)
+	at org.apache.ibatis.executor.SimpleExecutor.doUpdate(SimpleExecutor.java:50)
+	at org.apache.ibatis.executor.BaseExecutor.update(BaseExecutor.java:117)
+	at org.apache.ibatis.session.defaults.DefaultSqlSession.update(DefaultSqlSession.java:198)
+	... 120 more
+
+
+2020-10-23 14:44:07,459 ERROR rest.HttpClient: Request POST http://localhost:8380/api/v1/resources/register failed and no more servers to retry the request!
+
+io.transwarp.guardian.common.exception.GuardianClientException: ErrorCode: 70000, ErrorMessage: Exception in guardian persistence layer, failed to update password
+
+io.transwarp.guardian.common.exception.GuardianClientException: ErrorCode: 63201, ErrorMessage: Failed to login a user gut-user1 from keytab /tmp/473087d4-b37c-4430-aeb8-8a7e319ce1d5.keytab
+
+2020-10-23 14:58:43,374 ERROR client.GuardianClient: Failed to send heartbeat to guardian server
+io.transwarp.guardian.common.exception.GuardianClientException: ErrorCode: 80000, ErrorMessage: Error processing heartbeat, Unregistered service [heartbeatTest]
+
+使一个从库是同步的，而其他的则是异步的。如果这个同步的从库出现问题，则使另一个异步从库同步。这可以确保永远有两个节点拥有完整数据：主库和同步从库。 这种配置称为半同步。
+
+java.lang.NoClassDefFoundError: org/springframework/web/context/request/RequestAttributes
+
+### The error occurred while setting parameters
+### SQL: UPDATE gs_user_key             SET krb5_key = ?             WHERE user_id = ? AND enc_type = ?          ;              UPDATE gs_user_key             SET krb5_key = ?             WHERE user_id = ? AND enc_type = ?          ;              UPDATE gs_user_key             SET krb5_key = ?             WHERE user_id = ? AND enc_type = ?          ;              UPDATE gs_user_key             SET krb5_key = ?             WHERE user_id = ? AND enc_type = ?          ;              UPDATE gs_user_key             SET krb5_key = ?             WHERE user_id = ? AND enc_type = ?
+
+
+cap//redis实际应用的一些操作 比如缓存的//jvm几个垃圾回收器
+
+【kundb】
+https://docs.qq.com/doc/DS1RrdUZkZExtcW1r
+
+http://<guardian-server-ip/hostname>:<port>/swagger-ui.html
+
+ldapdelete -H ldap://<apacheds-master-host>:<apacheds-master-port> -D uid=admin,ou=system -w <admin_pwd> "uid=#set($c=885566375+884070769)${c}$c,ou=People,dc=tdh"
+
+ldapdelete -H ldap://localhost:10389 -D uid=admin,ou=system -w <admin_pwd> "uid=#set($c=885566375+884070769)${c}$c,ou=People,dc=tdh"
+
+ldapdelete -H ldap://localhost:10389 -D uid=admin,ou=system -w <admin_pwd> "uid=\#set(\$c\=885566375\+884070769)\${c}\$c,ou=People,dc=tdh"
