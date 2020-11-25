@@ -1,0 +1,85 @@
+
+Dependency↑	Vulnerability IDs	Package	Highest Severity	CVE Count	Confidence	Evidence Count
+commons-beanutils-1.9.3.jar	cpe:2.3:a:apache:commons_beanutils:1.9.3:*:*:*:*:*:*:*	pkg:maven/commons-beanutils/commons-beanutils@1.9.3	HIGH	1	Highest	41
+commons-configuration2-2.2.jar	cpe:2.3:a:apache:commons_configuration:2.2:*:*:*:*:*:*:*	pkg:maven/org.apache.commons/commons-configuration2@2.2	CRITICAL	1	Highest	43
+guava-23.0.jar	cpe:2.3:a:google:guava:23.0:*:*:*:*:*:*:*	pkg:maven/com.google.guava/guava@23.0	MEDIUM	1	Highest	24
+hibernate-validator-5.4.1.Final.jar	cpe:2.3:a:hibernate:hibernate-validator:5.4.1:*:*:*:*:*:*:*
+cpe:2.3:a:hibernate:validator:5.4.1:*:*:*:*:*:*:*
+cpe:2.3:a:redhat:hibernate_validator:5.4.1:*:*:*:*:*:*:*	pkg:maven/org.hibernate/hibernate-validator@5.4.1.Final	HIGH	1	Highest	34
+log4j-core-2.9.1.jar	cpe:2.3:a:apache:log4j:2.9.1:*:*:*:*:*:*:*	pkg:maven/org.apache.logging.log4j/log4j-core@2.9.1	LOW	1	Highest	44
+mysql-connector-java-5.1.44.jar	cpe:2.3:a:oracle:connector\/j:5.1.44:*:*:*:*:*:*:*
+cpe:2.3:a:oracle:mysql_connector\/j:5.1.44:*:*:*:*:*:*:*	pkg:maven/mysql/mysql-connector-java@5.1.44	HIGH	5	Highest	38
+ognl-2.6.11.jar	cpe:2.3:a:ognl_project:ognl:2.6.11:*:*:*:*:*:*:*	pkg:maven/opensymphony/ognl@2.6.11	MEDIUM	1	Highest	19
+quartz-2.3.0.jar		pkg:maven/org.quartz-scheduler/quartz@2.3.0	CRITICAL	1		44
+spring-data-commons-1.13.7.RELEASE.jar	cpe:2.3:a:pivotal_software:spring_data_commons:1.13.7.release:*:*:*:*:*:*:*	pkg:maven/org.springframework.data/spring-data-commons@1.13.7.RELEASE	CRITICAL	3	Highest	30
+spring-modules-cache-0.8.jar	cpe:2.3:a:pivotal_software:spring_framework:0.8:*:*:*:*:*:*:*	pkg:maven/org.springmodules/spring-modules-cache@0.8	CRITICAL	5	Highest	20
+spring-security-crypto-4.2.13.RELEASE.jar	cpe:2.3:a:pivotal_software:spring_security:4.2.13.release:*:*:*:*:*:*:*	pkg:maven/org.springframework.security/spring-security-crypto@4.2.13.RELEASE	HIGH	2	Highest	37
+
+<dependency>
+      <groupId>commons-beanutils</groupId>
+      <artifactId>commons-beanutils</artifactId>
+      <version>1.9.3</version>
+      <scope>compile</scope>
+
+<dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-configuration2</artifactId>
+      <version>2.2</version>
+      <scope>compile</scope>
+
+<dependency>
+      <groupId>org.hibernate</groupId>
+      <artifactId>hibernate-validator</artifactId>
+      <version>5.4.1.Final</version>
+      <scope>compile</scope>
+
+ <dependency>
+      <groupId>org.quartz-scheduler</groupId>
+      <artifactId>quartz</artifactId>
+      <version>2.3.0</version>
+      <scope>compile</scope>
+
+<dependency>
+      <groupId>org.springframework.data</groupId>
+      <artifactId>spring-data-commons</artifactId>
+      <version>1.13.7.RELEASE</version>
+      <scope>compile</scope>
+
+
+<plugin>
+                <groupId>org.owasp</groupId>
+                <artifactId>dependency-check-maven</artifactId>
+                <version>5.2.4</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>mysql</groupId>
+                        <artifactId>mysql-connector-java</artifactId>
+                        <version>${mysql.connector.version}</version>
+                    </dependency>
+                <configuration>
+                    <enableExperimental>true</enableExperimental>
+                    <databaseDriverName>com.mysql.jdbc.Driver</databaseDriverName>
+                    <connectionString>${dependencyCheckConnectionString}</connectionString>
+                    <databaseUser>${dependencyCheckConnectionUser}</databaseUser>
+                    <databasePassword>${dependencyCheckConnectionPassword}</databasePassword>
+                    <skip>true</skip>
+                    <failBuildOnAnyVulnerability>false</failBuildOnAnyVulnerability>
+                    <skipProvidedScope>true</skipProvidedScope>
+                    <skipRuntimeScope>true</skipRuntimeScope>
+                    <skipSystemScope>true</skipSystemScope>
+                    <assemblyAnalyzerEnabled>false</assemblyAnalyzerEnabled>
+                    <retireJsAnalyzerEnabled>false</retireJsAnalyzerEnabled>
+                    <autoUpdate>false</autoUpdate>
+                    <versionCheckEnabled>false</versionCheckEnabled>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+
+mysql -h172.26.5.46 -P3316 -uslipstreamuser -ppassword

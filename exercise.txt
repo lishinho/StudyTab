@@ -5,6 +5,7 @@ JAVA基础
 - 图的分类
 带权图 
 有向图/无向图  
+
 - 存储
 邻接矩阵  
 邻接表
@@ -210,6 +211,8 @@ JVM 使用了锁升级的优化方式，就是先使用偏向锁优先同一线�
 
 - threadlocal  
 
+每个线程Thread都维护了自己的threadLocals变量，所以在每个线程创建ThreadLocal的时候，实际上数据是存在自己线程Thread的threadLocals变量里面的，别人没办法拿到，从而实现了隔离。
+
 threadlocal数据隔离 数据结构模型 弱引用 哈希冲突解决 内存泄漏  
 没有链表的hashmap  
 线程中维护数组，每个数组元素维护链表，每个链表元素的entry，entry的key是一个弱引用的threadlocal  
@@ -409,6 +412,7 @@ Spring AOP提供了对JDK动态代理的支持以及CGLib的支持 可以通过x
 Spring的@Bean注解用于告诉方法，产生一个Bean对象，然后这个Bean对象交给Spring管理。产生这个Bean对象的方法Spring只会调用一次，
 随后这个Spring将会将这个Bean对象放在自己的IOC容器中。
 @Autowired
+自动注入
 @Component
 @NestedConfigurationProperty，该注解会为basicProperties生成单独的一个属性组。如果不添加该注解，则不会生成单独的属性组，而是形成如下的一个属性节点：
 @JsonUnwrapped @JsonUnwrapped: 作用在属性字段或方法上，用来将子JSON对象的属性添加到封闭的JSON对象。
@@ -639,6 +643,21 @@ mysql
 -可串行化
 
 ### innodb
+索引与算法/锁机制/事务/备份与恢复
+
+1. 索引与算法
+B+树索引/全文索引/hash索引
+聚集索引:按照每张表的主键构造一棵B+树，同时叶子节点中存放整张表的行记录数据，每个数据页通过双向链表连接
+辅助索引：一张表可以有多个辅助索引来查找主键
+
+什么时候建立索引 -- 访问表中很少一部分才有意义 且索引具有高选择性 比如姓名
+联合索引 最左匹配原则
+
+
+
+
+
+
 - 支持事务
 - 行锁
 - 支持外键

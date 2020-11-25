@@ -1,0 +1,142 @@
+{{define "report.tmpl"}}
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Hunter, the best vulnerability scan tool in Transwarp</title>
+        <style>
+            .tabtop13 {
+                margin-top: fill;
+            }
+            .tabtop13 td{
+                background-color:#ffffff;
+                line-height:150%;
+            }
+            .body{
+                margin: 0 auto;
+                padding: 0;
+                text-align: left;
+                height: 100%;
+                font-family: myriad, arial, tahoma, verdana, sans-serif;
+                color: #151515;
+                font-size: 90%;
+                line-height: 1.3em;
+                background-color: #fff;
+            }
+            .font-center{}
+            .tbbg_left{
+                background: #e9faff;
+                text-align:center;
+            }
+            .tbbg_right{background: #e9faff !important;}
+            .tbbg2{background: #ffb6c1 !important;}
+            .title{
+                font-family: myriad, arial, tahoma, verdana, sans-serif;
+                font-size: 180%;
+                line-height: 1.1em;
+                font-weight: bold;
+                border-bottom:1px dashed #CCCCCC;
+                color: #151515;
+                background: #f0f0f0;
+            }
+            .subtitle {
+                font-family: myriad, arial, tahoma, verdana, sans-serif;
+                font-size: 16px;
+                font-weight: bold;
+                line-height: 1.1em;
+                height: 60px;
+                color: #255e95;
+            }
+        </style>
+    </head>
+    <body class="body">
+    <table width="100%" border="1" cellspacing="0" cellpadding="3" align="center">
+        <tr>
+            <td align="center" class="title" height="60">Hunter Common Vulnerabilities and Exposures Scanning Report</td>
+        </tr>
+    </table>
+
+    <table width="100%" border="1" cellspacing="0" cellpadding="5" class="tabtop13">
+        <tr>
+            <td width="10%" class="tbbg_left font-center">GeneratedAt</td>
+            <td width="90%" class="tbbg_left">{{ .GeneratedAt }}</td>
+        </tr>
+        <tr>
+            <td width="10%" class="tbbg_left font-center">Repository</td>
+            <td width="90%" class="tbbg_left">{{ .Artifact.Repository }}</td>
+        </tr>
+        <tr>
+            <td width="10%" class="tbbg_left font-center">Digest</td>
+            <td width="90%" class="tbbg_left">{{ .Artifact.Digest }}</td>
+        </tr>
+        <tr>
+            <td width="10%" class="tbbg_left font-center">Tag</td>
+            <td width="90%" class="tbbg_left">{{ .Artifact.Tag }}</td>
+        </tr>
+        <tr>
+            <td width="10%" class="tbbg_left font-center">MimeType</td>
+            <td width="90%" class="tbbg_left">{{ .Artifact.MimeType }}</td>
+        </tr>
+        <tr>
+            <td width="10%" class="tbbg_left font-center">ScannerName</td>
+            <td width="90%" class="tbbg_left">{{ .Scanner.Name }}</td>
+        </tr>
+        <tr>
+            <td width="10%" class="tbbg_left font-center">ScannerVendor</td>
+            <td width="90%" class="tbbg_left">{{ .Scanner.Vendor }}</td>
+        </tr>
+        <tr>
+            <td width="10%" class="tbbg_left font-center">ScannerVersion</td>
+            <td width="90%" class="tbbg_left">{{ .Scanner.Version }}</td>
+        </tr>
+        <tr>
+            <td width="10%" class="tbbg_left font-center">Severity</td>
+            <td width="90%" class="tbbg_left">{{ .Severity }}</td>
+        </tr>
+        <tr>
+            <td colspan="2" class="tbbg_left font-center subtitle">Vulnerabilities</td>
+        </tr>
+    {{range .Vulnerabilities}}
+        <tr>
+            <td width="10%" class="tbbg2 font-center">ID</td>
+            <td width="90%" class="tbbg2">{{ .ID }}</td>
+        </tr>
+        <tr>
+            <td width="10%" class="tbbg_left font-center">Pkg</td>
+            <td width="90%" class="tbbg_left">{{ .Pkg }}</td>
+        </tr>
+        <tr>
+            <td width="10%" class="tbbg_left font-center">Version</td>
+            <td width="90%" class="tbbg_left">{{ .Version }}</td>
+        </tr>
+        <tr>
+            <td width="10%" class="tbbg_left font-center">FixVersion</td>
+            <td width="90%" class="tbbg_left">{{ .FixVersion }}</td>
+        </tr>
+        <tr>
+            <td width="10%" class="tbbg_left font-center">Severity</td>
+            <td width="90%" class="tbbg_left">{{ .Severity }}</td>
+        </tr>
+        <tr>
+            <td width="10%" class="tbbg_left font-center">Description</td>
+            <td width="90%" class="tbbg_left">{{ .Description }}</td>
+        </tr>
+        <tr>
+            <td width="10%" class="tbbg_left font-center">Links</td>
+            <td width="90%" class="tbbg_left">{{ .Links }}</td>
+        </tr>
+        <tr>
+            <td width="10%" class="tbbg_left font-center">Layer</td>
+            <td width="90%" class="tbbg_left">{{ .Layer }}</td>
+        </tr>
+        <tr>
+            <td width="10%" class="tbbg_left font-center">CVSS</td>
+            <td width="90%" class="tbbg_left">{{ .CVSS }}</td>
+        </tr>
+    {{end}}
+
+    </table>
+
+    </body>
+    </html>
+
+{{end}}

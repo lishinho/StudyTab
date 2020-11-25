@@ -221,3 +221,216 @@ ldapdelete -H ldap://<apacheds-master-host>:<apacheds-master-port> -D uid=admin,
 ldapdelete -H ldap://localhost:10389 -D uid=admin,ou=system -w <admin_pwd> "uid=#set($c=885566375+884070769)${c}$c,ou=People,dc=tdh"
 
 ldapdelete -H ldap://localhost:10389 -D uid=admin,ou=system -w <admin_pwd> "uid=\#set(\$c\=885566375\+884070769)\${c}\$c,ou=People,dc=tdh"
+
+UPDATE gs_user_key
+SET krb5_key = x'3019A003020117A11204103DBDE697D71690A769204BEB12283678'
+WHERE user_id = 5308 AND enc_type = 'RC4_HMAC';
+
+-repository transwarp/guardian -tag latest -scheduler_url http://172.26.0.98:18888 -report_path /tmp/reports -scanner_urls http://localhost:8080
+
+./registry-client -repository transwarp/guardian -tag latest -scheduler_url http://172.26.0.98:18888 -report_path /tmp/reports -scanner_urls http://localhost:8080
+
+./registry-client -scan_fs=true -scheduler_url http://172.26.0.98:18888/ -report_path /tmp/reports -scanner_urls http://127.0.0.1:8080
+
+
+{
+	"ScanRegistry": {
+		"scan_fs": "true",
+		"insecure_skip_verify": "true",
+		"scanner_urls": "http://127.0.0.1:8080"
+	}
+}
+
+repository_name: transwarp/guardian
+tag:             latest
+scanner_url:     http://127.0.0.1:8080
+
+data, err := ioutil.ReadAll(resp.Body)
+
+
+time="2020-10-26T17:19:25+08:00" level=info msg="{\n\t\"repository_name\":\"\",\n\t\"tag\":\"\",\n\t\"registry_url\":\"\",\n\t\"user_name\":\"\",\n\t\"password\":\"\",\n\t\"insecure_skip_verify\":true,\n\t\"scan_fs\":true,\n\t\"scanner_url\":\"http://127.0.0.1:8080\"\n}"
+传地址和引用
+
+if err != nil {
+        fmt.Printf("read body err, %v\n", err)
+        return
+    }
+    println("json:", string(body))
+
+
+0f8b4c413ea3e166ecaed84a
+
+type Scanner struct {
+	Name    string `json:"name"`
+	Vendor  string `json:"vendor"`
+	Version string `json:"version"`
+}
+
+type Artifact struct {
+	Repository string `json:"repository"`
+	Digest     string `json:"digest"`
+	Tag        string `json:"tag"`
+	MimeType   string `json:"mime_type,omitempty"`
+}
+
+
+fetch(new Request('url',{
+    method:'POST', 
+    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+    body:"param1=value1&param2=value2"
+})).then((resp)=>{console.log(resp)})
+
+
+
+var url = "localhost:9000/api/v1/";
+var xhr = new XMLHttpRequest();
+xhr.open("GET", url, true);
+xhr.onload = function (e) {
+  if (xhr.readyState === 4) {
+    if (xhr.status === 200) {
+      console.log(xhr.responseText);
+    } else {
+      console.error(xhr.statusText);
+    }
+  }
+};
+xhr.onerror = function (e) {
+  console.error(xhr.statusText);
+};
+xhr.send(null);
+
+{"repository_name":"","tag":"","registry_url":"","user_name":"","password":"","insecure_skip_verify":true,"scan_fs":true,"scanner_url":"http://127.0.0.1:8080"}
+
+
+var url = "127.0.0.1:9000/api/v1/scanTask";
+var params ={"repository_name":"","tag":"","registry_url":"","user_name":"","password":"","insecure_skip_verify":true,"scan_fs":true,"scanner_url":"http://127.0.0.1:8080"};
+var xhr = new XMLHttpRequest();
+xhr.open("POST", url, true);
+xhr.setRequestHeader("Content-Type", "application/json");
+xhr.onload = function (e) {
+  if (xhr.readyState === 4) {
+    if (xhr.status === 200) {
+      console.log(xhr.responseText);
+    } else {
+      console.error(xhr.statusText);
+    }
+  }
+};
+xhr.onerror = function (e) {
+  console.error(xhr.statusText);
+};
+xhr.send(JSON.stringify(params));
+
+ failed to list releases: Get "https://api.github.com/repos/aquasecurity/trivy-db/releases"
+在scanner的session中禁掉代理
+
+org.springframework.boot.web.server.WebServerException: Unable to start embedded Jetty server
+        at org.springframework.boot.web.embedded.jetty.JettyWebServer.start(JettyWebServer.java:166) ~[spring-boot-2.1.17.RELEASE.jar:2.1.17.RELEASE]
+        at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.startWebServer(ServletWebServerApplicationContext.java:297) ~[spring-boot-2.1.17.RELEASE.jar:2.1.17.RELEASE]
+删掉guardian数据库
+
+
+RestClientAuthWithAccessTokenTest通过
+heartbeatTest有概率不过 单测干扰
+
+EffectiveServiceNameTest txsql重测
+
+updateUserKeys映射
+
+
+private void registerDummyService(SessionVo sessionVo, ResourceBaseService service, String serviceType, String serviceName,
+                                    String description, Map<String, String> configs, boolean storeToDB) throws GuardianException {
+    boolean confUpdated = service == null || !Objects.equals(service.getConfigs(), configs);
+    if (storeToDB) {
+      ServiceVo dummyService = new ServiceVo();
+      dummyService.setServiceName(serviceName);
+      dummyService.setServiceType(serviceType);
+      dummyService.setDescription(description);
+      if (confUpdated) {
+        dummyService.setConfigs(configs);
+      }
+      serviceManager.storeService(sessionVo, dummyService);
+    }
+
+    long currentTime = System.currentTimeMillis();
+    if (confUpdated || currentTime - service.getInitializedTime() > INITIALIZATION_THRESHOLD ||
+        !StringUtils.equalsIgnoreCase(serviceType, service.getServiceType())) {
+      // get GuardianDummyService from application context
+      service = context.getBean(GuardianDummyService.class, serviceType, serviceName, description, configs);
+      service.setInitializedTime(currentTime);
+      serviceStore.put(serviceName, service);
+      service.initiate();
+    }
+  }
+
+curl -X GET -u zhenbang.li:123456 "http://172.16.1.97:8080/remote.php/webdav/TRANSWARP_RELEASES/OFFICIAL/STELLARDB/stellardb-3.0.1-final/IMAGE/centos-7/STELLARDB-Image-Registry-Transwarp-3.0.1-final.tar.gz" > /root/stellarDB/stellarDB.tar.gz
+
+重启
+
+{
+  "serviceName": "test1",
+  "serviceStatus": "ONLINE",
+  "serviceType": "INCEPTOR",
+  "timestamp": 0
+}
+
+Java 是由 Sun Microsystems 公司于 1995 年 5 月开发的一种静态语言、强类型语言
+Java不同于一般的编译语言或解释型语言。它首先将源代码编译成字节码，再依赖各种不同平台上的虚拟机来解释执行字节码，从而具有“一次编写，到处运行”的跨平台特性。
+
+{"BindVars":{"vtg1":{"type":265,"value":"NTAwMA=="},"vtg2":{"type":265,"value":"NDI="},"vtg3":{"type":265,"value":"MA=="},"vtg4":{"type":265,"value":"MA=="}},"Cost":"13.94","CostUnit":"ms","Database":"guardian","Error":null,"Program":"vtgate","RowsAffected":0,"SQL":"INSERT INTO gs_user_perm (user_id, perm_id, grant_option) VALUES (\n            5000,\n            42,\n            0\n        ) ON DUPLICATE KEY UPDATE grant_option = 0","SQLType":"INSERT","Session":"f8fbb398-cc21-42b9-a44e-2acca82ec8df","Transactions":[{"Target":{"keyspace":"kundb1","shard":"0","tablet_type":1,"connSchema":"guardian"},"TransactionID":979036550643851586}],"User":"vt_app","level":"info","msg":"Execute Query","time":"2020-10-27T15:23:09+08:00"}
+{"BindVars":{},"Cost":"0.07","CostUnit":"ms","Database":"guardian","Error":null,"Program":"vtgate","RowsAffected":0,"SQL":"SET autocommit=1","SQLType":"SET","Session":"f8fbb398-cc21-42b9-a44e-2acca82ec8df","Transactions":null,"User":"vt_app","level":"info","msg":"Execute Query","time":"2020-10-27T15:23:09+08:00"}
+
+
+{"BindVars":{"vtg1":{"type":265,"value":"NDk="}},"Cost":"3.23","CostUnit":"ms","Database":"guardian","Error":null,"Program":"vtgate","RowsAffected":0,"SQL":"SELECT\n          event_id,\n          sync_event\n        FROM\n        gs_apacheds_sync_event\n        WHERE event_id \u003e 49\n        ORDER BY event_id ASC","SQLType":"DML","Session":"2f7024ca-b91f-4b7d-8333-81809e817484","Transactions":null,"User":"vt_app","level":"info","msg":"Execute Query","time":"2020-10-27T15:28:22+08:00"}
+{"BindVars":{},"Cost":"0.03","CostUnit":"ms","Database":"guardian","Error":null,"Program":"vtgate","RowsAffected":0,"SQL":"SET autocommit=1","SQLType":"SET","Session":"2f7024ca-b91f-4b7d-8333-81809e817484","Transactions":null,"User":"vt_app","level":"info","msg":"Execute Query","time":"2020-10-27T15:28:22+08:00"}
+
+慢sql
+1 {"BindVars":{"vtg1":{"type":10262,"value":"eWFybjEy"},"vtg2":{"type":10262,"value":"WUFSTg=="}},"Cost":"827.60","CostUnit":"ms","Database":"guardian","Error":null,"Program":"vtgate","RowsAffected":0,"SQL":"INSERT IGNORE INTO gs_resource_services\n        (service_name, service_type)\n        VALUES(\n        'yarn12',\n        'YARN'\n        )","SQLType":"INSERT","Session":"10bda9be-c6d7-443f-bdd3-5f3346b94e7a","Transactions":[{"Target":{"keyspace":"kundb1","shard":"0","tablet_type":1,"connSchema":"guardian"},"TransactionID":979036550643851648}],"User":"vt_app","level":"info","msg":"Execute Query","time":"2020-10-27T15:33:17+08:00"}
+
+
+2 {"BindVars":{"vtg1":{"type":265,"value":"Njc="},"vtg2":{"type":10262,"value":"QUNDRVNT"}},"Cost":"911.11","CostUnit":"ms","Database":"guardian","Error":null,"Program":"vtgate","RowsAffected":0,"SQL":"INSERT IGNORE INTO gs_perm (resource_id, action) VALUES (\n            67,\n            'ACCESS'\n        )","SQLType":"INSERT","Session":"f8fbb398-cc21-42b9-a44e-2acca82ec8df","Transactions":[{"Target":{"keyspace":"kundb1","shard":"0","tablet_type":1,"connSchema":"guardian"},"TransactionID":979036550643851650}],"User":"vt_app","level":"info","msg":"Execute Query","time":"2020-10-27T15:33:18+08:00"}
+
+3 {"BindVars":{"vtg1":{"type":265,"value":"NTAwMA=="},"vtg2":{"type":265,"value":"NTI="},"vtg3":{"type":265,"value":"MA=="},"vtg4":{"type":265,"value":"MA=="}},"Cost":"607.69","CostUnit":"ms","Database":"guardian","Error":null,"Program":"vtgate","RowsAffected":0,"SQL":"INSERT INTO gs_user_perm (user_id, perm_id, grant_option) VALUES (\n            5000,\n            52,\n            0\n        ) ON DUPLICATE KEY UPDATE grant_option = 0","SQLType":"INSERT","Session":"2f7024ca-b91f-4b7d-8333-81809e817484","Transactions":[{"Target":{"keyspace":"kundb1","shard":"0","tablet_type":1,"connSchema":"guardian"},"TransactionID":979036550643851656}],"User":"vt_app","level":"info","msg":"Execute Query","time":"2020-10-27T15:33:19+08:00"}
+
+4 {"BindVars":{"vtg1":{"type":265,"value":"MTYwMzc4NDAwNDkzMA=="},"vtg2":{"type":10262,"value":"eWFybjEy"},"vtg3":{"type":10262,"value":"eyJyZXNvdXJjZVZvIjp7ImlkIjowLCJzZXJ2aWNlVHlwZSI6IllBUk4iLCJzZXJ2aWNlTmFtZSI6Inlhcm4xMiIsImRhdGFTb3VyY2UiOlt7InR5cGUiOiJZQVJOLVNJVEUiLCJ2YWx1ZSI6InNjaGVkdWxlciJ9XSwiZXh0ZXJuYWxJZCI6MH0sInR5cGUiOiJRdW90YUNoYW5nZSJ9"},"vtg4":{"type":10262,"value":"UVVPVEE="}},"Cost":"532.76","CostUnit":"ms","Database":"guardian","Error":null,"Program":"vtgate","RowsAffected":0,"SQL":"INSERT INTO gs_change_list\n        (timestamp, component, entity, cacheStatus, type) VALUES\n          \n            (1603784004930,\n            'yarn12',\n            '{\"resourceVo\":{\"id\":0,\"serviceType\":\"YARN\",\"serviceName\":\"yarn12\",\"dataSource\":[{\"type\":\"YARN-SITE\",\"value\":\"scheduler\"}],\"externalId\":0},\"type\":\"QuotaChange\"}',\n            null,\n            'QUOTA')","SQLType":"INSERT","Session":"10bda9be-c6d7-443f-bdd3-5f3346b94e7a","Transactions":[{"Target":{"keyspace":"kundb1","shard":"0","tablet_type":1,"connSchema":"guardian"},"TransactionID":979036550643851664}],"User":"vt_app","level":"info","msg":"Execute Query","time":"2020-10-27T15:33:21+08:00"}
+
+5 {"BindVars":{"vtg1":{"type":265,"value":"NzA="},"vtg2":{"type":10262,"value":"eyJ5YXJuLnNjaGVkdWxlci5mYWlyLm1heC5hc3NpZ24iOi0xLCJ5YXJuLnNjaGVkdWxlci5mYWlyLmxvY2FsaXR5LnRocmVzaG9sZC5yYWNrIjotMS4wLCJ5YXJuLnNjaGVkdWxlci5mYWlyLmFsbG93LXVuZGVjbGFyZWQtcG9vbHMiOnRydWUsInlhcm4uc2NoZWR1bGVyLmZhaXIuYXNzaWdubXVsdGlwbGUiOmZhbHNlLCJ5YXJuL
+NjaGVkdWxlci5mYWlyLnVzZXItYXMtZGVmYXVsdC1xdWV1ZSI6dHJ1ZSwieWFybi5zY2hlZHVsZXIuZmFpci5wcmVlbXB0aW9uIjpmYWxzZSwieWFybi5zY2hlZHVsZXIuZmFpci5wcmVlbXB0aW9uLmNsdXN0ZXItdXRpbGl6YXRpb24tdGhyZXNob2xkIjowLjgsInlhcm4uc2NoZWR1bGVyLmZhaXIuc2l6ZWJhc2Vkd2VpZ2h0IjpmYWxzZSwieWFybi5zY2hlZHVsZXIuZmFpci51cGRhdGUtaW50ZXJ2YWwtbXMiOjUwMCwieWFybi5zY2hlZHVsZXIuZmFpci5sb2NhbGl0eS50aHJlc2hvbGQubm9kZSI6LTEuMH0="}},"Cost":"874.86","CostUnit":"ms","Database":"guardian","Error":null,"Program":"vtgate","RowsAffected":0,"SQL":"INSERT INTO gs_quota\n        (resource_id, quota_entity)\n        VALUES(\n            70,\n            '{\"yarn.scheduler.fair.max.assign\":-1,\"yarn.scheduler.fair.locality.threshold.rack\":-1.0,\"yarn.scheduler.fair.allow-undeclared-pools\":true,\"yarn.scheduler.fair.assignmultiple\":false,\"yarn.scheduler.fair.user-as-default-queue\":true,\"yarn.scheduler.fair.preemption\":false,\"yarn.scheduler.fair.preemption.cluster-utilization-threshold\":0.8,\"yarn.scheduler.fair.sizebasedweight\":false,\"yarn.scheduler.fair.update-interval-ms\":500,\"yarn.scheduler.fair.locality.threshold.node\":-1.0}'\n        )\n        ON DUPLICATE KEY UPDATE quota_entity = VALUES(quota_entity)","SQLType":"INSERT","Session":"10bda9be-c6d7-443f-bdd3-5f3346b94e7a","Transactions":[{"Target":{"keyspace":"kundb1","shard":"0","tablet_type":1,"connSchema":"guardian"},"TransactionID":979036550643851666}],"User":"vt_app","level":"info","msg":"Execute Query","time":"2020-10-27T15:33:22+08:00"}
+
+
+6 {"BindVars":{"vtg1":{"type":265,"value":"NzI="},"vtg2":{"type":10262,"value":"eyJtYXhBTVJlc291cmNlIjowLjEsInVzZXJMaW1pdEZhY3RvciI6MS4wLCJtYXhpbXVtQ2FwYWNpdHkiOjEwMC4wLCJzdGF0ZSI6IlJVTk5JTkciLCJ1c2VyTGltaXQiOjEwMCwiY2FwYWNpdHkiOjEwMC4wLCJtYXhBcHBsaWNhdGlvbnMiOjEwMDAwfQ=="}},"Cost":"638.04","CostUnit":"ms","Database":"guardian","Error":null,"Program":"vtgate","RowsAffected":0,"SQL":"INSERT INTO gs_quota\n        (resource_id, quota_entity)\n        VALUES(\n            72,\n            '{\"maxAMResource\":0.1,\"userLimitFactor\":1.0,\"maximumCapacity\":100.0,\"state\":\"RUNNING\",\"userLimit\":100,\"capacity\":100.0,\"maxApplications\":10000}'\n        )\n        ON DUPLICATE KEY UPDATE quota_entity = VALUES(quota_entity)","SQLType":"INSERT","Session":"f8fbb398-cc21-42b9-a44e-2acca82ec8df","Transactions":[{"Target":{"keyspace":"kundb1","shard":"0","tablet_type":1,"connSchema":"guardian"},"TransactionID":979036550643851672}],"User":"vt_app","level":"info","msg":"Execute Query","time":"2020-10-27T15:33:23+08:00"}
+
+7 {"BindVars":{"vtg1":{"type":10262,"value":"U0NIRURVTEVSIGZhaXIgUVVFVUUgcm9vdA=="},"vtg2":{"type":10262,"value":"U0NIRURVTEVSIGZhaXIgUVVFVUUgcm9vdA=="},"vtg3":{"type":265,"value":"MTA="},"vtg4":{"type":265,"value":"MA=="}},"Cost":"651.22","CostUnit":"ms","Database":"guardian","Error":null,"Program":"vtgate","RowsAffected":0,"SQL":"INSERT IGNORE INTO gs_resources\n            (path, digest, service_id, external_id)\n        VALUES(\n            'SCHEDULER fair QUEUE root',\n            MD5(LOWER('SCHEDULER fair QUEUE root')),\n            10,\n            0\n        )","SQLType":"INSERT","Session":"2f7024ca-b91f-4b7d-8333-81809e817484","Transactions":[{"Target":{"keyspace":"kundb1","shard":"0","tablet_type":1,"connSchema":"guardian"},"TransactionID":979036550643851680}],"User":"vt_app","level":"info","msg":"Execute Query","time":"2020-10-27T15:33:25+08:00"}
+
+
+INSERT IGNORE INTO gs_resource_services(service_name, service_type) VALUES('yarn1992', 'YARN')
+
+
+内嵌css 自适应页面大小宽度 分页
+
+{
+	"repository_name":"transwarp/guardian",
+	"tag":"latest",
+	"registry_url":"",
+	"user_name":"",
+	"password":"",
+	"insecure_skip_verify":false,
+	"scan_fs":false,
+	"scanner_url":"http://127.0.0.1:8080"
+}
+
+处理：
+ msg="scan transwarp/guardian:latest report finished"
+
+
+
+bili_jct 2adf928a8c14676a8cd8358716a25382
+SESSDATA 8fbbb0fd%2C1619596637%2C449e8*a1
+DedeUserID 6554207
+
+ps -aux | grep mysql |grep vt_0
+
+
+
+120*32
+300*80

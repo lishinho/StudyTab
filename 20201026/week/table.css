@@ -1,0 +1,35 @@
+@charset "utf-8";
+/* CSS Document */
+.title {
+    margin-bottom: fill;
+}
+.tabtop13 {
+    margin-top: fill;
+    margin-left: fill;
+    margin-right: fill;
+    margin-outside: fill;
+}
+.tabtop13 td{
+    background-color:#ffffff;
+    height:25px;
+    line-height:150%;
+}
+.font-center{ text-align:center}
+.btbg{background: #e9faff !important;}
+.btbg2{background: #f3f3f3 !important;}
+.biaoti{
+    font-family: 微软雅黑, sans-serif;
+    font-size: 26px;
+    font-weight: bold;
+    border-bottom:1px dashed #CCCCCC;
+    color: #255e95;
+    background: #f0f0f0;
+}
+.titfont {
+
+    font-family: 微软雅黑, sans-serif;
+    font-size: 16px;
+    font-weight: bold;
+    color: #255e95;
+    background-color: #e9faff;
+}

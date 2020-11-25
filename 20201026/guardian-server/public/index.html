@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Guardian</title>
+    <meta charset="utf-8">
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/png" href="assets/images/favicon.4696c35b657a63b2bd06f77222769bb4.REVED.png">
+    <link rel="stylesheet" href="assets/css/vendor.min.5258278bd90e6acffc6f4c4cf8d3e457.REVED.css">
+    <link rel="stylesheet" href="assets/css/styles.min.adfa6028b4adea219ffd5693029f2414.REVED.css">
+</head>
+
+<body>
+<!--[if lt IE 7]>
+<p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+<![endif]-->
+<!-- Add your site or application content here -->
+<tui-overlay show="loadingService"></tui-overlay>
+<top-navbar ng-if="$state.current.name !== 'login'"></top-navbar>
+<div class="main" ng-if="$state.current.name === 'login' || $root.roleManager.ready">
+    <div class="content" ui-view></div>
+</div>
+<global-error 
+    errors="globalError.errors" 
+    current-route="$state.current.name"
+    on-remove="globalError.removeErrorByIndex(index)"
+></global-error>
+<script src="app/vendor.min.839a4720d3546669dc682fdbb8cf8ceb.REVED.js"></script>
+<script src="app/main.min.ed831cf00fd659f48b28a5cc32c7dd4a.REVED.js"></script>
+</body>
+
+</html>

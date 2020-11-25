@@ -1,0 +1,467 @@
+work51
+
+20201026-20201030
+
+完成：
+1. WARP-43659: resource-manager单测review修改完成
+2. WARP-50729: hdfs quota-cache性能评测(加锁与不加锁） guardian listquota api性能测试
+3. WARP-50927: hdfs/yarn, hbase的单点登出接入
+
+
+mysql> tee /home/a.txt
+mysql> select * from rank;
+mysql> exit
+
+
+sed -i 's/ throws.*//g' testv2
+删除匹配throws字符后面的字符串
+sed -i '/^$/d' testv2
+删除空行
+sed -i '/\*/d' testv2 
+删除带*的行
+sed -i '/^\s*$/d' testv2
+删除带空格的空行
+wc -l testv2
+统计文件行数
+grep -i '.*group.*' testv1
+查找存在group的行
+
+可以参考auditcontroller的getAuditRecords
+common包里的param 传到controller层  通过controller层调用manager层 在inceptormgr中拿链接
+连接可以通过apacheds cleaner的方式维护 每一个user是一个连接 要有相应的client缓存
+
+
+API路径可以为  /api/v1/resources/databaseOwners 和  /api/v1/resources/tableOwners
+
+
+mysql> select database_name, owner_name, owner_type from databases_v;
++---------------+------------+------------+
+| database_name | owner_name | owner_type |
++---------------+------------+------------+
+| discover      | PUBLIC     | ROLE       |
+| default       | PUBLIC     | ROLE       |
+| system        | PUBLIC     | ROLE       |
+| gxx           | hive       | USER       |
++---------------+------------+------------+
+4 rows in set (0.00 sec)
+
+mysql> select database_name, table_name, owner_name from tables_v;
++---------------+---------------+------------+
+| database_name | table_name    | owner_name |
++---------------+---------------+------------+
+| system        | dual          | hive       |
+| gxx           | test_midgard1 | hive       |
+| gxx           | gxx2          | hive       |
+| gxx           | tb1           | hive       |
+| gxx           | tb2           | hive       |
++---------------+---------------+------------+
+5 rows in set (0.05 sec)
+
+mysql> select database_name, owner_name, owner_type from databases_v where database_name like 'gx%';
+
+mysql> select count(*) from databases_v;
++----------+
+| count(*) |
++----------+
+|        4 |
++----------+
+1 row in set (0.00 sec)
+
+mysql> select count(*) from tables_v;
++----------+
+| count(*) |
++----------+
+|        5 |
++----------+
+1 row in set (0.01 sec)
+
+mysql -h172.26.5.47 -P3316 -uinceptoruser -ppassword
+
+
+alpha集群：http://172.16.0.34:8180   test/123     ssh:  root/Warp1234
+
+arm装有guardian的集群：http://172.26.0.139:8180   test/123     ssh: root/abcd1234
+
+
+jdk8/bin/java -Xms1024m -Xmx2048m   -cp /root/guardian-tool  -jar /root/guardian-tool/guardian-tool-0.0.2.jar io.transwarp.guardiantool.GuardianToolApplication
+/usr/bin/java -Xms1024m -Xmx2048m -cp /home/guardian/guardian-backend/guardian/guardian-client/target -jar guardian-tool-0.1.0.jar io.transwarp.keytabTool.KeytabTest
+
+
+/usr/bin/java -Xms1024m -Xmx2048m -cp /home/guardian/guardian-backend/guardian/guardian-client/target/*:/home/guardian/guardian-backend/guardian/guardian-common/target/*://home/guardian/guardian-backend/guardian/examples/target/lib/*:guardian-tool-0.1.0.jar io.transwarp.keytabTool.KeytabTest
+
+
+ 1159  mkdir /home/lishinho/bak
+ 1160  mv /etc/hdfs1/conf/hdfs.keytab /home/lishinho/bak/
+ 1162  rm -rf /etc/hdfs1/conf/kerberos/hdfs.keytab
+
+
+
+cp hdfs.keytab /etc/hdfs1/conf/kerberos/
+cp hdfs.keytab /etc/hdfs1/conf/
+rm -rf /etc/zookeeper1/conf/kerberos/zookeeper.keytab 
+mv /etc/zookeeper1/conf/zookeeper.keytab /home/lishinho/bak/
+cp zookeeper.keytab /etc/zookeeper1/conf/
+cp zookeeper.keytab /etc/zookeeper1/conf/kerberos/
+rm -rf /etc/yarn1/conf/kerberos/yarn.keytab 
+mv /etc/yarn1/conf/yarn.keytab /home/lishinho/bak/
+cp yarn.keytab /etc/yarn1/conf/
+cp yarn.keytab /etc/yarn1/conf/kerberos/
+rm -rf /etc/inceptorsql1/conf/kerberos/inceptor.keytab 
+mv /etc/inceptorsql1/conf/inceptor.keytab /home/lishinho/bak/
+cp inceptor.keytab /etc/inceptorsql1/conf/
+cp inceptor.keytab /etc/inceptorsql1/conf/kerberos/
+rm -rf /etc/hyperbase1/conf/kerberos/hyperbase.keytab 
+mv /etc/hyperbase1/conf/hyperbase.keytab /home/lishinho/bak/
+cp hyperbase.keytab /etc/hyperbase1/conf/
+cp hyperbase.keytab /etc/hyperbase1/conf/kerberos/
+mv /etc/search1/conf/search.keytab /home/lishinho/bak/
+cp search.keytab /etc/search1/conf/
+
+输入: [3,2,1,0,4]
+输出: false
+解释: 无论怎样，你总会到达索引为 3 的位置。但该位置的最大跳跃长度是 0 ， 所以你永远不可能到达最后一个位置。
+
+
+// bool[i] 在第i个位置能否跳到终点
+深度遍历 用栈
+
+if list.get(0) >= final-1
+ return true
+for (1 -> final-1)
+ if bool && recursive(arr, final) == true
+    true
+return false
+for (init)
+  if bool == true stack.push
+
+
+2020-10-07 19:41:49,048 ERROR org.apache.zookeeper.server.quorum.QuorumPeerMain: [myid:1] - [main:QuorumPeerMain@89] - Unexpected exception, exiting abnormally
+java.io.IOException: Could not configure server because SASL configuration did not allow the  ZooKeeper server to authenticate itself properly: javax.security.auth.login.LoginException: Client not found in Kerberos database (6) - Client not found in Kerberos database
+        at org.apache.zookeeper.server.ServerCnxnFactory.configureSaslLogin(ServerCnxnFactory.java:205)
+        at org.apache.zookeeper.server.NIOServerCnxnFactory.configure(NIOServerCnxnFactory.java:87)
+        at org.apache.zookeeper.server.quorum.QuorumPeerMain.runFromConfig(QuorumPeerMain.java:130)
+        at org.apache.zookeeper.server.quorum.QuorumPeerMain.initializeAndRun(QuorumPeerMain.java:111)
+        at org.apache.zookeeper.server.quorum.QuorumPeerMain.main(QuorumPeerMain.java:78)
+
+
+Server {
+  com.sun.security.auth.module.Krb5LoginModule required
+  useKeyTab=true
+  keyTab="/etc/zookeeper1/conf/zookeeper.keytab"
+  storeKey=true
+  useTicketCache=false
+  principal="zookeeper/tdhkylin01@TDH";
+};
+Client {
+  com.sun.security.auth.module.Krb5LoginModule required
+  useKeyTab=true
+  storeKey=true
+  useTicketCache=false
+  keyTab="/etc/zookeeper1/conf/zookeeper.keytab"
+  principal="zookeeper/tdhkylin01@TDH";
+};
+
+
+172.16.0.34 tdhkylin01
+172.16.0.35 tdhkylin02
+172.16.0.36 tdhkylin03
+
+1. rbac权限模型的讲解
+2. abac和rbac的不同 mysql怎么实现rbac的
+3. jvm调优参数
+4. k8s进程管理
+5. 大数据排序 桶排序 mapreduce
+
+1109 
+1. SLA-10517 指导guardian server和federation的oem并出包
+2. WARP-51377 guardian server获取metastore的db owner信息
+3. alpha集群修复，依赖另一个集群的guardian手动开组件安全
+4. guardian-kundb使用测试的federation/cas部分 
+
+
++++++++++++
+
+useServerPrepStmts
+
+E1109 13:17:52.788324      51 server.go:259] Cannot read client handshake response from client 107 (172.16.203.112:60750): io.ReadFull(header size) failed: unexpected EOF
+E1109 13:18:02.912035      51 server.go:259] Cannot read client handshake response from client 109 (172.16.203.112:60794): io.ReadFull(header size) failed: unexpected EOF
+E1109 13:18:13.042740      51 server.go:259] Cannot read client handshake response from client 111 (172.16.203.112:60842): io.ReadFull(header size) failed: unexpected EOF
+E1109 13:18:23.169805      51 server.go:259] Cannot read client handshake response from client 113 (172.16.203.112:60888): io.ReadFull(header size) failed: unexpected EOF
+E1109 13:18:33.261196      51 server.go:259] Cannot read client handshake response from client 115 (172.16.203.112:60936): io.ReadFull(header size) failed: unexpected EOF
+E1109 13:18:43.375655      51 server.go:259] Cannot read client handshake response from client 117 (172.16.203.112:60956): io.ReadFull(header size) failed: unexpected EOF
+E1109 13:18:53.447695      51 server.go:259] Cannot read client handshake response from client 119 (172.16.203.112:60962): io.ReadFull(header size) failed: unexpected EOF
+E1109 13:19:03.537000      51 server.go:259] Cannot read client handshake response from client 121 (172.16.203.112:60970): io.ReadFull(header size) failed: unexpected EOF
+
+
+{"javax.jdo.option.ConnectionDriverName":"com.mysql.jdbc.Driver", "javax.jdo.option.ConnectionPassword":"password", "javax.jdo.option.ConnectionURL":"jdbc:mysql://node547:3316,node545:3316,node546:3316/metastore_inceptor1?failOverReadOnly=false&createDatabaseIfNotExist=false&characterEncoding=UTF-8","javax.jdo.option.ConnectionUserName":"inceptoruser"}
+
+
+{ "configs": {"javax.jdo.option.ConnectionDriverName":"com.mysql.jdbc.Driver", "javax.jdo.option.ConnectionPassword":"password", "javax.jdo.option.ConnectionURL":"jdbc:mysql://node547:3316,node545:3316,node546:3316/metastore_inceptor1?failOverReadOnly=false&createDatabaseIfNotExist=false&characterEncoding=UTF-8","javax.jdo.option.ConnectionUserName":"inceptoruser"},
+  "serviceName": "inceptor1",
+  "serviceStatus": "ONLINE",
+  "serviceType": "INCEPTOR",
+  "timestamp": 0
+}
+
+
+mysql> select NAME, OWNER_NAME, OWNER_TYPE from DBS where NAME like '%';
++----------+------------+------------+
+| NAME     | OWNER_NAME | OWNER_TYPE |
++----------+------------+------------+
+| discover | PUBLIC     | ROLE       |
+| default  | PUBLIC     | ROLE       |
+| system   | PUBLIC     | ROLE       |
+| gxx      | hive       | USER       |
++----------+------------+------------+
+4 rows in set (0.01 sec)
+
+mysql> select count(*) from TBLS join DBS on TBLS.DB_ID = DBS.DB_ID where NAME = 'gxx';
++----------+
+| count(*) |
++----------+
+|        4 |
++----------+
+1 row in set (0.00 sec)
+
+
+/home/slipstream/kafka/bin/../libs/zkclient-0.10.jar:/home/slipstream/kafka/bin/../libs/zookeeper-3.4.9.jar (org.apache.zookeeper.ZooKeeper
+
+
+## 启动脚本
+
+```
+./bin
+├── base-env.sh             #环境变量-全局配置入口
+├── check-executor-ps.sh    #检查是否运行中
+├── check-metastore-ps.sh   #检查是否运行中
+├── check-server-ps.sh      #检查是否运行中
+├── start-executor-2.sh     #启动executor 2. executor id 为2
+├── start-executor-3.sh     #启动executor 3. executor id 为3
+├── start-executor.sh       #启动executor. executor id 为1
+├── start-metastore.sh      #启动metastore
+├── start-server.sh         #启动server
+├── stop-executor.sh        #停止服务
+├── stop-metastore.sh       #停止服务
+└── stop-server.sh          #停止服务
+```
+
+## 启动步骤
+
+1. 拷贝到服务器后, 检查好目录权限等
+1. 确定`bin/base-env.sh`中各项依赖的路径
+2. 创建mysql数据库`metastore_slipstream1`, 执行`sql/mysql`中的脚本
+3. 主节点上, 执行`./bin/start-metastore.sh`, 启动metastore
+4. 主节点上, 执行`./bin/start-server.sh`
+5. server启动后, beeline连接后, 执行`sql/inceptor`中的脚本
+6. 主节点上, 执行`./bin/start-executor.sh`
+7. 节点2上, 执行`./bin/start-executor-2.sh`
+8. 节点3上, 执行`./bin/start-executor-3.sh`
+
+## 默认配置
+
+1. beeline端口`10010`
+2. ui端口`4044`
+3. metastore thrift端口`9093`
+4. server akka端口`10081`
+
+
+<#-- handle the kerberos-->
+<#assign  authentication="NONE">
+<#if service.auth == "kerberos">
+    <#assign  authentication="KERBEROS">
+    <@property "hive.metastore.sasl.enabled" "true"/>
+    <@property "hive.metastore.kerberos.keytab.file" service.keytab/>
+    <@property "hive.metastore.kerberos.principal" "hive/_HOST@" + service.realm/>
+    <@property "yarn.resourcemanager.principal" "yarn/_HOST@" + service.realm/>
+    <@property "transwarp.docker.inceptor" service.roles.INCEPTOR_SERVER[0]['hostname'] + ':' + service['hive.server2.thrift.port']/>
+    <@property "hive.server2.authentication.kerberos.principal"  "hive/_HOST@" + service.realm/>
+    <@property "hive.server2.authentication.kerberos.keytab" service.keytab/>
+</#if>
+ <#if dependencies.HYPERBASE?? && service.auth = "kerberos">
+    <@property "hbase.regionserver.kerberos.principal" "hbase/_HOST@${service.realm}"/>
+    <@property "hbase.master.kerberos.principal" "hbase/_HOST@${service.realm}"/>
+    <@property "hbase.security.authentication" "kerberos"/>
+</#if>
+
+### The error occurred while setting parameters
+### SQL: INSERT INTO gf_fed_user_role(user_id, role) VALUES  (?,             ?)
+### Cause: com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException: vtgate: http://node545:15001/: syntax error at position 43 near 'role'
+; bad SQL grammar []; nested exception is com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException: vtgate: http://node545:15001/: syntax error at position 43 near 'role'
+	at org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator.doTranslate(SQLErrorCodeSQLExceptionTranslator.java:239)
+
+
+List<HiveObjectOwner> records = ((InceptorResourceSvc) service).getHiveObjectOwner(session, params);
+
+    int count = ((InceptorResourceSvc) service).getRecordCount(session, params);
+    int totalPageNumber = count / pageSize;
+
+    result.setPageSize(pageSize);
+    result.setTotalPageNumber(count % pageSize == 0 ? totalPageNumber : totalPageNumber + 1);
+    result.setPageNumber(pageNumber);
+    result.setBody(records);
+
+
+export client
+
+.命令行方式
+
+export KAFKA_OPTS="-Djava.security.auth.login.config=/etc/kafka1/conf/jaas.conf -Djava.security.krb5.conf=/etc/krb5.conf"
+
+（在tdc环境下 export KAFKA_OPTS="-Dzookeeper.server.principal=zookeeper/tos_tdcsys -Djava.security.auth.login.config=/etc/kafka/conf/jaas.conf"  并且不需要进行kinit了）
+
+kinit -kt keytab principal
+
+下述配置放置conf/consumer.properties 和 producer.properties
+
+/consumers/{group_id}
+
+int startOffset = (params.getPageNumber()-1) * params.getPageSize();
+    String sql = "select TBL_NAME, OWNER from TBLS join DBS on TBLS.DB_ID = DBS.DB_ID " +
+        "where NAME = ? and TBL_NAME like ? limit ? , ?";
+
+    try (PreparedStatement statement = connection.prepareStatement(sql)){
+      statement.setString(1, params.getDatasource().get(1));
+      statement.setString(2, params.getSearchValue() + "%");
+      statement.setInt(3, startOffset);
+      statement.setInt(4, params.getPageSize());
+      try (ResultSet rs = statement.executeQuery()) {
+        while (rs.next()) {
+          String tableName = rs.getString(1);
+          String ownerName = rs.getString(2);
+          HiveObjectOwner owner = new HiveObjectOwner.HiveObjectOwnerBuilder()
+              .objectType(TABLE_OR_VIEW)
+              .objectName(tableName)
+              .ownerType(PrincipalType.USER)
+              .ownerName(ownerName)
+              .build();
+          tableOwners.add(owner);
+        }
+      }
+    } catch (SQLException e) {
+      LOG.error("Cannot lookup metastore table owner for user {} using cached connection, clear it", session.getUser());
+      metastoreConnCache.invalidate(session.getUserId());
+      throw new GuardianException(ErrorCodes.INCEPTOR_OWNER_FETCH_ERROR, e, serviceName);
+    }
+
+bash kafka-consumer-groups.sh --new-consumer --bootstrap-server tw-node593:9092,tw-node594:9092,tw-node595:9092 --list --command-config /etc/kafka/conf/consumer.properties
+export KAFKA_OPTS="-Djava.security.auth.login.config=/etc/kafka1/conf/jaas.conf $KAFKA_OPTS"
+
+
+创建topic
+[root@tw-node593 bin]# ./kafka-topics.sh --zookeeper tw-node593:2181,tw-node594:2181,tw-node595:2181 --topic topic1 --create --partitions 2 --replication-factor 2
+
+list topic
+[root@tw-node593 bin]# ./kafka-topics.sh --zookeeper tw-node593:2181,tw-node594:2181,tw-node595:2181 --list
+topic1
+
+DNS查找顺序：浏览器缓存> 本地操作系统缓存> DNS服务器(路由缓存>互联网 DNS缓存服务器)
+
+
+export KAFKA_OPTS="-Djava.security.auth.login.config=/etc/kafka1/conf/jaas.conf -Djava.security.krb5.conf=/etc/kafka1/conf/krb5.conf"
+
+每次kafka执行 console consumer都会新建一个consumer group
+./kafka-console-consumer.sh --bootstrap-server tw-node593:9092,tw-node594:9092,tw-node595:9092 --topic topic2 --consumer-property security.protocol=SASL_PLAINTEXT --consumer-property sasl.kerberos.service.name=kafka
+
+查询consumer group
+ ./kafka-consumer-groups.sh --bootstrap-server tw-node593:9092,tw-node594:9092,tw-node595:9092 --list --command-config /usr/lib/kafka/config/consumer.properties 
+
+consumer.properties中新加
+security.protocol=SASL_PLAINTEXT
+sasl.kerberos.service.name=kafka
+
+在 producer.properties 和 consumer.properties 文件中配置以下的属性：
+    security.protocol=SASL_PLAINTEXT (or SASL_SSL)
+    sasl.mechanism=GSSAPI
+    sasl.kerberos.service.name=kafka
+
+
+export CLIENT_JVMFLAGS="-Djava.security.auth.login.config=/etc/zookeeper1/conf/jaas.conf"
+
+<groupId>org.apache.kafka</groupId>
+  <artifactId>kafka-clients</artifactId>
+  <version>0.10.2.0-transwarp-7.0.0</version>
+
+
+retry.backoff.ms
+metadata.max.age.ms
+bootstrap.servers
+client.dns.lookup
+metric.reporters
+client-id
+metrics.sample.window.ms
+metrics.recording.level
+kafka.admin.client
+connections.max.idle.ms
+reconnect.backoff.ms
+
+1. 本周11个SLA总结在http://172.16.1.168:8090/pages/createpage.action?spaceKey=SEC&fromPageId=15699249
+2. WARP-51377 guardian server获取metastore的db owner信息 80%
+3. WARP-48816 guardian-kundb对接 http://172.16.1.168:8090/pages/viewpage.action?pageId=25068056
+
+
+镜像放在百度网盘 链接: https://pan.baidu.com/s/1aLBbrPJhD4KYe4Ga5JMBug 提取码: 4swc 
+1. 换好guardian-server镜像 
+2. 在guardian配置路径下/etc/guardian/conf路径下添加jaas.conf文件并加上kafka client部分如下：
+
+KafkaClient {
+  com.sun.security.auth.module.Krb5LoginModule required
+  useKeyTab=true
+  keyTab="/etc/guardian/conf/guardian.keytab"
+  storeKey=true
+  useTicketCache=false
+  principal="guardian/guardian@TDH";
+};
+3. guardian页面 赋给guardian用户在guardian中的kafka消费組的admin权限
+4. 重启guardian-server
+
+通过开安全kafka创建consumer group 可以参考wiki http://172.16.1.168:8090/pages/viewpage.action?pageId=26674385
+额外说明 此次打的镜像基于guardian-3.1.4-final加上之前做的patch和在一起的 和之前的guardian-312应该不会有兼容性问题
+不过仍然需要在自己的测试集群先测试一下
+
+
+-repository transwarp/guardian -tag latest -report_path /tmp/reports -scanner_urls http://127.0.0.1:8080
+
+-registry_url https://172.16.1.99/v2 -repository gold/tdh-baseimage -tag dev -insecure_skip_verify=true -report_path /tmp/reports -scanner_urls http://127.0.0.1:8080
+
+-scan_fs=true -report_path /tmp/reports -scanner_urls http://127.0.0.1:8080
+
+
+catch (SQLException e) {
+      LOG.error("Cannot lookup metastore database owner for user {} using connection on service {}, clear it",
+          userName, serviceName);
+      metastoreConnCache.invalidate(userName);
+      throw new GuardianException(ErrorCodes.INCEPTOR_OWNER_FETCH_ERROR, e);
+    }
+
+
+Caused by: org.apache.kafka.common.errors.ClusterAuthorizationException: Error listing groups on tw-node597:9092 (id: 1 rack: null)
+2020-11-16 14:01:25,646 ERROR io.transwarp.guardian.server.boot.exception.GuardianExceptionHandler: Exception occurs and handled by GuardianExceptionHandler:
+io.transwarp.guardian.common.exception.GuardianException: ErrorCode: 56007, ErrorMessage: Failed to fetch resources due to permission denied or some errors occur, you can type the resource URI in following input box. Error message: org.apache.kafka.common.errors.ClusterAuthorizationException: Error listing groups on tw-node597:9092 (id: 1 rack: null)
+        at io.transwarp.guardian.resource.ResourceServiceManager.runTimedTask(ResourceServiceManager.java:527)
+        at io.transwarp.guardian.resource.ResourceServiceManager.lookupResource(ResourceServiceManager.java:306)
+        at io.transwarp.guardian.server.boot.controller.ResourceServiceController.lookupResource(ResourceServiceController.java:94)
+        at io.transwarp.guardian.server.boot.controller.ResourceServiceController$$FastClassBySpringCGLIB$$1f811119.invoke(<generated>)
+        at org.springframework.cglib.proxy.MethodProxy.invoke(MethodProxy.java:218)
+        at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.invokeJoinpoint(CglibAopProxy.java:752)
+        at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:163)
+        at org.springframework.aop.framework.adapter.AfterReturningAdviceInterceptor.invoke(AfterReturningAdviceInterceptor.java:55)
+        at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:175)
+
+WARP-52688
+
+E1118 19:37:24.131239      52 vtgate.go:421] SQLLog: Session Info: 1924dae9-51e1-41e2-8449-083de171ea6c federation, Executed sql: INSERT INTO gf_fed_user(username, password, email, phone, create_time, description)
+        VALUES ('A', '{sha256}ee8f87989ee1497a78b668e09da8902dcf1f62555b8c44cdee81d3664e5dde3d4d677e95f3deb531', 'admin@federation', null, 1605699451336, null), BindVariables: map[vtg1:type:VARBINARY value:"A"  vtg2:type:VARBINARY value:"{sha256}ee8f87989ee1497a78b668e09da8902dcf1f62555b8c44cdee81d3664e5dde3d4d677e95f3deb531"  vtg3:type:VARBINARY value:"admin@federation"  vtg4:type:INT64 value:"1605699451336" ], Cost: 2.794867ms, Error: vtgate: http://node545:15001/: execInsertUnsharded: target: kundb1.0.master, used tablet: transwarp-100 (node547), vttablet: Duplicate entry 'A' for key 'gf_fed_user.name_unique' (errno 1062) (sqlstate 23000) during query: insert into federation.gf_fed_user(username, `password`, email, phone, create_time, description) values ('A', '{sha256}ee8f87989ee1497a78b668e09da8902dcf1f62555b8c44cdee81d3664e5dde3d4d677e95f3deb531', 'admin@federation', null, 1605699451336, null), CallerID: vt_app
+
+
+1123
+1. WARP-51377 guardian server获取metastore的db owner信息 [guardian]
+2. WARP-52688: 优化cas日志处理 [cas]
+3. WARP-52785: 修改federation mapper中会触发sql报错的保留字 [federation]
+4. WARP-52768: 通过kafka客户端查询kafka consumer group [guardian]
+
+# bash -x script/jenkins_job_build.sh
+
+mvn clean install dependency-check:aggregate -DskipTests -Ddependency-check.skip=false
+
+Manage Hudson > Configure System
+

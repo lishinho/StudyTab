@@ -1,0 +1,12 @@
+{
+  "app/main.min.js": "app/main.min.ed831cf00fd659f48b28a5cc32c7dd4a.REVED.js",
+  "app/vendor.min.js": "app/vendor.min.839a4720d3546669dc682fdbb8cf8ceb.REVED.js",
+  "assets/css/styles.min.css": "assets/css/styles.min.adfa6028b4adea219ffd5693029f2414.REVED.css",
+  "assets/css/vendor.min.css": "assets/css/vendor.min.5258278bd90e6acffc6f4c4cf8d3e457.REVED.css",
+  "assets/images/favicon.png": "assets/images/favicon.4696c35b657a63b2bd06f77222769bb4.REVED.png",
+  "assets/images/loading.png": "assets/images/loading.20c13f6dea7895d8a082702a6f486311.REVED.png",
+  "assets/images/logo-red.png": "assets/images/logo-red.b18328b5935b4615a022aa61728b71df.REVED.png",
+  "assets/images/studio.png": "assets/images/studio.0de5beec040861d95ffc7e50b5e90cdb.REVED.png",
+  "assets/svg-symbols.css": "assets/svg-symbols.b4bb5474cedf404db78b940c54024fc2.REVED.css",
+  "assets/svg-symbols.svg": "assets/svg-symbols.098f93717e3badda11eb73357ec20b8f.REVED.svg"
+}
